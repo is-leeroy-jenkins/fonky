@@ -255,6 +255,20 @@ class PublicDocumentationTests( unittest.TestCase ):
                 self.assertIn( 'Attributes:', cls.__doc__ )
                 self.assertIn( 'Methods:', cls.__doc__ )
 
+    def test_public_members_annotated_at_class_level( self ) -> None:
+        """Require documented public members to have class annotations, not shared values."""
+        for cls in (loco.Outlook, loco.Word, loco.PowerPoint, loco.Excel,
+            loco.Calculator, loco.File, loco.Data, loco.Windows, loco.Shell):
+            with self.subTest( cls=cls.__name__ ):
+                doc = cls.__doc__
+                attributes = doc.split( '    Attributes:\n', 1 )[ 1 ].split(
+                    '\n    Methods:', 1 )[ 0 ]
+                member_names = [ line.strip( ).split( ' (', 1 )[ 0 ]
+                    for line in attributes.splitlines( ) if ' (' in line ]
+                for name in member_names:
+                    self.assertIn( name, cls.__annotations__ )
+                    self.assertNotIn( name, cls.__dict__ )
+
     def test_contextual_exception_without_logging( self ) -> None:
         """Preserve an original ValueError and annotate the failing method."""
         files = loco.File( )
