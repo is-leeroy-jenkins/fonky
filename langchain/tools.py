@@ -967,7 +967,8 @@ def load_aws_file( bucket: str, key: str, aws_access_key_id: Optional[str]=None,
             Any: LangChain documents loaded from the requested source.
 
         Raises:
-            Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the project error type.
+            Error: If the implementation wraps a provider, parsing, filesystem, or processing
+                failure in the project error type.
         
     """
     _instance = AwsFileLoader( )
@@ -1046,7 +1047,8 @@ def load_aws_bucket( bucket: str, prefix: Optional[str]=None, aws_access_key_id:
             Any: LangChain documents loaded from the requested source.
 
         Raises:
-            Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the project error type.
+            Error: If the implementation wraps a provider, parsing, filesystem, or processing
+            failure in the project error type.
         
     """
     _instance = AwsBucketLoader( )

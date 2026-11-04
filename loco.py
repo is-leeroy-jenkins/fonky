@@ -1626,8 +1626,6 @@ class Shell:
         self.usage = shutil.disk_usage( self.path )
         return { 'total': self.usage.total, 'used': self.usage.used, 'free': self.usage.free }
 
-
-
     def launch_process( self, command: Sequence[str], cwd: str = '' ) -> int:
         """Launch an allowlisted executable without a shell.
 
@@ -2076,8 +2074,6 @@ class Excel:
                 self.application.Quit( )
                 self.application = None
 
-
-
     def set_formula( self, sheet: str, cell: str, formula: str ) -> None:
         """Set an Excel formula.
 
@@ -2228,8 +2224,6 @@ class Excel:
         except Exception as e:
             e.add_note( 'fonky.loco.Excel.export_pdf' )
             raise
-
-
 
     def create_table( self, sheet: str, address: str, name: str ) -> None:
         """Create an Excel table over an existing rectangular range.
