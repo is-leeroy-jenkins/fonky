@@ -1499,6 +1499,113 @@ class Excel:
         return self.pdf_path
 
 
+
+    def create_table( self, sheet: str, address: str, name: str ) -> None:
+        """Create an Excel table over an existing rectangular range.
+
+        Args:
+            sheet (str): Worksheet name.
+            address (str): A1-style source range.
+            name (str): Unique table name.
+
+        Returns:
+            None: Adds the Excel table.
+        """
+        throw_if( 'sheet', sheet )
+        throw_if( 'address', address )
+        throw_if( 'name', name )
+        self.sheet = sheet
+        self.address = address
+        self.name = name
+        self.ensure_open( )
+        if self.backend == 'com':
+            worksheet = self.workbook.Worksheets( self.sheet )
+            table = worksheet.ListObjects.Add( 1, worksheet.Range( self.address ), None, 1 )
+            table.Name = self.name
+        else:
+            from openpyxl.worksheet.table import Table, TableStyleInfo
+            table = Table( displayName=self.name, ref=self.address )
+            table.tableStyleInfo = TableStyleInfo( name='TableStyleMedium2',
+                showFirstColumn=False, showLastColumn=False, showRowStripes=True,
+                showColumnStripes=False )
+            self.workbook[ self.sheet ].add_table( table )
+
+    def format_range( self, sheet: str, address: str, bold: bool = False,
+        number_format: str = 'General' ) -> None:
+        """Apply bold text and number formats to a worksheet range.
+
+        Args:
+            sheet (str): Worksheet name.
+            address (str): A1-style range.
+            bold (bool): Whether text should be bold.
+            number_format (str): Excel number-format string.
+
+        Returns:
+            None: Formats the selected range.
+        """
+        throw_if( 'sheet', sheet )
+        throw_if( 'address', address )
+        self.sheet = sheet
+        self.address = address
+        self.bold = bold
+        self.number_format = number_format
+        self.ensure_open( )
+        if self.backend == 'com':
+            target = self.workbook.Worksheets( self.sheet ).Range( self.address )
+            target.Font.Bold = self.bold
+            target.NumberFormat = self.number_format
+        else:
+            from openpyxl.styles import Font
+            worksheet = self.workbook[ self.sheet ]
+            selected = worksheet[ self.address ]
+            rows = selected if isinstance( selected, tuple ) else ((selected,),)
+            if rows and not isinstance( rows[ 0 ], tuple ):
+                rows = (rows,)
+            for row in rows:
+                for cell in row:
+                    existing = cell.font.copy( )
+                    existing.bold = self.bold
+                    cell.font = existing
+                    cell.number_format = self.number_format
+
+    def create_chart( self, sheet: str, address: str, anchor: str = 'E2' ) -> None:
+        """Create a column chart from headers and numeric rows.
+
+        Args:
+            sheet (str): Worksheet name.
+            address (str): Rectangular chart-data range.
+            anchor (str): Destination cell for file-based charts.
+
+        Returns:
+            None: Adds a column chart.
+        """
+        throw_if( 'sheet', sheet )
+        throw_if( 'address', address )
+        self.sheet = sheet
+        self.address = address
+        self.anchor = anchor
+        self.ensure_open( )
+        if self.backend == 'com':
+            worksheet = self.workbook.Worksheets( self.sheet )
+            chart = worksheet.ChartObjects( ).Add( 300, 40, 450, 250 ).Chart
+            chart.ChartType = 51
+            chart.SetSourceData( worksheet.Range( self.address ) )
+        else:
+            from openpyxl.chart import BarChart, Reference
+            from openpyxl.utils.cell import range_boundaries
+            worksheet = self.workbook[ self.sheet ]
+            min_col, min_row, max_col, max_row = range_boundaries( self.address )
+            if max_col - min_col < 1 or max_row - min_row < 1:
+                raise ValueError( 'Chart data requires headers and at least one data row.' )
+            chart = BarChart( )
+            values = Reference( worksheet, min_col=min_col + 1, max_col=max_col,
+                min_row=min_row, max_row=max_row )
+            labels = Reference( worksheet, min_col=min_col, min_row=min_row + 1, max_row=max_row )
+            chart.add_data( values, titles_from_data=True )
+            chart.set_categories( labels )
+            worksheet.add_chart( chart, self.anchor )
+
+
 class Word:
     """Word document editing through python-docx or dedicated Word COM automation."""
 
@@ -1719,6 +1826,61 @@ class Word:
             self.document.add_picture( self.image_path )
 
 
+
+    def find_text( self, value: str ) -> bool:
+        """Check whether the document contains text.
+
+        Args:
+            value (str): Target substring.
+
+        Returns:
+            bool: True when a match is found.
+        """
+        throw_if( 'value', value )
+        self.value = value
+        return self.value in self.read_document( )
+
+    def set_header( self, text: str ) -> None:
+        """Set the primary document header.
+
+        Args:
+            text (str): Header text.
+
+        Returns:
+            None: Updates the header.
+        """
+        throw_if( 'text', text )
+        self.text = text
+        if self.document is None:
+            raise RuntimeError( 'No document is open.' )
+        if self.backend == 'com':
+            self.document.Sections( 1 ).Headers( 1 ).Range.Text = self.text
+        else:
+            section = self.document.sections[ 0 ]
+            paragraph = section.header.paragraphs[ 0 ]
+            paragraph.text = self.text
+
+    def set_footer( self, text: str ) -> None:
+        """Set the primary document footer.
+
+        Args:
+            text (str): Footer text.
+
+        Returns:
+            None: Updates the footer.
+        """
+        throw_if( 'text', text )
+        self.text = text
+        if self.document is None:
+            raise RuntimeError( 'No document is open.' )
+        if self.backend == 'com':
+            self.document.Sections( 1 ).Footers( 1 ).Range.Text = self.text
+        else:
+            section = self.document.sections[ 0 ]
+            paragraph = section.footer.paragraphs[ 0 ]
+            paragraph.text = self.text
+
+
 class PowerPoint:
     """PowerPoint slide creation with python-pptx or dedicated COM automation."""
 
@@ -1923,6 +2085,74 @@ class PowerPoint:
                 self.image_path, Inches( self.left ), Inches( self.top ), width=Inches( self.width ) )
 
 
+
+    def delete_slide( self, slide_number: int ) -> None:
+        """Delete a presentation slide.
+
+        Args:
+            slide_number (int): One-based slide number.
+
+        Returns:
+            None: Removes the selected slide.
+        """
+        self.slide_number = slide_number
+        if self.presentation is None:
+            raise RuntimeError( 'No presentation is open.' )
+        if self.slide_number < 1 or self.slide_number > len( self.list_slides( ) ):
+            raise IndexError( 'Slide number is out of range.' )
+        if self.backend == 'com':
+            self.presentation.Slides( self.slide_number ).Delete( )
+        else:
+            slide_id = self.presentation.slides._sldIdLst[ self.slide_number - 1 ]
+            self.presentation.part.drop_rel( slide_id.rId )
+            self.presentation.slides._sldIdLst.remove( slide_id )
+
+    def add_table( self, slide_number: int, rows: Sequence[Sequence[Any]],
+        left: float = 1.0, top: float = 1.0, width: float = 8.0,
+        height: float = 3.0 ) -> None:
+        """Insert a rectangular table on a slide.
+
+        Args:
+            slide_number (int): One-based slide number.
+            rows (Sequence[Sequence[Any]]): Rectangular table contents.
+            left (float): Left position in inches.
+            top (float): Top position in inches.
+            width (float): Table width in inches.
+            height (float): Table height in inches.
+
+        Returns:
+            None: Adds the table.
+        """
+        throw_if( 'rows', rows )
+        self.slide_number = slide_number
+        self.rows = [ list( row ) for row in rows ]
+        self.left = left
+        self.top = top
+        self.width = width
+        self.height = height
+        columns = len( self.rows[ 0 ] )
+        if columns < 1 or any( len( row ) != columns for row in self.rows ):
+            raise ValueError( 'Table rows must have consistent nonzero width.' )
+        if self.presentation is None:
+            raise RuntimeError( 'No presentation is open.' )
+        if self.backend == 'com':
+            shape = self.presentation.Slides( self.slide_number ).Shapes.AddTable(
+                len( self.rows ), columns, self.left * 72, self.top * 72,
+                self.width * 72, self.height * 72 )
+            for i, row in enumerate( self.rows ):
+                for j, value in enumerate( row ):
+                    shape.Table.Cell( i + 1, j + 1 ).Shape.TextFrame.TextRange.Text = str( value )
+        else:
+            from pptx.util import Inches
+            slide = self.presentation.slides[ self.slide_number - 1 ]
+            shape = slide.shapes.add_table( len( self.rows ), columns,
+                Inches( self.left ), Inches( self.top ), Inches( self.width ),
+                Inches( self.height ) )
+            for i, row in enumerate( self.rows ):
+                for j, value in enumerate( row ):
+                    shape.table.cell( i, j ).text = str( value )
+
+
 class Outlook:
     """Classic Microsoft Outlook desktop automation via COM."""
 
@@ -2087,6 +2317,84 @@ class Outlook:
         item.Location = self.location
         item.Save( )
         return str( item.EntryID )
+
+
+
+    def search_messages( self, phrase: str, limit: int = 100 ) -> list[dict[str, str]]:
+        """Search recent Inbox messages by subject or sender.
+
+        Args:
+            phrase (str): Case-insensitive search phrase.
+            limit (int): Maximum messages scanned.
+
+        Returns:
+            list[dict[str, str]]: Matching message summaries.
+        """
+        throw_if( 'phrase', phrase )
+        self.phrase = phrase.casefold( )
+        self.limit = limit
+        messages = self.list_messages( self.limit )
+        return [ message for message in messages if self.phrase in
+            message[ 'subject' ].casefold( ) or self.phrase in message[ 'sender' ].casefold( ) ]
+
+    def list_appointments( self, limit: int = 20 ) -> list[dict[str, str]]:
+        """List appointments in the default Outlook Calendar.
+
+        Args:
+            limit (int): Maximum number of calendar items.
+
+        Returns:
+            list[dict[str, str]]: Calendar appointment summaries.
+        """
+        self.limit = limit
+        if self.limit < 1:
+            raise ValueError( 'limit must be positive.' )
+        if self.namespace is None:
+            self.connect( )
+        items = self.namespace.GetDefaultFolder( 9 ).Items
+        items.Sort( '[Start]' )
+        output = []
+        for item in items:
+            if item.Class == 26:
+                output.append( { 'entry_id': str( item.EntryID ),
+                    'subject': str( item.Subject or '' ),
+                    'start': str( item.Start ), 'end': str( item.End ) } )
+                if len( output ) >= self.limit:
+                    break
+        return output
+
+    def save_attachments( self, entry_id: str, directory: str ) -> list[str]:
+        """Save a message's attachments to an existing local directory.
+
+        Args:
+            entry_id (str): Outlook message identifier.
+            directory (str): Destination directory.
+
+        Returns:
+            list[str]: Saved attachment paths.
+        """
+        throw_if( 'entry_id', entry_id )
+        throw_if( 'directory', directory )
+        self.entry_id = entry_id
+        self.directory = Path( directory ).resolve( )
+        if not self.directory.is_dir( ):
+            raise NotADirectoryError( str( self.directory ) )
+        if self.namespace is None:
+            self.connect( )
+        item = self.namespace.GetItemFromID( self.entry_id )
+        if item.Class != 43:
+            raise ValueError( 'Requested Outlook item is not a mail message.' )
+        saved = []
+        for attachment in item.Attachments:
+            name = Path( str( attachment.FileName ) ).name
+            if not name or name in ('.', '..'):
+                raise ValueError( 'Invalid attachment filename.' )
+            target = self.directory / name
+            if target.exists( ):
+                raise FileExistsError( str( target ) )
+            attachment.SaveAsFile( str( target ) )
+            saved.append( str( target ) )
+        return saved
 
 
 class Windows:
