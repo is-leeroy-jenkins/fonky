@@ -50,6 +50,9 @@ jobs:
       - name: test_readonly_database
         if: always()
         run: python -m unittest discover -s tests -p test_loco.py -k test_readonly_database -v
+      - name: test_database_crud
+        if: always()
+        run: python -m unittest discover -s tests -p test_loco.py -k test_database_crud -v
       - name: test_arithmetic
         if: always()
         run: python -m unittest discover -s tests -p test_loco.py -k test_arithmetic -v
@@ -65,3 +68,7 @@ jobs:
       - name: test_powerpoint
         if: always()
         run: python -m unittest discover -s tests -p test_loco.py -k test_powerpoint -v
+
+      - name: test_extended_office_operations
+        if: always()
+        run: python -m unittest discover -s tests -p test_loco.py -k test_extended_office_operations -v
