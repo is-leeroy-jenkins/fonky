@@ -75,3 +75,91 @@ python -m unittest discover -s tests -p test_loco.py -v
 ```
 
 CI runs Python 3.11 and 3.13 on Ubuntu and Windows. Live Office COM and Outlook profile testing requires a workstation with an Office installation.
+
+
+## AI tool integrations (29 approved operations)
+
+The nine classes in `fonky.loco` remain standalone and do not import an AI SDK. The
+`fonky.loco_tools` module exposes **29 complete, one-call operations** over those classes.
+Every provider module exports the same tool names without duplicating the execution logic.
+
+| Group | Local tool functions |
+| --- | --- |
+| Calculator | `local_calculate`, `local_percentage` |
+| Files | `local_file_list`, `local_file_read`, `local_file_exists`, `local_file_info`, `local_file_hash` |
+| SQLite | `local_sqlite_tables`, `local_sqlite_schema`, `local_sqlite_query` |
+| Excel | `local_excel_sheets`, `local_excel_cell`, `local_excel_range`, `local_excel_write_range` |
+| Word | `local_word_read`, `local_word_create`, `local_word_append`, `local_word_replace` |
+| PowerPoint | `local_slides_create`, `local_slides_add_slide`, `local_slides_add_text` |
+| Outlook | `local_outlook_messages`, `local_outlook_search`, `local_outlook_read`, `local_outlook_draft` |
+| Windows | `local_windows_list`, `local_windows_controls` |
+| Shell | `local_system_info`, `local_disk_usage` |
+
+These are **atomic operations**. For example, an Excel read tool opens the workbook,
+retrieves the requested content, and closes the workbook within a single invocation.
+File-backed Word, Excel, and PowerPoint operations use the existing `backend='file'`
+implementation. Live Office COM sessions, executing shell commands, VBA macros,
+sending email, and destructive file/database operations are **not** AI-exposed in
+this first integration.
+
+### Host-side configuration
+
+Set an approved local workspace before registering file-based tools:
+
+```powershell
+$env:FONKY_LOCAL_ROOT = "C:\\Work\\Fonky"
+```
+
+The following optional settings must be defined by the **host application or operator**,
+not supplied as model-visible tool arguments:
+
+| Environment variable | Default | Effect when set to `1` |
+| --- | --- | --- |
+| `FONKY_LOCAL_WRITE_ENABLED` | Disabled | Permit the selected Office document writes and Outlook draft creation |
+| `FONKY_LOCAL_OUTLOOK_ENABLED` | Disabled | Permit reading/searching the local classic Outlook profile |
+| `FONKY_LOCAL_DESKTOP_ENABLED` | Disabled | Permit inspecting local Windows windows and controls |
+
+Filesystem paths exposed to the model are relative to `FONKY_LOCAL_ROOT`, with
+resolved-path containment enforced. Read-only SQLite connections are used for database tools.
+Treat the environment-variable gates as host configuration, **not** as a substitute for
+per-user approval, OS access controls, isolation, or workstation permissions.
+In a multi-user service, use separate isolated executors rather than sharing one
+process-level environment configuration across users.
+
+### Provider registration
+
+OpenAI Agents SDK:
+
+```python
+from agents import Agent
+from fonky.gpt.tools import local_calculate, local_file_read
+
+agent = Agent(
+    name='Fonky Local',
+    instructions='Use only the available approved local tools.',
+    tools=[ local_calculate, local_file_read ],
+)
+```
+
+Anthropic uses the corresponding `fonky.claude.tools` names decorated with `@beta_tool`.
+Google ADK uses the plain Python functions exported by `fonky.gemini.tools`.
+LangChain exports its local operations as `@tool(parse_docstring=True)` instances.
+
+xAI and Mistral require provider-native function definitions and a client-side tool call
+execution loop. Their modules export:
+- `local_tool_definitions`: provider-native tool definitions for all 29 operations.
+- `local_*` functions: matching local Python callables to execute when the model requests them.
+
+Register **only the subset of tools needed for the application**. Importing a tool definition
+does not grant a remote AI model access to a workstation: the tool executor must run on
+the local machine with the necessary operating-system and Office permissions.
+
+### Testing
+
+```powershell
+python -m unittest discover -s tests -p test_loco_tools.py -v
+```
+
+CI runs these tests alongside the existing `loco.py` regression suite under
+Python 3.11 and 3.13 on Windows and Ubuntu. Live classic Outlook and desktop UI
+interactions still require separate workstation-based integration testing.

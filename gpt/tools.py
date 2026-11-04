@@ -3826,3 +3826,72 @@ __all__: List[ str ] = [
 	'nltk_chunk_sentences',
 	'preprocess_semantic_search',
 ]
+
+
+# ==========================================================================================
+# LOCAL AUTOMATION TOOLS - SHARED STANDALONE FONKY IMPLEMENTATION
+# ==========================================================================================
+
+from .. import loco_tools as _loco_tools
+
+local_calculate = function_tool( _loco_tools.local_calculate )
+local_percentage = function_tool( _loco_tools.local_percentage )
+local_file_list = function_tool( _loco_tools.local_file_list )
+local_file_read = function_tool( _loco_tools.local_file_read )
+local_file_exists = function_tool( _loco_tools.local_file_exists )
+local_file_info = function_tool( _loco_tools.local_file_info )
+local_file_hash = function_tool( _loco_tools.local_file_hash )
+local_sqlite_tables = function_tool( _loco_tools.local_sqlite_tables )
+local_sqlite_schema = function_tool( _loco_tools.local_sqlite_schema )
+local_sqlite_query = function_tool( _loco_tools.local_sqlite_query )
+local_excel_sheets = function_tool( _loco_tools.local_excel_sheets )
+local_excel_cell = function_tool( _loco_tools.local_excel_cell )
+local_excel_range = function_tool( _loco_tools.local_excel_range )
+local_excel_write_range = function_tool( _loco_tools.local_excel_write_range )
+local_word_read = function_tool( _loco_tools.local_word_read )
+local_word_create = function_tool( _loco_tools.local_word_create )
+local_word_append = function_tool( _loco_tools.local_word_append )
+local_word_replace = function_tool( _loco_tools.local_word_replace )
+local_slides_create = function_tool( _loco_tools.local_slides_create )
+local_slides_add_slide = function_tool( _loco_tools.local_slides_add_slide )
+local_slides_add_text = function_tool( _loco_tools.local_slides_add_text )
+local_outlook_messages = function_tool( _loco_tools.local_outlook_messages )
+local_outlook_search = function_tool( _loco_tools.local_outlook_search )
+local_outlook_read = function_tool( _loco_tools.local_outlook_read )
+local_outlook_draft = function_tool( _loco_tools.local_outlook_draft )
+local_windows_list = function_tool( _loco_tools.local_windows_list )
+local_windows_controls = function_tool( _loco_tools.local_windows_controls )
+local_system_info = function_tool( _loco_tools.local_system_info )
+local_disk_usage = function_tool( _loco_tools.local_disk_usage )
+
+__all__.extend( [
+    'local_calculate',
+    'local_percentage',
+    'local_file_list',
+    'local_file_read',
+    'local_file_exists',
+    'local_file_info',
+    'local_file_hash',
+    'local_sqlite_tables',
+    'local_sqlite_schema',
+    'local_sqlite_query',
+    'local_excel_sheets',
+    'local_excel_cell',
+    'local_excel_range',
+    'local_excel_write_range',
+    'local_word_read',
+    'local_word_create',
+    'local_word_append',
+    'local_word_replace',
+    'local_slides_create',
+    'local_slides_add_slide',
+    'local_slides_add_text',
+    'local_outlook_messages',
+    'local_outlook_search',
+    'local_outlook_read',
+    'local_outlook_draft',
+    'local_windows_list',
+    'local_windows_controls',
+    'local_system_info',
+    'local_disk_usage',
+] )

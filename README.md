@@ -36,7 +36,8 @@ Fonky is a Python library that provides a unified collection of reusable tools f
 fonky/
 ├── __init__.py
 ├── boogr.py
-├── loco.py                  # Local Office / OS / SQLite tools
+├── loco.py                  # Standalone local Office / OS / SQLite automation
+├── loco_tools.py            # 29 one-call AI tool functions over loco.py
 ├── config.py
 ├── fetchers.py
 ├── loaders.py
@@ -331,3 +332,45 @@ excel.close_workbook()
 ```
 
 Windows extras: `python -m pip install 'fonky[local]'` (available after publication). [Local automation guide](docs/user-guide/Local-Automation.md) describes the backends, permissions, testing, and limitations.
+
+
+### Local AI Tools: GPT, Claude, Gemini, Grok, Mistral, and LangChain
+
+Fonky now exposes **29 approved local operations** without modifying the standalone
+`loco.py` automation classes. Each provider's existing `tools.py` module exports
+matching names such as `local_calculate`, `local_file_read`,
+`local_excel_cell`, and `local_sqlite_query`. Shared implementation and host
+permissions live in `fonky.loco_tools`, not in an additional agent framework.
+
+Configure a trusted local workspace before file-backed tool calls:
+
+```powershell
+$env:FONKY_LOCAL_ROOT = "C:\\Work\\Fonky"
+```
+
+File-backed Office document writes are disabled until the host sets
+`FONKY_LOCAL_WRITE_ENABLED=1`. Local Outlook and Windows UI inspection are disabled
+until the host sets `FONKY_LOCAL_OUTLOOK_ENABLED=1` or
+`FONKY_LOCAL_DESKTOP_ENABLED=1`, respectively. Models cannot set these flags
+through the exposed tool parameters. Local file and database paths must remain
+within the configured workspace.
+
+```python
+from agents import Agent
+from fonky.gpt.tools import local_calculate, local_file_read
+
+agent = Agent(
+    name='Fonky Local',
+    instructions='Use the permitted local tools.',
+    tools=[local_calculate, local_file_read],
+)
+```
+
+For Anthropic, Google ADK, and LangChain, import the same tool names from their
+respective `fonky.<provider>.tools` modules. Grok and Mistral additionally export
+`local_tool_definitions` for native JSON-schema function calling, with matching
+local Python callables for execution.
+
+See the [Local Automation Guide](docs/user-guide/Local-Automation.md) and
+[Local AI Tool API Reference](docs/api/loco-tools.md) for the complete tool list,
+limits, permissions, and examples.

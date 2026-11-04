@@ -3828,3 +3828,72 @@ __all__: List[ str ] = [
 	'nltk_chunk_sentences',
 	'preprocess_semantic_search',
 ]
+
+
+# ==========================================================================================
+# LOCAL AUTOMATION TOOLS - SHARED STANDALONE FONKY IMPLEMENTATION
+# ==========================================================================================
+
+from .. import loco_tools as _loco_tools
+
+local_calculate = beta_tool( _loco_tools.local_calculate )
+local_percentage = beta_tool( _loco_tools.local_percentage )
+local_file_list = beta_tool( _loco_tools.local_file_list )
+local_file_read = beta_tool( _loco_tools.local_file_read )
+local_file_exists = beta_tool( _loco_tools.local_file_exists )
+local_file_info = beta_tool( _loco_tools.local_file_info )
+local_file_hash = beta_tool( _loco_tools.local_file_hash )
+local_sqlite_tables = beta_tool( _loco_tools.local_sqlite_tables )
+local_sqlite_schema = beta_tool( _loco_tools.local_sqlite_schema )
+local_sqlite_query = beta_tool( _loco_tools.local_sqlite_query )
+local_excel_sheets = beta_tool( _loco_tools.local_excel_sheets )
+local_excel_cell = beta_tool( _loco_tools.local_excel_cell )
+local_excel_range = beta_tool( _loco_tools.local_excel_range )
+local_excel_write_range = beta_tool( _loco_tools.local_excel_write_range )
+local_word_read = beta_tool( _loco_tools.local_word_read )
+local_word_create = beta_tool( _loco_tools.local_word_create )
+local_word_append = beta_tool( _loco_tools.local_word_append )
+local_word_replace = beta_tool( _loco_tools.local_word_replace )
+local_slides_create = beta_tool( _loco_tools.local_slides_create )
+local_slides_add_slide = beta_tool( _loco_tools.local_slides_add_slide )
+local_slides_add_text = beta_tool( _loco_tools.local_slides_add_text )
+local_outlook_messages = beta_tool( _loco_tools.local_outlook_messages )
+local_outlook_search = beta_tool( _loco_tools.local_outlook_search )
+local_outlook_read = beta_tool( _loco_tools.local_outlook_read )
+local_outlook_draft = beta_tool( _loco_tools.local_outlook_draft )
+local_windows_list = beta_tool( _loco_tools.local_windows_list )
+local_windows_controls = beta_tool( _loco_tools.local_windows_controls )
+local_system_info = beta_tool( _loco_tools.local_system_info )
+local_disk_usage = beta_tool( _loco_tools.local_disk_usage )
+
+__all__.extend( [
+    'local_calculate',
+    'local_percentage',
+    'local_file_list',
+    'local_file_read',
+    'local_file_exists',
+    'local_file_info',
+    'local_file_hash',
+    'local_sqlite_tables',
+    'local_sqlite_schema',
+    'local_sqlite_query',
+    'local_excel_sheets',
+    'local_excel_cell',
+    'local_excel_range',
+    'local_excel_write_range',
+    'local_word_read',
+    'local_word_create',
+    'local_word_append',
+    'local_word_replace',
+    'local_slides_create',
+    'local_slides_add_slide',
+    'local_slides_add_text',
+    'local_outlook_messages',
+    'local_outlook_search',
+    'local_outlook_read',
+    'local_outlook_draft',
+    'local_windows_list',
+    'local_windows_controls',
+    'local_system_info',
+    'local_disk_usage',
+] )
