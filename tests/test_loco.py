@@ -270,7 +270,7 @@ class PublicDocumentationTests( unittest.TestCase ):
         self.assertEqual( exception.module, 'loco' )
         self.assertEqual( exception.cause, 'File' )
         self.assertEqual( exception.method, 'resolve( self, path: str ) -> Path' )
-        self.assertIsInstance( exception.__cause__, ValueError )
+        self.assertIsInstance( exception.__context__, ValueError )
         self.assertTrue( exception.trace )
 
     def test_constructor_configuration_not_guard_checked( self ) -> None:
