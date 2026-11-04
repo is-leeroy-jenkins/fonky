@@ -36,6 +36,7 @@ Fonky is a Python library that provides a unified collection of reusable tools f
 fonky/
 ├── __init__.py
 ├── boogr.py
+├── loco.py                  # Local Office / OS / SQLite tools
 ├── config.py
 ├── fetchers.py
 ├── loaders.py
@@ -310,3 +311,23 @@ tools = [
 ## 📝 License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/is-leeroy-jenkins/Fonky/blob/main/LICENSE.txt)
+
+
+## 🖥️ Local Automation (No Cloud API Key)
+
+Fonky includes nine local classes through `fonky.loco`: `Outlook`, `Word`, `PowerPoint`, `Excel`, `Calculator`, `File`, `Data`, `Windows`, and `Shell`. They provide file-backed Office operations, SQLite queries, arithmetic, file management, Windows automation, and allowlisted shell commands. Live Microsoft Office automation requires Windows, classic Outlook for mail, and installed Office applications.
+
+```python
+from fonky.loco import Calculator, Excel
+
+calculator = Calculator()
+print(calculator.evaluate_expression('(12 + 8) / 4'))
+
+excel = Excel(backend='file')
+excel.create_workbook()
+excel.write_cell('Sheet', 'A1', 'Budget')
+excel.save_workbook('budget.xlsx')
+excel.close_workbook()
+```
+
+Windows extras: `python -m pip install 'fonky[local]'` (available after publication). [Local automation guide](docs/user-guide/Local-Automation.md) describes the backends, permissions, testing, and limitations.
