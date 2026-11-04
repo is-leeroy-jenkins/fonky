@@ -1058,6 +1058,117 @@ class Excel:
                 self.application = None
 
 
+
+    def set_formula( self, sheet: str, cell: str, formula: str ) -> None:
+        """Set an Excel formula.
+
+        Args:
+            sheet (str): Worksheet name.
+            cell (str): Destination cell.
+            formula (str): Formula beginning with '='.
+
+        Returns:
+            None: Updates the selected cell.
+        """
+        throw_if( 'formula', formula )
+        self.formula = formula
+        if not self.formula.startswith( '=' ):
+            raise ValueError( 'Excel formula must start with =.' )
+        self.write_cell( sheet, cell, self.formula )
+
+    def read_dataframe( self, sheet: str, address: str ) -> Any:
+        """Read a rectangular Excel range into a DataFrame.
+
+        Args:
+            sheet (str): Worksheet name.
+            address (str): Range including its header row.
+
+        Returns:
+            pandas.DataFrame: Values with the first row as headers.
+        """
+        self.sheet = sheet
+        self.address = address
+        import pandas as pd
+        self.rows = self.read_range( self.sheet, self.address )
+        return pd.DataFrame( self.rows[ 1: ], columns=self.rows[ 0 ] ) if self.rows else pd.DataFrame( )
+
+    def write_dataframe( self, sheet: str, start_cell: str, df_data: Any,
+        include_index: bool = False ) -> None:
+        """Write a DataFrame and its column headers to a worksheet.
+
+        Args:
+            sheet (str): Worksheet name.
+            start_cell (str): Top-left cell address.
+            df_data (pandas.DataFrame): Input DataFrame.
+            include_index (bool): Include the DataFrame index.
+
+        Returns:
+            None: Updates the selected range.
+        """
+        throw_if( 'df_data', df_data )
+        self.df_data = df_data
+        self.include_index = include_index
+        self.rows = [ list( self.df_data.columns ) ]
+        self.rows.extend( self.df_data.itertuples( index=False, name=None ) )
+        if self.include_index:
+            self.rows[ 0 ].insert( 0, str( self.df_data.index.name or 'Index') )
+            for i, index in enumerate( self.df_data.index ):
+                self.rows[ i + 1 ] = [ index, *self.rows[ i + 1 ] ]
+        self.write_range( sheet, start_cell, self.rows )
+
+    def refresh_queries( self ) -> None:
+        """Refresh all workbook data connections using Excel COM.
+
+        Returns:
+            None: Requests refresh.
+
+        Raises:
+            NotImplementedError: If the COM backend is not selected.
+        """
+        self.ensure_open( )
+        if self.backend != 'com':
+            raise NotImplementedError( 'Query refresh requires Microsoft Excel COM.' )
+        self.workbook.RefreshAll( )
+        self.application.CalculateUntilAsyncQueriesDone( )
+
+    def run_macro( self, name: str, approved: bool = False ) -> Any:
+        """Run an Excel macro only with explicit authorization.
+
+        Args:
+            name (str): Qualified VBA macro name.
+            approved (bool): Authorization to execute VBA.
+
+        Returns:
+            Any: Macro result.
+        """
+        throw_if( 'name', name )
+        self.name = name
+        self.approved = approved
+        self.ensure_open( )
+        if not self.approved:
+            raise PermissionError( 'Macro execution requires approved=True.' )
+        if self.backend != 'com':
+            raise NotImplementedError( 'VBA execution requires Excel COM.' )
+        return self.application.Run( self.name )
+
+    def export_pdf( self, path: str ) -> str:
+        """Export an Excel workbook to PDF.
+
+        Args:
+            path (str): PDF destination.
+
+        Returns:
+            str: PDF path.
+        """
+        throw_if( 'path', path )
+        self.pdf_path = str( Path( path ).resolve( ) )
+        self.ensure_open( )
+        if self.backend != 'com':
+            raise NotImplementedError( 'PDF export requires Excel COM.' )
+        self.workbook.ExportAsFixedFormat( 0, self.pdf_path )
+        return self.pdf_path
+
+
 class Word:
     """Word document editing through python-docx or dedicated Word COM automation."""
 
@@ -1235,6 +1346,49 @@ class Word:
                 self.application = None
 
 
+
+    def insert_table( self, rows: int, columns: int ) -> None:
+        """Insert a Word table.
+
+        Args:
+            rows (int): Number of rows.
+            columns (int): Number of columns.
+
+        Returns:
+            None: Inserts a table.
+        """
+        self.rows = rows
+        self.columns = columns
+        if self.rows < 1 or self.columns < 1:
+            raise ValueError( 'Table dimensions must be positive.' )
+        if self.document is None:
+            raise RuntimeError( 'No document is open.' )
+        if self.backend == 'com':
+            position = self.document.Content
+            position.Collapse( 0 )
+            self.document.Tables.Add( position, self.rows, self.columns )
+        else:
+            self.document.add_table( rows=self.rows, cols=self.columns )
+
+    def insert_image( self, path: str ) -> None:
+        """Insert a local image into Word.
+
+        Args:
+            path (str): Image file path.
+
+        Returns:
+            None: Adds the image.
+        """
+        throw_if( 'path', path )
+        self.image_path = str( Path( path ).resolve( ) )
+        if self.document is None:
+            raise RuntimeError( 'No document is open.' )
+        if self.backend == 'com':
+            self.document.InlineShapes.AddPicture( self.image_path )
+        else:
+            self.document.add_picture( self.image_path )
+
+
 class PowerPoint:
     """PowerPoint slide creation with python-pptx or dedicated COM automation."""
 
@@ -1376,6 +1530,69 @@ class PowerPoint:
                 self.application = None
 
 
+
+    def add_text( self, slide_number: int, text: str, left: float = 1.0,
+        top: float = 1.0, width: float = 5.0, height: float = 1.0 ) -> None:
+        """Add positioned text to a slide, using inches for coordinates.
+
+        Args:
+            slide_number (int): One-based slide number.
+            text (str): Text to insert.
+            left (float): Left coordinate in inches.
+            top (float): Top coordinate in inches.
+            width (float): Width in inches.
+            height (float): Height in inches.
+
+        Returns:
+            None: Adds a text box.
+        """
+        throw_if( 'text', text )
+        self.slide_number = slide_number
+        self.text = text
+        self.bounds = (left, top, width, height)
+        if self.presentation is None:
+            raise RuntimeError( 'No presentation is open.' )
+        if self.backend == 'com':
+            shape = self.presentation.Slides( self.slide_number ).Shapes.AddTextbox(
+                1, *(value * 72 for value in self.bounds) )
+            shape.TextFrame.TextRange.Text = self.text
+        else:
+            from pptx.util import Inches
+            slide = self.presentation.slides[ self.slide_number - 1 ]
+            shape = slide.shapes.add_textbox( *(Inches( value ) for value in self.bounds) )
+            shape.text_frame.text = self.text
+
+    def add_image( self, slide_number: int, path: str, left: float = 1.0,
+        top: float = 1.0, width: float = 4.0 ) -> None:
+        """Insert a local image on a slide.
+
+        Args:
+            slide_number (int): One-based slide index.
+            path (str): Image filename.
+            left (float): Horizontal position in inches.
+            top (float): Vertical position in inches.
+            width (float): Image width in inches.
+
+        Returns:
+            None: Adds the image.
+        """
+        throw_if( 'path', path )
+        self.slide_number = slide_number
+        self.image_path = str( Path( path ).resolve( ) )
+        self.left = left
+        self.top = top
+        self.width = width
+        if self.presentation is None:
+            raise RuntimeError( 'No presentation is open.' )
+        if self.backend == 'com':
+            self.presentation.Slides( self.slide_number ).Shapes.AddPicture(
+                self.image_path, False, True, self.left * 72, self.top * 72, self.width * 72, -1 )
+        else:
+            from pptx.util import Inches
+            self.presentation.slides[ self.slide_number - 1 ].shapes.add_picture(
+                self.image_path, Inches( self.left ), Inches( self.top ), width=Inches( self.width ) )
+
+
 class Outlook:
     """Classic Microsoft Outlook desktop automation via COM."""
 
@@ -1510,6 +1727,38 @@ class Outlook:
 # WINDOWS UI AUTOMATION
 # ==========================================================================================
 
+
+    def create_appointment( self, subject: str, start: str, end: str,
+        location: str = '' ) -> str:
+        """Save an Outlook calendar appointment without inviting attendees.
+
+        Args:
+            subject (str): Appointment subject.
+            start (str): Start time, parseable by Outlook.
+            end (str): End time, parseable by Outlook.
+            location (str): Optional location.
+
+        Returns:
+            str: Saved appointment entry ID.
+        """
+        throw_if( 'subject', subject )
+        throw_if( 'start', start )
+        throw_if( 'end', end )
+        self.subject = subject
+        self.start = start
+        self.end = end
+        self.location = location
+        if self.application is None:
+            self.connect( )
+        item = self.application.CreateItem( 1 )
+        item.Subject = self.subject
+        item.Start = self.start
+        item.End = self.end
+        item.Location = self.location
+        item.Save( )
+        return str( item.EntryID )
+
+
 class Windows:
     """Windows UI Automation backed by pywinauto."""
 
@@ -1614,6 +1863,37 @@ class Windows:
             raise RuntimeError( 'No window has been selected.' )
         self.window.capture_as_image( ).save( self.path )
         return self.path
+
+
+
+    def get_text( self, title: str, control_type: str = 'Edit' ) -> str:
+        """Read text from a named UI Automation control.
+
+        Args:
+            title (str): Control title.
+            control_type (str): UIA control type.
+
+        Returns:
+            str: Control text.
+        """
+        throw_if( 'title', title )
+        self.title = title
+        self.control_type = control_type
+        if self.window is None:
+            raise RuntimeError( 'No window has been selected.' )
+        return str( self.window.child_window( title=self.title,
+            control_type=self.control_type ).window_text( ) )
+
+    def close_window( self ) -> None:
+        """Request that the selected window close.
+
+        Returns:
+            None: Closes the window.
+        """
+        if self.window is None:
+            raise RuntimeError( 'No window has been selected.' )
+        self.window.close( )
+        self.window = None
 
 
 __all__ = [ 'Outlook', 'Word', 'PowerPoint', 'Excel', 'Calculator', 'File', 'Data',
