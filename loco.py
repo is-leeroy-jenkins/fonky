@@ -81,6 +81,20 @@ def throw_if( name: str, value: object ) -> None:
         raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 
+
+def sql_identifier( name: str ) -> str:
+    """Quote a SQLite identifier without treating it as SQL syntax.
+
+    Args:
+        name (str): Database table or column name.
+
+    Returns:
+        str: Escaped and quoted identifier.
+    """
+    throw_if( 'name', name )
+    return '"' + name.replace( '"', '""' ) + '"'
+
+
 def require_windows( ) -> None:
     """Require a Windows desktop environment.
 
@@ -661,6 +675,137 @@ class Data:
         self.parameters = parameters
         import pandas as pd
         return pd.DataFrame( self.execute_query( self.sql, self.parameters ) )
+
+
+
+    def create_table( self, table: str, columns: dict[str, str] ) -> None:
+        """Create a table with explicitly supported SQLite column types.
+
+        Args:
+            table (str): New table name.
+            columns (dict[str, str]): Column names and SQLite type declarations.
+
+        Returns:
+            None: Adds the table in the current transaction.
+        """
+        throw_if( 'table', table )
+        throw_if( 'columns', columns )
+        self.table = table
+        self.columns = columns
+        allowed = { 'INTEGER', 'REAL', 'TEXT', 'BLOB', 'NUMERIC',
+            'INTEGER PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT' }
+        if any( declaration.upper( ) not in allowed for declaration in self.columns.values( ) ):
+            raise ValueError( 'Unsupported SQLite column declaration.' )
+        definitions = ', '.join( sql_identifier( name ) + ' ' + declaration
+            for name, declaration in self.columns.items( ) )
+        self.execute_nonquery( 'CREATE TABLE ' + sql_identifier( self.table ) + '(' + definitions + ')' )
+
+    def drop_table( self, table: str, approved: bool = False ) -> None:
+        """Drop a table when expressly approved.
+
+        Args:
+            table (str): Table name.
+            approved (bool): Explicit permission to drop the table.
+
+        Returns:
+            None: Drops the table in the current transaction.
+        """
+        throw_if( 'table', table )
+        self.table = table
+        self.approved = approved
+        if not self.approved:
+            raise PermissionError( 'Dropping a table requires approved=True.' )
+        self.execute_nonquery( 'DROP TABLE ' + sql_identifier( self.table ) )
+
+    def insert_record( self, table: str, values: dict[str, Any] ) -> int:
+        """Insert a parameterized SQLite record.
+
+        Args:
+            table (str): Table name.
+            values (dict[str, Any]): Column/value mapping.
+
+        Returns:
+            int: Affected record count.
+        """
+        throw_if( 'table', table )
+        throw_if( 'values', values )
+        self.table = table
+        self.values = values
+        names = ', '.join( sql_identifier( name ) for name in self.values )
+        placeholders = ', '.join( '?' for name in self.values )
+        statement = f'INSERT INTO {sql_identifier( self.table )} ({names}) VALUES ({placeholders})'
+        return self.execute_nonquery( statement, tuple( self.values.values( ) ) )
+
+    def update_record( self, table: str, values: dict[str, Any],
+        where: str, where_parameters: Sequence[Any] ) -> int:
+        """Update selected records using bound values.
+
+        Args:
+            table (str): Table name.
+            values (dict[str, Any]): New field values.
+            where (str): Trusted SQL WHERE clause supplied by the application.
+            where_parameters (Sequence[Any]): Bound WHERE clause arguments.
+
+        Returns:
+            int: Number of affected records.
+        """
+        throw_if( 'table', table )
+        throw_if( 'values', values )
+        throw_if( 'where', where )
+        self.table = table
+        self.values = values
+        self.where = where
+        self.where_parameters = where_parameters
+        changes = ', '.join( sql_identifier( name ) + '=?' for name in self.values )
+        statement = f'UPDATE {sql_identifier( self.table )} SET {changes} WHERE {self.where}'
+        return self.execute_nonquery( statement, tuple( self.values.values( ) ) + tuple( self.where_parameters ) )
+
+    def delete_record( self, table: str, where: str,
+        where_parameters: Sequence[Any], approved: bool = False ) -> int:
+        """Delete selected SQLite records with explicit permission.
+
+        Args:
+            table (str): Table name.
+            where (str): Trusted SQL WHERE clause.
+            where_parameters (Sequence[Any]): Bound WHERE arguments.
+            approved (bool): Explicit deletion approval.
+
+        Returns:
+            int: Number of deleted records.
+        """
+        throw_if( 'table', table )
+        throw_if( 'where', where )
+        self.table = table
+        self.where = where
+        self.where_parameters = where_parameters
+        self.approved = approved
+        if not self.approved:
+            raise PermissionError( 'Record deletion requires approved=True.' )
+        return self.execute_nonquery( f'DELETE FROM {sql_identifier( self.table )} WHERE {self.where}',
+            self.where_parameters )
+
+    def write_dataframe( self, table: str, df_data: Any, if_exists: str = 'fail' ) -> int:
+        """Write a DataFrame to SQLite.
+
+        Args:
+            table (str): Destination table.
+            df_data (pandas.DataFrame): Input records.
+            if_exists (str): 'fail', 'append', or 'replace'.
+
+        Returns:
+            int: Number of rows inserted.
+        """
+        throw_if( 'table', table )
+        throw_if( 'df_data', df_data )
+        self.table = table
+        self.df_data = df_data
+        self.if_exists = if_exists
+        if self.if_exists not in ('fail', 'append', 'replace'):
+            raise ValueError( 'if_exists must be fail, append, or replace.' )
+        if self.read_only:
+            raise PermissionError( 'Database is read-only.' )
+        self.connect( )
+        return int( self.df_data.to_sql( self.table, self.connection, if_exists=self.if_exists, index=False ) )
 
 
 # ==========================================================================================
