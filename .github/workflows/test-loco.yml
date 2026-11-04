@@ -47,6 +47,9 @@ jobs:
       - name: test_transactions_and_backup
         if: always()
         run: python -m unittest discover -s tests -p test_loco.py -k test_transactions_and_backup -v
+      - name: test_readonly_database
+        if: always()
+        run: python -m unittest discover -s tests -p test_loco.py -k test_readonly_database -v
       - name: test_arithmetic
         if: always()
         run: python -m unittest discover -s tests -p test_loco.py -k test_arithmetic -v
