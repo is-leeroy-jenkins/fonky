@@ -9101,3 +9101,112 @@ __all__: List[ str ] = [
 	'chunk_sentences_tool',
 	'semantic_search_tool',
 ]
+
+
+# ==========================================================================================
+# LOCAL AUTOMATION TOOLS - SHARED STANDALONE FONKY IMPLEMENTATION
+# ==========================================================================================
+
+from .. import loco_tools as _loco_tools
+
+local_calculate = _loco_tools.local_calculate
+local_percentage = _loco_tools.local_percentage
+local_file_list = _loco_tools.local_file_list
+local_file_read = _loco_tools.local_file_read
+local_file_exists = _loco_tools.local_file_exists
+local_file_info = _loco_tools.local_file_info
+local_file_hash = _loco_tools.local_file_hash
+local_sqlite_tables = _loco_tools.local_sqlite_tables
+local_sqlite_schema = _loco_tools.local_sqlite_schema
+local_sqlite_query = _loco_tools.local_sqlite_query
+local_excel_sheets = _loco_tools.local_excel_sheets
+local_excel_cell = _loco_tools.local_excel_cell
+local_excel_range = _loco_tools.local_excel_range
+local_excel_write_range = _loco_tools.local_excel_write_range
+local_word_read = _loco_tools.local_word_read
+local_word_create = _loco_tools.local_word_create
+local_word_append = _loco_tools.local_word_append
+local_word_replace = _loco_tools.local_word_replace
+local_slides_create = _loco_tools.local_slides_create
+local_slides_add_slide = _loco_tools.local_slides_add_slide
+local_slides_add_text = _loco_tools.local_slides_add_text
+local_outlook_messages = _loco_tools.local_outlook_messages
+local_outlook_search = _loco_tools.local_outlook_search
+local_outlook_read = _loco_tools.local_outlook_read
+local_outlook_draft = _loco_tools.local_outlook_draft
+local_windows_list = _loco_tools.local_windows_list
+local_windows_controls = _loco_tools.local_windows_controls
+local_system_info = _loco_tools.local_system_info
+local_disk_usage = _loco_tools.local_disk_usage
+
+__all__.extend( [
+    'local_calculate',
+    'local_percentage',
+    'local_file_list',
+    'local_file_read',
+    'local_file_exists',
+    'local_file_info',
+    'local_file_hash',
+    'local_sqlite_tables',
+    'local_sqlite_schema',
+    'local_sqlite_query',
+    'local_excel_sheets',
+    'local_excel_cell',
+    'local_excel_range',
+    'local_excel_write_range',
+    'local_word_read',
+    'local_word_create',
+    'local_word_append',
+    'local_word_replace',
+    'local_slides_create',
+    'local_slides_add_slide',
+    'local_slides_add_text',
+    'local_outlook_messages',
+    'local_outlook_search',
+    'local_outlook_read',
+    'local_outlook_draft',
+    'local_windows_list',
+    'local_windows_controls',
+    'local_system_info',
+    'local_disk_usage',
+] )
+
+
+# Provider-native function-call definitions, executed through the local Python callables.
+local_tool_definitions = [
+    tool( name=operation.__name__, description=operation.__doc__.splitlines( )[ 0 ],
+        parameters=_loco_tools.local_tool_schema( operation ) )
+    for operation in (
+    _loco_tools.local_calculate,
+    _loco_tools.local_percentage,
+    _loco_tools.local_file_list,
+    _loco_tools.local_file_read,
+    _loco_tools.local_file_exists,
+    _loco_tools.local_file_info,
+    _loco_tools.local_file_hash,
+    _loco_tools.local_sqlite_tables,
+    _loco_tools.local_sqlite_schema,
+    _loco_tools.local_sqlite_query,
+    _loco_tools.local_excel_sheets,
+    _loco_tools.local_excel_cell,
+    _loco_tools.local_excel_range,
+    _loco_tools.local_excel_write_range,
+    _loco_tools.local_word_read,
+    _loco_tools.local_word_create,
+    _loco_tools.local_word_append,
+    _loco_tools.local_word_replace,
+    _loco_tools.local_slides_create,
+    _loco_tools.local_slides_add_slide,
+    _loco_tools.local_slides_add_text,
+    _loco_tools.local_outlook_messages,
+    _loco_tools.local_outlook_search,
+    _loco_tools.local_outlook_read,
+    _loco_tools.local_outlook_draft,
+    _loco_tools.local_windows_list,
+    _loco_tools.local_windows_controls,
+    _loco_tools.local_system_info,
+    _loco_tools.local_disk_usage,
+    _loco_tools.local_tool_schema,
+    )
+]
+__all__.append( 'local_tool_definitions' )

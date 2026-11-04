@@ -3977,3 +3977,72 @@ __all__: List[ str ] = [
 	'nltk_chunk_sentences',
 	'preprocess_semantic_search',
 ]
+
+
+# ==========================================================================================
+# LOCAL AUTOMATION TOOLS - SHARED STANDALONE FONKY IMPLEMENTATION
+# ==========================================================================================
+
+from .. import loco_tools as _loco_tools
+
+local_calculate = tool( parse_docstring=True )( _loco_tools.local_calculate )
+local_percentage = tool( parse_docstring=True )( _loco_tools.local_percentage )
+local_file_list = tool( parse_docstring=True )( _loco_tools.local_file_list )
+local_file_read = tool( parse_docstring=True )( _loco_tools.local_file_read )
+local_file_exists = tool( parse_docstring=True )( _loco_tools.local_file_exists )
+local_file_info = tool( parse_docstring=True )( _loco_tools.local_file_info )
+local_file_hash = tool( parse_docstring=True )( _loco_tools.local_file_hash )
+local_sqlite_tables = tool( parse_docstring=True )( _loco_tools.local_sqlite_tables )
+local_sqlite_schema = tool( parse_docstring=True )( _loco_tools.local_sqlite_schema )
+local_sqlite_query = tool( parse_docstring=True )( _loco_tools.local_sqlite_query )
+local_excel_sheets = tool( parse_docstring=True )( _loco_tools.local_excel_sheets )
+local_excel_cell = tool( parse_docstring=True )( _loco_tools.local_excel_cell )
+local_excel_range = tool( parse_docstring=True )( _loco_tools.local_excel_range )
+local_excel_write_range = tool( parse_docstring=True )( _loco_tools.local_excel_write_range )
+local_word_read = tool( parse_docstring=True )( _loco_tools.local_word_read )
+local_word_create = tool( parse_docstring=True )( _loco_tools.local_word_create )
+local_word_append = tool( parse_docstring=True )( _loco_tools.local_word_append )
+local_word_replace = tool( parse_docstring=True )( _loco_tools.local_word_replace )
+local_slides_create = tool( parse_docstring=True )( _loco_tools.local_slides_create )
+local_slides_add_slide = tool( parse_docstring=True )( _loco_tools.local_slides_add_slide )
+local_slides_add_text = tool( parse_docstring=True )( _loco_tools.local_slides_add_text )
+local_outlook_messages = tool( parse_docstring=True )( _loco_tools.local_outlook_messages )
+local_outlook_search = tool( parse_docstring=True )( _loco_tools.local_outlook_search )
+local_outlook_read = tool( parse_docstring=True )( _loco_tools.local_outlook_read )
+local_outlook_draft = tool( parse_docstring=True )( _loco_tools.local_outlook_draft )
+local_windows_list = tool( parse_docstring=True )( _loco_tools.local_windows_list )
+local_windows_controls = tool( parse_docstring=True )( _loco_tools.local_windows_controls )
+local_system_info = tool( parse_docstring=True )( _loco_tools.local_system_info )
+local_disk_usage = tool( parse_docstring=True )( _loco_tools.local_disk_usage )
+
+__all__.extend( [
+    'local_calculate',
+    'local_percentage',
+    'local_file_list',
+    'local_file_read',
+    'local_file_exists',
+    'local_file_info',
+    'local_file_hash',
+    'local_sqlite_tables',
+    'local_sqlite_schema',
+    'local_sqlite_query',
+    'local_excel_sheets',
+    'local_excel_cell',
+    'local_excel_range',
+    'local_excel_write_range',
+    'local_word_read',
+    'local_word_create',
+    'local_word_append',
+    'local_word_replace',
+    'local_slides_create',
+    'local_slides_add_slide',
+    'local_slides_add_text',
+    'local_outlook_messages',
+    'local_outlook_search',
+    'local_outlook_read',
+    'local_outlook_draft',
+    'local_windows_list',
+    'local_windows_controls',
+    'local_system_info',
+    'local_disk_usage',
+] )
