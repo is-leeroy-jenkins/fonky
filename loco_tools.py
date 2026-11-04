@@ -12,7 +12,7 @@ import json
 import os
 from inspect import Parameter, signature
 from pathlib import Path
-from typing import Callable
+from typing import Callable, get_type_hints
 from pydantic import TypeAdapter
 from .loco import Calculator, Data, Excel, File, Outlook, PowerPoint, Shell, Windows, Word
 
@@ -665,8 +665,9 @@ def local_tool_schema( operation: Callable ) -> dict[str, object]:
     """
     properties = {}
     required = []
+    annotations = get_type_hints( operation )
     for parameter in signature( operation ).parameters.values( ):
-        details = TypeAdapter( parameter.annotation ).json_schema( )
+        details = TypeAdapter( annotations[ parameter.name ] ).json_schema( )
         if parameter.default is Parameter.empty:
             required.append( parameter.name )
         else:
