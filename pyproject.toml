@@ -84,6 +84,25 @@ dependencies = [
     "xmltodict>=0.13,<1",
 ]
 
+[project.optional-dependencies]
+office = [
+    "pywin32>=306; platform_system == 'Windows'",
+]
+desktop = [
+    "pywinauto>=0.6.8; platform_system == 'Windows'",
+    "pyautogui>=0.9.54",
+    "psutil>=5.9",
+]
+local = [
+    "pywin32>=306; platform_system == 'Windows'",
+    "pywinauto>=0.6.8; platform_system == 'Windows'",
+    "pyautogui>=0.9.54",
+    "psutil>=5.9",
+]
+test = [
+    "pytest>=8",
+]
+
 [project.urls]
 Documentation = "https://is-leeroy-jenkins.github.io/fonky/"
 Issues = "https://github.com/is-leeroy-jenkins/fonky/issues"
