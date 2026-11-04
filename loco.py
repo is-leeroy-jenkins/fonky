@@ -727,7 +727,6 @@ class Data:
         Returns:
             None: Stores database configuration.
         """
-        throw_if( 'path', path )
         self.path = path
         self.read_only = read_only
         self.connection = None
@@ -1724,8 +1723,6 @@ class Excel:
         Returns:
             None: Initializes workbook state.
         """
-        if backend not in ('file', 'com'):
-            raise ValueError( "backend must be 'file' or 'com'." )
         self.backend = backend
         self.workbook = None
         self.application = None
@@ -2348,8 +2345,6 @@ class Word:
         Returns:
             None: Initializes document state.
         """
-        if backend not in ('file', 'com'):
-            raise ValueError( "backend must be 'file' or 'com'." )
         self.backend = backend
         self.document = None
         self.application = None
@@ -2737,8 +2732,6 @@ class PowerPoint:
         Returns:
             None: Initializes presentation state.
         """
-        if backend not in ('file', 'com'):
-            raise ValueError( "backend must be 'file' or 'com'." )
         self.backend = backend
         self.presentation = None
         self.application = None
@@ -3434,8 +3427,6 @@ class Windows:
         Returns:
             None: Initializes automation state.
         """
-        if backend not in ('uia', 'win32'):
-            raise ValueError( "backend must be 'uia' or 'win32'." )
         self.backend = backend
         self.application = None
         self.window = None
