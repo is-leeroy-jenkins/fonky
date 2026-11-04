@@ -363,6 +363,107 @@ class File:
 # SQLITE DATABASE
 # ==========================================================================================
 
+
+    def get_info( self, path: str ) -> dict[str, Any]:
+        """Return filesystem metadata.
+
+        Args:
+            path (str): Target path.
+
+        Returns:
+            dict[str, Any]: Name, path, type, size, and modification time.
+        """
+        self.path = self.resolve( path )
+        self.stat = self.path.stat( )
+        return { 'name': self.path.name, 'path': str( self.path ),
+            'is_file': self.path.is_file( ), 'is_directory': self.path.is_dir( ),
+            'size': self.stat.st_size, 'modified': self.stat.st_mtime }
+
+    def read_bytes( self, path: str ) -> bytes:
+        """Read binary file contents.
+
+        Args:
+            path (str): Source file.
+
+        Returns:
+            bytes: Binary content.
+        """
+        self.path = self.resolve( path )
+        return self.path.read_bytes( )
+
+    def write_bytes( self, path: str, content: bytes, overwrite: bool = False ) -> int:
+        """Write binary file contents.
+
+        Args:
+            path (str): Destination file.
+            content (bytes): Binary content.
+            overwrite (bool): Permit file replacement.
+
+        Returns:
+            int: Number of bytes written.
+        """
+        throw_if( 'content', content )
+        self.path = self.resolve( path )
+        self.content = content
+        self.overwrite = overwrite
+        with self.path.open( 'wb' if self.overwrite else 'xb' ) as handle:
+            return handle.write( self.content )
+
+    def rename_file( self, path: str, new_name: str ) -> str:
+        """Rename a file within its existing directory.
+
+        Args:
+            path (str): Existing path.
+            new_name (str): New filename without directory separators.
+
+        Returns:
+            str: Renamed file path.
+        """
+        throw_if( 'new_name', new_name )
+        self.path = self.resolve( path )
+        self.new_name = new_name
+        if Path( self.new_name ).name != self.new_name or self.new_name in ('.', '..'):
+            raise ValueError( 'new_name must be a filename, not a path.' )
+        self.destination = self.resolve( str( self.path.with_name( self.new_name ) ) )
+        if self.destination.exists( ):
+            raise FileExistsError( str( self.destination ) )
+        return str( self.path.rename( self.destination ) )
+
+    def get_size( self, path: str ) -> int:
+        """Get a file size in bytes.
+
+        Args:
+            path (str): Source file path.
+
+        Returns:
+            int: Size in bytes.
+        """
+        self.path = self.resolve( path )
+        return self.path.stat( ).st_size
+
+    def delete_directory( self, path: str, recursive: bool = False ) -> None:
+        """Remove a directory, optionally including its contents.
+
+        Args:
+            path (str): Directory path.
+            recursive (bool): Permit recursive deletion.
+
+        Returns:
+            None: Removes the directory.
+
+        Raises:
+            PermissionError: When attempting to remove the configured root.
+        """
+        self.path = self.resolve( path )
+        self.recursive = recursive
+        if self.root is not None and self.path == self.root:
+            raise PermissionError( 'Cannot delete the configured filesystem root.' )
+        if self.recursive:
+            shutil.rmtree( self.path )
+        else:
+            self.path.rmdir( )
+
+
 class Data:
     """SQLite connection and transaction operations."""
 
@@ -710,6 +811,36 @@ class Calculator:
 # SYSTEM PROCESS EXECUTION
 # ==========================================================================================
 
+
+    def power( self, base: float, exponent: float ) -> float:
+        """Raise a base to a power.
+
+        Args:
+            base (float): Base number.
+            exponent (float): Exponent.
+
+        Returns:
+            float: Exponentiation result.
+        """
+        self.base = base
+        self.exponent = exponent
+        return math.pow( self.base, self.exponent )
+
+    def round_value( self, value: float, digits: int = 2 ) -> float:
+        """Round a number to a specified precision.
+
+        Args:
+            value (float): Input number.
+            digits (int): Number of fractional digits.
+
+        Returns:
+            float: Rounded value.
+        """
+        self.value = value
+        self.digits = digits
+        return round( self.value, self.digits )
+
+
 class Shell:
     """Subprocess execution with explicit permissions and timeouts."""
 
@@ -803,6 +934,60 @@ class Shell:
         self.path = path
         self.usage = shutil.disk_usage( self.path )
         return { 'total': self.usage.total, 'used': self.usage.used, 'free': self.usage.free }
+
+
+
+    def launch_process( self, command: Sequence[str], cwd: str = '' ) -> int:
+        """Launch an allowlisted executable without a shell.
+
+        Args:
+            command (Sequence[str]): Executable and arguments.
+            cwd (str): Optional working directory.
+
+        Returns:
+            int: New process identifier.
+        """
+        throw_if( 'command', command )
+        self.command = list( command )
+        self.cwd = cwd
+        if not self.allowed_commands or Path( self.command[ 0 ] ).name not in self.allowed_commands:
+            raise PermissionError( 'Executable is not permitted by the shell policy.' )
+        self.process = subprocess.Popen( self.command, cwd=self.cwd or None, shell=False )
+        return self.process.pid
+
+    def list_processes( self ) -> list[dict[str, Any]]:
+        """Enumerate local processes using optional psutil.
+
+        Returns:
+            list[dict[str, Any]]: Process IDs and names.
+        """
+        import psutil
+        return [ { 'pid': process.info[ 'pid' ], 'name': process.info[ 'name' ] }
+            for process in psutil.process_iter( attrs=['pid', 'name'] ) ]
+
+    def get_memory_usage( self ) -> dict[str, Any]:
+        """Read system RAM utilization with psutil.
+
+        Returns:
+            dict[str, Any]: Available, total, and used bytes.
+        """
+        import psutil
+        self.memory = psutil.virtual_memory( )
+        return { 'total': self.memory.total, 'used': self.memory.used,
+            'available': self.memory.available }
+
+    def get_cpu_usage( self, interval: float = 0.1 ) -> float:
+        """Read CPU utilization with psutil.
+
+        Args:
+            interval (float): Sampling interval in seconds.
+
+        Returns:
+            float: CPU utilization percentage.
+        """
+        self.interval = interval
+        import psutil
+        return float( psutil.cpu_percent( interval=self.interval ) )
 
 
 # ==========================================================================================
@@ -1894,6 +2079,57 @@ class Windows:
             raise RuntimeError( 'No window has been selected.' )
         self.window.close( )
         self.window = None
+
+
+
+    def minimize_window( self ) -> None:
+        """Minimize the attached window.
+
+        Returns:
+            None: Minimizes the window.
+        """
+        if self.window is None:
+            raise RuntimeError( 'No window has been selected.' )
+        self.window.minimize( )
+
+    def maximize_window( self ) -> None:
+        """Maximize the attached window.
+
+        Returns:
+            None: Maximizes the window.
+        """
+        if self.window is None:
+            raise RuntimeError( 'No window has been selected.' )
+        self.window.maximize( )
+
+    def resize_window( self, width: int, height: int ) -> None:
+        """Resize the attached window.
+
+        Args:
+            width (int): Width in pixels.
+            height (int): Height in pixels.
+
+        Returns:
+            None: Resizes the window.
+        """
+        self.width = width
+        self.height = height
+        if self.width < 1 or self.height < 1:
+            raise ValueError( 'Window dimensions must be positive.' )
+        if self.window is None:
+            raise RuntimeError( 'No window has been selected.' )
+        self.window.move_window( width=self.width, height=self.height )
+
+    def list_controls( self ) -> list[str]:
+        """List textual descriptions of descendant controls.
+
+        Returns:
+            list[str]: Window control descriptions.
+        """
+        if self.window is None:
+            raise RuntimeError( 'No window has been selected.' )
+        return [ f'{control.element_info.control_type}: {control.window_text( )}'
+            for control in self.window.descendants( ) ]
 
 
 __all__ = [ 'Outlook', 'Word', 'PowerPoint', 'Excel', 'Calculator', 'File', 'Data',
