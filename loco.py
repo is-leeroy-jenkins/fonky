@@ -648,8 +648,11 @@ class Data:
         self.connect( )
         if Path( self.destination ).resolve( ) == Path( self.path ).resolve( ):
             raise ValueError( 'Destination must differ from the source database.' )
-        with sqlite3.connect( self.destination ) as target:
+        target = sqlite3.connect( self.destination )
+        try:
             self.connection.backup( target )
+        finally:
+            target.close( )
         return self.destination
 
     def integrity_check( self ) -> list[ str ]:
