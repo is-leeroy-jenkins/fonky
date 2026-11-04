@@ -191,7 +191,22 @@ class File:
         delete_directory(): Remove a directory, optionally including its contents.
     """
 
-    root: Path | None
+    root: Path | None  # Configured filesystem access boundary, if supplied.
+    path: str | Path  # Active local file, document, or database path.
+    directory: Path  # Selected filesystem directory.
+    pattern: str  # Glob expression used for file discovery.
+    recursive: bool  # Whether the current operation traverses subdirectories.
+    entries: Any  # Filesystem iterator used by the active search.
+    encoding: str  # Character encoding for text file operations.
+    content: str | bytes  # Content supplied for the active write operation.
+    overwrite: bool  # Whether an existing target may be replaced.
+    source: Path  # Resolved source of a copy or move.
+    destination: str | Path  # Resolved destination of the active operation.
+    algorithm: str  # Selected file hashing algorithm.
+    digest: Any  # Incremental cryptographic hash state.
+    archive: Path  # ZIP archive selected for compression or extraction.
+    stat: Any  # Filesystem metadata returned by Path.stat().
+    new_name: str  # Requested destination filename.
 
     def __init__( self, root: str = '' ) -> None:
         """Configure permitted filesystem scope.
@@ -710,9 +725,24 @@ class Data:
         write_dataframe(): Write a DataFrame to SQLite.
     """
 
-    connection: sqlite3.Connection | None
-    path: str
-    read_only: bool
+    path: str | Path  # Active local file, document, or database path.
+    read_only: bool  # Whether SQLite permits write operations.
+    connection: sqlite3.Connection | None  # Managed SQLite connection, initialized on demand.
+    uri: str  # SQLite URI used for a read-only database connection.
+    sql: str  # SQL statement supplied to the current operation.
+    parameters: Sequence[Any]  # Bound parameters for the active SQL statement.
+    statement: str  # SQL statement prefix used to enforce read operations.
+    cursor: sqlite3.Cursor  # Cursor for the most recent SQLite command.
+    rows: Any  # Rows used for a database, spreadsheet, or presentation operation.
+    table: str  # Selected SQLite table or Office table name.
+    destination: str | Path  # Resolved destination of the active operation.
+    columns: Any  # Column definitions or table dimensions.
+    approved: bool  # Explicit authorization for a sensitive operation.
+    values: dict[str, Any]  # Values mapped to database columns or document elements.
+    where: str  # Trusted SQL WHERE clause supplied by the caller.
+    where_parameters: Sequence[Any]  # Bound parameters used by the SQL WHERE clause.
+    df_data: Any  # Pandas DataFrame supplied to the active data operation.
+    if_exists: str  # SQLite DataFrame table replacement policy.
 
     def __init__( self, path: str, read_only: bool = False ) -> None:
         """Initialize a database wrapper without connecting.
@@ -1181,6 +1211,17 @@ class Calculator:
         round_value(): Round a number to a specified precision.
     """
 
+    left: float  # Left arithmetic operand or horizontal slide position.
+    right: float  # Right arithmetic operand.
+    value: Any  # Value being read, written, calculated, or searched.
+    percent: float  # Percentage applied to a base numeric value.
+    expression: str  # Arithmetic expression supplied for parsing.
+    tree: ast.Expression  # Parsed abstract syntax tree of an expression.
+    node: ast.AST  # Current AST node during restricted arithmetic evaluation.
+    base: float  # Base value for exponentiation.
+    exponent: float  # Power used in exponentiation.
+    digits: int  # Decimal places used for rounding.
+
     _binary: dict[type, Callable[[Any, Any], Any]] = {
         ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
         ast.Div: operator.truediv, ast.Pow: operator.pow, ast.Mod: operator.mod
@@ -1457,7 +1498,17 @@ class Shell:
         get_cpu_usage(): Read CPU utilization with psutil.
     """
 
-    allowed_commands: set[str] | None
+    allowed_commands: set[str]  # Executable names explicitly permitted by the shell policy.
+    command: list[str] | str  # Executable command or program selected for execution.
+    timeout: int  # Maximum command execution duration in seconds.
+    cwd: str  # Working directory for the launched process.
+    result: subprocess.CompletedProcess | Any  # Most recent process execution result.
+    script: str  # PowerShell script submitted for execution.
+    path: str | Path  # Active local file, document, or database path.
+    usage: Any  # Disk usage statistics returned by shutil.
+    process: subprocess.Popen  # Process handle retained after launch.
+    memory: Any  # Memory statistics returned by psutil.
+    interval: float  # Duration for CPU utilization sampling.
 
     def __init__( self, allowed_commands: Sequence[str] = () ) -> None:
         """Configure an optional executable allowlist.
@@ -1706,10 +1757,26 @@ class Excel:
         create_chart(): Create a column chart from headers and numeric rows.
     """
 
-    workbook: Any
-    application: Any
-    path: str
-    backend: str
+    backend: str  # Selected file-based, COM, or UI Automation backend.
+    workbook: Any  # Current open Excel workbook object.
+    application: Any  # COM application or UI automation object owned by this instance.
+    path: str | Path  # Active local file, document, or database path.
+    name: str  # Name of the current worksheet, table, or resource.
+    sheet: str  # Selected Excel worksheet name.
+    cell: str  # A1-style selected cell address.
+    value: Any  # Value being read, written, calculated, or searched.
+    address: str  # A1-style range address.
+    start_cell: str  # Top-left A1-style destination cell.
+    rows: Any  # Rows used for a database, spreadsheet, or presentation operation.
+    save_changes: bool  # Whether to save pending edits before closing.
+    formula: str  # Excel formula, including its leading equals sign.
+    df_data: Any  # Pandas DataFrame supplied to the active data operation.
+    include_index: bool  # Whether to include a DataFrame index in exported rows.
+    approved: bool  # Explicit authorization for a sensitive operation.
+    pdf_path: str  # Destination PDF file path.
+    bold: bool  # Whether text formatting uses bold weight.
+    number_format: str  # Excel display format string applied to cells.
+    anchor: str  # Excel destination cell for an embedded chart.
 
     def __init__( self, backend: str = 'file' ) -> None:
         """Choose the file or COM backend.
@@ -2333,6 +2400,21 @@ class Word:
         set_footer(): Set the primary document footer.
     """
 
+    backend: str  # Selected file-based, COM, or UI Automation backend.
+    document: Any  # Open Word document object.
+    application: Any  # COM application or UI automation object owned by this instance.
+    path: str | Path  # Active local file, document, or database path.
+    text: str  # Text used in the current document or UI operation.
+    style: str  # Word paragraph style identifier.
+    old: str  # Text to search for replacement.
+    new: str  # Replacement text.
+    path_pdf: str  # Word PDF export destination.
+    save_changes: bool  # Whether to save pending edits before closing.
+    rows: Any  # Rows used for a database, spreadsheet, or presentation operation.
+    columns: Any  # Column definitions or table dimensions.
+    image_path: str  # Source path of an image inserted into an Office document.
+    value: Any  # Value being read, written, calculated, or searched.
+
     def __init__( self, backend: str = 'file' ) -> None:
         """Select the Word backend.
 
@@ -2720,6 +2802,23 @@ class PowerPoint:
         add_table(): Insert a rectangular table on a slide.
     """
 
+    backend: str  # Selected file-based, COM, or UI Automation backend.
+    presentation: Any  # Current open PowerPoint presentation object.
+    application: Any  # COM application or UI automation object owned by this instance.
+    path: str | Path  # Active local file, document, or database path.
+    title: str  # Current slide, window, or control title.
+    layout: int  # PowerPoint slide layout index.
+    pdf_path: str  # Destination PDF file path.
+    slide_number: int  # One-based slide index.
+    text: str  # Text used in the current document or UI operation.
+    bounds: tuple[float, float, float, float]  # Text-box position and dimensions measured in inches.
+    image_path: str  # Source path of an image inserted into an Office document.
+    left: float  # Left arithmetic operand or horizontal slide position.
+    top: float  # Vertical slide coordinate measured in inches.
+    width: float  # Object or window width.
+    rows: Any  # Rows used for a database, spreadsheet, or presentation operation.
+    height: float  # Object or window height.
+
     def __init__( self, backend: str = 'file' ) -> None:
         """Select the presentation backend.
 
@@ -3087,6 +3186,21 @@ class Outlook:
         save_attachments(): Save a message's attachments to an existing local directory.
     """
 
+    application: Any  # COM application or UI automation object owned by this instance.
+    namespace: Any  # MAPI namespace obtained from the Outlook COM application.
+    folder: str  # Selected Outlook default mailbox folder.
+    limit: int  # Maximum number of returned or scanned Outlook items.
+    entry_id: str  # Outlook item identifier.
+    recipient: str  # Message recipient address.
+    subject: str  # Mail or calendar appointment subject.
+    body: str  # Plain-text Outlook message body.
+    approved: bool  # Explicit authorization for a sensitive operation.
+    start: str  # Appointment start timestamp.
+    end: str  # Appointment end timestamp.
+    location: str  # Appointment location.
+    phrase: str  # Case-folded term used for Outlook message searching.
+    directory: Path  # Selected filesystem directory.
+
     def __init__( self ) -> None:
         """Initialize Outlook state without launching the application."""
         self.application = None
@@ -3414,6 +3528,16 @@ class Windows:
         resize_window(): Resize the attached window.
         list_controls(): List textual descriptions of descendant controls.
     """
+
+    backend: str  # Selected file-based, COM, or UI Automation backend.
+    application: Any  # COM application or UI automation object owned by this instance.
+    window: Any  # Selected Windows top-level UI Automation window.
+    title: str  # Current slide, window, or control title.
+    control_type: str  # UI Automation category of the selected control.
+    text: str  # Text used in the current document or UI operation.
+    path: str | Path  # Active local file, document, or database path.
+    width: float  # Object or window width.
+    height: float  # Object or window height.
 
     def __init__( self, backend: str = 'uia' ) -> None:
         """Select a pywinauto backend.
