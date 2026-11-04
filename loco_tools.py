@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import json
 import os
+from inspect import Parameter, signature
 from pathlib import Path
+from typing import Callable
+from pydantic import TypeAdapter
 from .loco import Calculator, Data, Excel, File, Outlook, PowerPoint, Shell, Windows, Word
 
 
@@ -646,6 +649,31 @@ def local_disk_usage( path: str = '.' ) -> str:
         str: Result of the local operation.
     """
     return json.dumps( Shell( ).get_disk_usage( _path( path ) ), default=str )
+
+
+def local_tool_schema( operation: Callable ) -> dict[str, object]:
+    """Create a JSON Schema for a standalone local tool callable.
+
+    Purpose:
+        Extracts typed parameters and defaults for xAI and Mistral native tool definitions.
+
+    Args:
+        operation (Callable): One of the approved local tool functions.
+
+    Returns:
+        dict[str, object]: JSON Schema object describing the tool's input parameters.
+    """
+    properties = {}
+    required = []
+    for parameter in signature( operation ).parameters.values( ):
+        details = TypeAdapter( parameter.annotation ).json_schema( )
+        if parameter.default is Parameter.empty:
+            required.append( parameter.name )
+        else:
+            details[ 'default' ] = parameter.default
+        properties[ parameter.name ] = details
+    return { 'type': 'object', 'properties': properties, 'required': required,
+        'additionalProperties': False }
 
 
 __all__ = [
