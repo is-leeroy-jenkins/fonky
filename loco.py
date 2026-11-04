@@ -145,7 +145,29 @@ def office_application( prog_id: str, visible: bool = False ) -> Any:
 # ==========================================================================================
 
 class File:
-    """Local filesystem operations with an optional root-directory boundary."""
+    """Local filesystem operations with an optional root-directory boundary.
+
+    Purpose:
+        Manages filesystem operations, optionally restricting resolved paths to a configured root directory.
+
+    Attributes:
+        root: Configured filesystem root used to restrict operations.
+        path: Current resolved filesystem, document, or database path.
+        directory: Directory selected for the active operation.
+        pattern: Glob pattern used to locate files.
+        recursive: Whether directory searching includes descendants.
+        entries: Filesystem entries found during enumeration.
+        encoding: Text encoding for file reads and writes.
+        content: Text or bytes written in the current operation.
+        overwrite: Whether an existing destination may be replaced.
+        source: Resolved source file path for copy or move operations.
+        destination: Resolved destination for a file, archive, or database operation.
+        algorithm: Name of the selected cryptographic hash algorithm.
+        digest: Incremental hash object used to calculate file integrity.
+        archive: Resolved ZIP archive path.
+        stat: Filesystem metadata returned for a selected path.
+        new_name: Requested replacement filename.
+    """
 
     root: Path | None
 
@@ -551,7 +573,31 @@ class File:
 
 
 class Data:
-    """SQLite connection and transaction operations."""
+    """SQLite connection and transaction operations.
+
+    Purpose:
+        Provides parameterized SQLite queries, database metadata, transactions, backups, and DataFrame integration.
+
+    Attributes:
+        path: Current resolved filesystem, document, or database path.
+        read_only: Whether the database connection is configured for read-only access.
+        connection: SQLite database connection managed by the instance.
+        uri: SQLite connection URI used for read-only access.
+        sql: SQL statement currently being executed.
+        parameters: Bound SQL parameters for the current statement.
+        statement: SQL statement prefix used when checking read-only operations.
+        cursor: Cursor associated with the most recent SQLite command.
+        rows: Data rows being read, inserted, or written.
+        table: Database table or Office table targeted by the current operation.
+        destination: Resolved destination for a file, archive, or database operation.
+        columns: Column definitions or dimensions supplied to a table operation.
+        approved: Whether an explicitly sensitive operation has been authorized.
+        values: Values supplied for database records or document cells.
+        where: WHERE clause supplied for a parameterized record operation.
+        where_parameters: Bound arguments for the selected WHERE clause.
+        df_data: Pandas DataFrame supplied for import or export.
+        if_exists: Behavior when a destination SQL table already exists.
+    """
 
     connection: sqlite3.Connection | None
     path: str
@@ -945,7 +991,23 @@ class Data:
 # ==========================================================================================
 
 class Calculator:
-    """Safe arithmetic and optional Windows Calculator control."""
+    """Safe arithmetic and optional Windows Calculator control.
+
+    Purpose:
+        Performs deterministic arithmetic and restricted expression evaluation without executing arbitrary code.
+
+    Attributes:
+        left: First arithmetic operand or horizontal placement coordinate.
+        right: Second arithmetic operand.
+        value: Current value used in arithmetic, text, or cell operations.
+        percent: Percentage applied to a numeric value.
+        expression: Arithmetic expression selected for evaluation.
+        tree: Parsed abstract syntax tree for an expression.
+        node: Current arithmetic expression node.
+        base: Base number used for exponentiation.
+        exponent: Exponent applied to a numeric base.
+        digits: Number of decimal places requested for rounding.
+    """
 
     _binary: dict[type, Callable[[Any, Any], Any]] = {
         ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
@@ -1152,7 +1214,24 @@ class Calculator:
 
 
 class Shell:
-    """Subprocess execution with explicit permissions and timeouts."""
+    """Subprocess execution with explicit permissions and timeouts.
+
+    Purpose:
+        Executes explicitly permitted local programs and exposes basic platform and resource information.
+
+    Attributes:
+        allowed_commands: Explicit allowlist of executable names permitted for process execution.
+        command: Executable command and its argument sequence.
+        timeout: Maximum permitted execution time in seconds.
+        cwd: Working directory for launched processes.
+        result: Result returned by the most recent subprocess operation.
+        script: PowerShell command text selected for execution.
+        path: Current resolved filesystem, document, or database path.
+        usage: Filesystem capacity statistics.
+        process: Process handle retained after launching a program.
+        memory: Virtual-memory statistics obtained from the operating system.
+        interval: Sampling duration for CPU utilization.
+    """
 
     allowed_commands: set[str] | None
 
@@ -1335,7 +1414,33 @@ class Shell:
 # ==========================================================================================
 
 class Excel:
-    """Workbook editing through openpyxl or dedicated Excel COM automation."""
+    """Workbook editing through openpyxl or dedicated Excel COM automation.
+
+    Purpose:
+        Reads and edits Excel workbooks using a file-based backend or Microsoft Excel COM automation.
+
+    Attributes:
+        backend: Selected Office file/COM or Windows UI Automation backend.
+        workbook: Open Excel workbook being edited.
+        application: Microsoft Office COM application instance or UI automation object.
+        path: Current resolved filesystem, document, or database path.
+        name: Selected worksheet, table, or automation object name.
+        sheet: Worksheet selected for cell, range, or chart operations.
+        cell: Excel A1-style cell address.
+        value: Current value used in arithmetic, text, or cell operations.
+        address: Excel A1-style cell-range address.
+        start_cell: Top-left cell of the destination data range.
+        rows: Data rows being read, inserted, or written.
+        save_changes: Whether pending document changes should be saved upon closing.
+        formula: Excel formula assigned to a cell.
+        df_data: Pandas DataFrame supplied for import or export.
+        include_index: Whether a DataFrame index is included when exporting to Excel.
+        approved: Whether an explicitly sensitive operation has been authorized.
+        pdf_path: Destination filename for an Office PDF export.
+        bold: Whether the target Excel range uses bold formatting.
+        number_format: Excel cell number-format specification.
+        anchor: Cell address used to anchor an Excel chart.
+    """
 
     workbook: Any
     application: Any
@@ -1872,7 +1977,27 @@ class Excel:
 
 
 class Word:
-    """Word document editing through python-docx or dedicated Word COM automation."""
+    """Word document editing through python-docx or dedicated Word COM automation.
+
+    Purpose:
+        Creates and edits Word documents using python-docx or Microsoft Word COM automation.
+
+    Attributes:
+        backend: Selected Office file/COM or Windows UI Automation backend.
+        document: Open Word document being edited.
+        application: Microsoft Office COM application instance or UI automation object.
+        path: Current resolved filesystem, document, or database path.
+        text: Text supplied for document, slide, or UI operations.
+        style: Word paragraph style to apply.
+        old: Text to be replaced in a Word document.
+        new: Replacement text for Word operations.
+        path_pdf: PDF output filename used by Word.
+        save_changes: Whether pending document changes should be saved upon closing.
+        rows: Data rows being read, inserted, or written.
+        columns: Column definitions or dimensions supplied to a table operation.
+        image_path: Local image file selected for insertion.
+        value: Current value used in arithmetic, text, or cell operations.
+    """
 
     def __init__( self, backend: str = 'file' ) -> None:
         """Select the Word backend.
@@ -2189,7 +2314,29 @@ class Word:
 
 
 class PowerPoint:
-    """PowerPoint slide creation with python-pptx or dedicated COM automation."""
+    """PowerPoint slide creation with python-pptx or dedicated COM automation.
+
+    Purpose:
+        Creates and edits presentations using python-pptx or Microsoft PowerPoint COM automation.
+
+    Attributes:
+        backend: Selected Office file/COM or Windows UI Automation backend.
+        presentation: Open PowerPoint presentation being edited.
+        application: Microsoft Office COM application instance or UI automation object.
+        path: Current resolved filesystem, document, or database path.
+        title: Title of the current slide, window, or UI control.
+        layout: PowerPoint slide layout selected for insertion.
+        pdf_path: Destination filename for an Office PDF export.
+        slide_number: One-based index of the target PowerPoint slide.
+        text: Text supplied for document, slide, or UI operations.
+        bounds: Position and dimensions for a slide text box.
+        image_path: Local image file selected for insertion.
+        left: First arithmetic operand or horizontal placement coordinate.
+        top: Vertical position of a slide object.
+        width: Width of the target slide object or window.
+        rows: Data rows being read, inserted, or written.
+        height: Height of the target slide object or window.
+    """
 
     def __init__( self, backend: str = 'file' ) -> None:
         """Select the presentation backend.
@@ -2497,7 +2644,27 @@ class PowerPoint:
 
 
 class Outlook:
-    """Classic Microsoft Outlook desktop automation via COM."""
+    """Classic Microsoft Outlook desktop automation via COM.
+
+    Purpose:
+        Provides Classic Outlook COM operations for mailbox messages, drafts, attachments, and appointments.
+
+    Attributes:
+        application: Microsoft Office COM application instance or UI automation object.
+        namespace: Outlook MAPI namespace associated with the current profile.
+        folder: Selected default Outlook mailbox folder.
+        limit: Maximum number of Outlook items to enumerate.
+        entry_id: Outlook identifier of the selected message or appointment.
+        recipient: Destination address of an Outlook message.
+        subject: Message or appointment subject.
+        body: Plain-text Outlook message content.
+        approved: Whether an explicitly sensitive operation has been authorized.
+        start: Appointment starting date and time.
+        end: Appointment ending date and time.
+        location: Calendar appointment location.
+        phrase: Case-insensitive search phrase for Outlook messages.
+        directory: Directory selected for the active operation.
+    """
 
     def __init__( self ) -> None:
         """Initialize Outlook state without launching the application."""
@@ -2771,7 +2938,22 @@ class Outlook:
 
 
 class Windows:
-    """Windows UI Automation backed by pywinauto."""
+    """Windows UI Automation backed by pywinauto.
+
+    Purpose:
+        Interacts with Windows application windows and controls through UI Automation.
+
+    Attributes:
+        backend: Selected Office file/COM or Windows UI Automation backend.
+        application: Microsoft Office COM application instance or UI automation object.
+        window: Currently selected top-level Windows application window.
+        title: Title of the current slide, window, or UI control.
+        control_type: UI Automation type of the target Windows control.
+        text: Text supplied for document, slide, or UI operations.
+        path: Current resolved filesystem, document, or database path.
+        width: Width of the target slide object or window.
+        height: Height of the target slide object or window.
+    """
 
     def __init__( self, backend: str = 'uia' ) -> None:
         """Select a pywinauto backend.
