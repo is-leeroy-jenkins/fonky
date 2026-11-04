@@ -1,6 +1,7 @@
 """Regression tests for Fonky local automation without cloud credentials."""
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import sqlite3
 import sys
@@ -9,10 +10,14 @@ import unittest
 from pathlib import Path
 
 
-MODULE_PATH = Path( __file__ ).resolve( ).parents[ 1 ] / 'loco.py'
-SPEC = importlib.util.spec_from_file_location( 'fonky_loco_test', MODULE_PATH )
-loco = importlib.util.module_from_spec( SPEC )
-SPEC.loader.exec_module( loco )
+PACKAGE_PATH = Path( __file__ ).resolve( ).parents[ 1 ]
+PACKAGE_SPEC = importlib.util.spec_from_file_location(
+    'fonky', PACKAGE_PATH / '__init__.py', submodule_search_locations=[ str( PACKAGE_PATH ) ] )
+package = importlib.util.module_from_spec( PACKAGE_SPEC )
+sys.modules[ 'fonky' ] = package
+PACKAGE_SPEC.loader.exec_module( package )
+loco = importlib.import_module( 'fonky.loco' )
+Error = importlib.import_module( 'fonky.boogr' ).Error
 
 
 class LocalFileTests( unittest.TestCase ):
@@ -29,7 +34,7 @@ class LocalFileTests( unittest.TestCase ):
             self.assertEqual( len( service.calculate_hash( 'docs/a.txt' ) ), 64 )
             self.assertEqual( len( service.list_files( 'docs' ) ), 1 )
             service.copy_file( 'docs/a.txt', 'docs/b.txt' )
-            with self.assertRaises( FileExistsError ):
+            with self.assertRaises( Error ) as caught:
                 service.copy_file( 'docs/a.txt', 'docs/b.txt' )
             service.move_file( 'docs/b.txt', 'docs/c.txt' )
             service.delete_file( 'docs/c.txt' )
@@ -39,7 +44,7 @@ class LocalFileTests( unittest.TestCase ):
         """Reject traversal and archive ZIP-slip attacks."""
         with tempfile.TemporaryDirectory( ) as directory:
             service = loco.File( directory )
-            with self.assertRaises( PermissionError ):
+            with self.assertRaises( Error ) as caught:
                 service.read_text( '../outside.txt' )
             service.create_directory( 'source' )
             service.write_text( 'source/data.txt', 'test' )
@@ -49,7 +54,7 @@ class LocalFileTests( unittest.TestCase ):
             import zipfile
             with zipfile.ZipFile( Path( directory ) / 'bad.zip', 'w' ) as archive:
                 archive.writestr( '../outside.txt', 'unsafe' )
-            with self.assertRaises( PermissionError ):
+            with self.assertRaises( Error ):
                 service.extract( 'bad.zip', 'output2' )
 
 
@@ -88,7 +93,7 @@ class DatabaseTests( unittest.TestCase ):
                 db.close( )
             readonly = loco.Data( path, read_only=True )
             self.assertEqual( len( readonly.execute_query( 'SELECT * FROM records' ) ), 1 )
-            with self.assertRaises( PermissionError ):
+            with self.assertRaises( Error ):
                 readonly.execute_nonquery( 'DELETE FROM records' )
             readonly.close( )
 
@@ -106,12 +111,12 @@ class DatabaseTests( unittest.TestCase ):
                 'name=?', ('A',) ), 1 )
             service.commit( )
             self.assertEqual( service.execute_query( 'SELECT amount FROM items' )[ 0 ][ 'amount' ], 5.0 )
-            with self.assertRaises( PermissionError ):
+            with self.assertRaises( Error ):
                 service.delete_record( 'items', 'name=?', ('A',) )
             self.assertEqual( service.delete_record( 'items', 'name=?', ('A',),
                 approved=True ), 1 )
             service.commit( )
-            with self.assertRaises( PermissionError ):
+            with self.assertRaises( Error ):
                 service.drop_table( 'items' )
             service.close( )
 
@@ -126,7 +131,7 @@ class CalculatorTests( unittest.TestCase ):
         self.assertEqual( service.divide( 10, 2 ), 5 )
         self.assertEqual( service.percentage( 200, 10 ), 20 )
         self.assertEqual( service.evaluate_expression( '(2+3)*4' ), 20 )
-        with self.assertRaises( ValueError ):
+        with self.assertRaises( Error ):
             service.evaluate_expression( '__import__("os").system("echo unsafe")' )
 
 
@@ -136,7 +141,7 @@ class ShellTests( unittest.TestCase ):
     def test_allowlist( self ) -> None:
         """Allow safe commands while rejecting arbitrary executables."""
         service = loco.Shell( )
-        with self.assertRaises( PermissionError ):
+        with self.assertRaises( Error ):
             service.run_command( [ sys.executable, '-V' ] )
         service = loco.Shell( [ Path( sys.executable ).name ] )
         result = service.run_command( [ sys.executable, '-c', 'print(123)' ] )
@@ -256,12 +261,17 @@ class PublicDocumentationTests( unittest.TestCase ):
                 self.assertIn( 'Methods:', cls.__doc__ )
 
     def test_contextual_exception_without_logging( self ) -> None:
-        """Preserve an original ValueError and annotate the failing method."""
+        """Wrap a failure in boogr.Error with its original exception and source metadata."""
         files = loco.File( )
-        with self.assertRaises( ValueError ) as caught:
+        with self.assertRaises( Error ) as caught:
             files.resolve( '' )
-        self.assertTrue( any( 'fonky.loco.File.resolve' in note
-            for note in caught.exception.__notes__ ) )
+        exception = caught.exception
+        self.assertIsInstance( exception.exception, ValueError )
+        self.assertEqual( exception.module, 'loco' )
+        self.assertEqual( exception.cause, 'File' )
+        self.assertEqual( exception.method, 'resolve( self, path: str ) -> Path' )
+        self.assertIsInstance( exception.__context__, ValueError )
+        self.assertTrue( exception.trace )
 
     def test_constructor_configuration_not_guard_checked( self ) -> None:
         """Allow constructors to capture configuration without argument guards."""

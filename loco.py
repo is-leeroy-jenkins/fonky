@@ -60,6 +60,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
+from .boogr import Error
+
 
 # ==========================================================================================
 # VALIDATION AND PLATFORM SUPPORT
@@ -246,9 +248,12 @@ class File:
             if self.root is not None and not self.path.is_relative_to( self.root ):
                 raise PermissionError( f'Path is outside the permitted directory: {self.path}' )
             return self.path
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.resolve' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'resolve( self, path: str ) -> Path'
+            raise exception
 
     def exists( self, path: str ) -> bool:
         """Check whether a local path exists.
@@ -265,9 +270,12 @@ class File:
         try:
             self.path = path
             return self.resolve( self.path ).exists( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.exists' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'exists( self, path: str ) -> bool'
+            raise exception
 
     def list_files( self, directory: str = '.', pattern: str = '*', recursive: bool = False ) -> list[ str ]:
         """List files matching a glob pattern.
@@ -323,9 +331,12 @@ class File:
             self.path = path
             self.encoding = encoding
             return self.resolve( self.path ).read_text( encoding=self.encoding )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.read_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'read_text( self, path: str, encoding: str = \'utf-8\' ) -> str'
+            raise exception
 
     def write_text( self, path: str, content: str, overwrite: bool = False,
         encoding: str = 'utf-8' ) -> int:
@@ -350,9 +361,12 @@ class File:
             self.encoding = encoding
             with self.path.open( 'w' if self.overwrite else 'x', encoding=self.encoding ) as handle:
                 return handle.write( self.content )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.write_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'write_text( self, path: str, content: str, overwrite: bool = False, encoding: str = \'utf-8\' ) -> int'
+            raise exception
 
     def copy_file( self, source: str, destination: str, overwrite: bool = False ) -> str:
         """Copy a file to a new destination.
@@ -376,9 +390,12 @@ class File:
                 raise FileExistsError( str( self.destination ) )
             shutil.copy2( self.source, self.destination )
             return str( self.destination )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.copy_file' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'copy_file( self, source: str, destination: str, overwrite: bool = False ) -> str'
+            raise exception
 
     def move_file( self, source: str, destination: str, overwrite: bool = False ) -> str:
         """Move a file without overwriting by default.
@@ -404,9 +421,12 @@ class File:
                 self.destination.unlink( )
             shutil.move( str( self.source ), str( self.destination ) )
             return str( self.destination )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.move_file' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'move_file( self, source: str, destination: str, overwrite: bool = False ) -> str'
+            raise exception
 
     def delete_file( self, path: str ) -> None:
         """Remove a specified file.
@@ -423,9 +443,12 @@ class File:
         try:
             self.path = self.resolve( path )
             self.path.unlink( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.delete_file' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'delete_file( self, path: str ) -> None'
+            raise exception
 
     def create_directory( self, path: str ) -> str:
         """Create a directory and missing parents.
@@ -443,9 +466,12 @@ class File:
             self.path = self.resolve( path )
             self.path.mkdir( parents=True, exist_ok=True )
             return str( self.path )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.create_directory' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'create_directory( self, path: str ) -> str'
+            raise exception
 
     def calculate_hash( self, path: str, algorithm: str = 'sha256' ) -> str:
         """Calculate a supported file digest.
@@ -468,9 +494,12 @@ class File:
                 for chunk in iter( lambda: handle.read( 1024 * 1024 ), b'' ):
                     self.digest.update( chunk )
             return self.digest.hexdigest( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.calculate_hash' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'calculate_hash( self, path: str, algorithm: str = \'sha256\' ) -> str'
+            raise exception
 
     def compress( self, directory: str, destination: str ) -> str:
         """Create a ZIP archive without following out-of-root symlinks.
@@ -494,9 +523,12 @@ class File:
                         self.root is None or entry.resolve( ).is_relative_to( self.root )):
                         archive.write( entry, entry.relative_to( self.directory ) )
             return str( self.destination )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.compress' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'compress( self, directory: str, destination: str ) -> str'
+            raise exception
 
     def extract( self, archive: str, destination: str ) -> str:
         """Extract a ZIP archive into an allowed directory.
@@ -530,9 +562,12 @@ class File:
     # ==========================================================================================
     # SQLITE DATABASE
     # ==========================================================================================
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.extract' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'extract( self, archive: str, destination: str ) -> str'
+            raise exception
 
 
     def get_info( self, path: str ) -> dict[str, Any]:
@@ -553,9 +588,12 @@ class File:
             return { 'name': self.path.name, 'path': str( self.path ),
                 'is_file': self.path.is_file( ), 'is_directory': self.path.is_dir( ),
                 'size': self.stat.st_size, 'modified': self.stat.st_mtime }
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.get_info' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'get_info( self, path: str ) -> dict[str, Any]'
+            raise exception
 
     def read_bytes( self, path: str ) -> bytes:
         """Read binary file contents.
@@ -572,9 +610,12 @@ class File:
         try:
             self.path = self.resolve( path )
             return self.path.read_bytes( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.read_bytes' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'read_bytes( self, path: str ) -> bytes'
+            raise exception
 
     def write_bytes( self, path: str, content: bytes, overwrite: bool = False ) -> int:
         """Write binary file contents.
@@ -597,9 +638,12 @@ class File:
             self.overwrite = overwrite
             with self.path.open( 'wb' if self.overwrite else 'xb' ) as handle:
                 return handle.write( self.content )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.write_bytes' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'write_bytes( self, path: str, content: bytes, overwrite: bool = False ) -> int'
+            raise exception
 
     def rename_file( self, path: str, new_name: str ) -> str:
         """Rename a file within its existing directory.
@@ -624,9 +668,12 @@ class File:
             if self.destination.exists( ):
                 raise FileExistsError( str( self.destination ) )
             return str( self.path.rename( self.destination ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.rename_file' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'rename_file( self, path: str, new_name: str ) -> str'
+            raise exception
 
     def get_size( self, path: str ) -> int:
         """Get a file size in bytes.
@@ -643,9 +690,12 @@ class File:
         try:
             self.path = self.resolve( path )
             return self.path.stat( ).st_size
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.get_size' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'get_size( self, path: str ) -> int'
+            raise exception
 
     def delete_directory( self, path: str, recursive: bool = False ) -> None:
         """Remove a directory, optionally including its contents.
@@ -672,9 +722,12 @@ class File:
                 shutil.rmtree( self.path )
             else:
                 self.path.rmdir( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.File.delete_directory' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'File'
+            exception.method = 'delete_directory( self, path: str, recursive: bool = False ) -> None'
+            raise exception
 
 
 class Data:
@@ -819,9 +872,12 @@ class Data:
             if self.cursor.description is None:
                 raise ValueError( 'execute_query requires a result-producing statement.' )
             return [ dict( record ) for record in self.cursor.fetchall( ) ]
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.execute_query' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'execute_query( self, sql: str, parameters: Sequence[Any] = () ) -> list[ dict[ str, Any ] ]'
+            raise exception
 
     def execute_nonquery( self, sql: str, parameters: Sequence[Any] = () ) -> int:
         """Execute a parameterized write statement without committing.
@@ -845,9 +901,12 @@ class Data:
             self.connect( )
             self.cursor = self.connection.execute( self.sql, self.parameters )
             return self.cursor.rowcount
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.execute_nonquery' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'execute_nonquery( self, sql: str, parameters: Sequence[Any] = () ) -> int'
+            raise exception
 
     def execute_many( self, sql: str, rows: Sequence[Sequence[Any]] ) -> int:
         """Execute a parameterized write for multiple records.
@@ -871,9 +930,12 @@ class Data:
             self.connect( )
             self.cursor = self.connection.executemany( self.sql, self.rows )
             return self.cursor.rowcount
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.execute_many' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'execute_many( self, sql: str, rows: Sequence[Sequence[Any]] ) -> int'
+            raise exception
 
     def list_tables( self ) -> list[ str ]:
         """List non-system SQLite tables.
@@ -910,9 +972,12 @@ class Data:
             self.cursor = self.connection.execute( 'PRAGMA table_info(' +
                 '"' + self.table.replace( '"', '""' ) + '"' + ')' )
             return [ dict( row ) for row in self.cursor.fetchall( ) ]
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.get_schema' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'get_schema( self, table: str ) -> list[ dict[ str, Any ] ]'
+            raise exception
 
     def commit( self ) -> None:
         """Commit pending changes.
@@ -962,9 +1027,12 @@ class Data:
             finally:
                 target.close( )
             return self.destination
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.backup_database' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'backup_database( self, destination: str ) -> str'
+            raise exception
 
     def integrity_check( self ) -> list[ str ]:
         """Verify SQLite file integrity.
@@ -996,9 +1064,12 @@ class Data:
             self.parameters = parameters
             import pandas as pd
             return pd.DataFrame( self.execute_query( self.sql, self.parameters ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.read_dataframe' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'read_dataframe( self, sql: str, parameters: Sequence[Any] = () ) -> Any'
+            raise exception
 
 
 
@@ -1027,9 +1098,12 @@ class Data:
             definitions = ', '.join( sql_identifier( name ) + ' ' + declaration
                 for name, declaration in self.columns.items( ) )
             self.execute_nonquery( 'CREATE TABLE ' + sql_identifier( self.table ) + '(' + definitions + ')' )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.create_table' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'create_table( self, table: str, columns: dict[str, str] ) -> None'
+            raise exception
 
     def drop_table( self, table: str, approved: bool = False ) -> None:
         """Drop a table when expressly approved.
@@ -1051,9 +1125,12 @@ class Data:
             if not self.approved:
                 raise PermissionError( 'Dropping a table requires approved=True.' )
             self.execute_nonquery( 'DROP TABLE ' + sql_identifier( self.table ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.drop_table' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'drop_table( self, table: str, approved: bool = False ) -> None'
+            raise exception
 
     def insert_record( self, table: str, values: dict[str, Any] ) -> int:
         """Insert a parameterized SQLite record.
@@ -1077,9 +1154,12 @@ class Data:
             placeholders = ', '.join( '?' for name in self.values )
             statement = f'INSERT INTO {sql_identifier( self.table )} ({names}) VALUES ({placeholders})'
             return self.execute_nonquery( statement, tuple( self.values.values( ) ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.insert_record' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'insert_record( self, table: str, values: dict[str, Any] ) -> int'
+            raise exception
 
     def update_record( self, table: str, values: dict[str, Any],
         where: str, where_parameters: Sequence[Any] ) -> int:
@@ -1108,9 +1188,12 @@ class Data:
             changes = ', '.join( sql_identifier( name ) + '=?' for name in self.values )
             statement = f'UPDATE {sql_identifier( self.table )} SET {changes} WHERE {self.where}'
             return self.execute_nonquery( statement, tuple( self.values.values( ) ) + tuple( self.where_parameters ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.update_record' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'update_record( self, table: str, values: dict[str, Any], where: str, where_parameters: Sequence[Any] ) -> int'
+            raise exception
 
     def delete_record( self, table: str, where: str,
         where_parameters: Sequence[Any], approved: bool = False ) -> int:
@@ -1139,9 +1222,12 @@ class Data:
                 raise PermissionError( 'Record deletion requires approved=True.' )
             return self.execute_nonquery( f'DELETE FROM {sql_identifier( self.table )} WHERE {self.where}',
                 self.where_parameters )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.delete_record' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'delete_record( self, table: str, where: str, where_parameters: Sequence[Any], approved: bool = False ) -> int'
+            raise exception
 
     def write_dataframe( self, table: str, df_data: Any, if_exists: str = 'fail' ) -> int:
         """Write a DataFrame to SQLite.
@@ -1174,9 +1260,12 @@ class Data:
     # ==========================================================================================
     # DETERMINISTIC CALCULATOR
     # ==========================================================================================
-        except Exception as e:
-            e.add_note( 'fonky.loco.Data.write_dataframe' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Data'
+            exception.method = 'write_dataframe( self, table: str, df_data: Any, if_exists: str = \'fail\' ) -> int'
+            raise exception
 
 class Calculator:
     """Safe arithmetic and optional Windows Calculator control.
@@ -1245,9 +1334,12 @@ class Calculator:
             self.left = left
             self.right = right
             return self.left + self.right
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.add' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'add( self, left: float, right: float ) -> float'
+            raise exception
 
     def subtract( self, left: float, right: float ) -> float:
         """Subtract two numbers.
@@ -1266,9 +1358,12 @@ class Calculator:
             self.left = left
             self.right = right
             return self.left - self.right
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.subtract' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'subtract( self, left: float, right: float ) -> float'
+            raise exception
 
     def multiply( self, left: float, right: float ) -> float:
         """Multiply two numbers.
@@ -1287,9 +1382,12 @@ class Calculator:
             self.left = left
             self.right = right
             return self.left * self.right
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.multiply' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'multiply( self, left: float, right: float ) -> float'
+            raise exception
 
     def divide( self, left: float, right: float ) -> float:
         """Divide two numbers.
@@ -1308,9 +1406,12 @@ class Calculator:
             self.left = left
             self.right = right
             return self.left / self.right
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.divide' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'divide( self, left: float, right: float ) -> float'
+            raise exception
 
     def square_root( self, value: float ) -> float:
         """Calculate a square root.
@@ -1327,9 +1428,12 @@ class Calculator:
         try:
             self.value = value
             return math.sqrt( self.value )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.square_root' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'square_root( self, value: float ) -> float'
+            raise exception
 
     def percentage( self, value: float, percent: float ) -> float:
         """Calculate a percentage of a number.
@@ -1348,9 +1452,12 @@ class Calculator:
             self.value = value
             self.percent = percent
             return self.value * self.percent / 100
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.percentage' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'percentage( self, value: float, percent: float ) -> float'
+            raise exception
 
     def evaluate_expression( self, expression: str ) -> float:
         """Evaluate arithmetic syntax without executing Python code.
@@ -1372,9 +1479,12 @@ class Calculator:
             self.expression = expression
             self.tree = ast.parse( self.expression, mode='eval' )
             return float( self.evaluate_node( self.tree.body ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.evaluate_expression' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'evaluate_expression( self, expression: str ) -> float'
+            raise exception
 
     def evaluate_node( self, node: ast.AST ) -> float:
         """Evaluate a restricted arithmetic node.
@@ -1401,9 +1511,12 @@ class Calculator:
                     raise ValueError( 'Exponent is too large.' )
                 return self._binary[ type( node.op ) ]( left, right )
             raise ValueError( 'Only numeric literals and arithmetic operators are permitted.' )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.evaluate_node' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'evaluate_node( self, node: ast.AST ) -> float'
+            raise exception
 
     def launch_calculator( self ) -> subprocess.Popen:
         """Launch Windows Calculator.
@@ -1440,9 +1553,12 @@ class Calculator:
             self.base = base
             self.exponent = exponent
             return math.pow( self.base, self.exponent )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.power' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'power( self, base: float, exponent: float ) -> float'
+            raise exception
 
     def round_value( self, value: float, digits: int = 2 ) -> float:
         """Round a number to a specified precision.
@@ -1461,9 +1577,12 @@ class Calculator:
             self.value = value
             self.digits = digits
             return round( self.value, self.digits )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Calculator.round_value' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Calculator'
+            exception.method = 'round_value( self, value: float, digits: int = 2 ) -> float'
+            raise exception
 
 
 class Shell:
@@ -1553,9 +1672,12 @@ class Shell:
                 timeout=self.timeout, cwd=self.cwd or None, check=False, shell=False )
             return { 'returncode': self.result.returncode, 'stdout': self.result.stdout,
                 'stderr': self.result.stderr }
-        except Exception as e:
-            e.add_note( 'fonky.loco.Shell.run_command' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Shell'
+            exception.method = 'run_command( self, command: Sequence[str], timeout: int = 30, cwd: str = \'\' ) -> dict[ str, Any ]'
+            raise exception
 
     def run_powershell( self, script: str, timeout: int = 30 ) -> dict[ str, Any ]:
         """Run a PowerShell command only when explicitly allowed.
@@ -1577,9 +1699,12 @@ class Shell:
             require_windows( )
             return self.run_command( [ 'powershell.exe', '-NoProfile', '-NonInteractive',
                 '-Command', self.script ], self.timeout )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Shell.run_powershell' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Shell'
+            exception.method = 'run_powershell( self, script: str, timeout: int = 30 ) -> dict[ str, Any ]'
+            raise exception
 
     def which( self, command: str ) -> str | None:
         """Find an executable on PATH.
@@ -1597,9 +1722,12 @@ class Shell:
             throw_if( 'command', command )
             self.command = command
             return shutil.which( self.command )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Shell.which' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Shell'
+            exception.method = 'which( self, command: str ) -> str | None'
+            raise exception
 
     def get_system_info( self ) -> dict[ str, str ]:
         """Return non-sensitive platform information.
@@ -1652,9 +1780,12 @@ class Shell:
                 raise PermissionError( 'Executable is not permitted by the shell policy.' )
             self.process = subprocess.Popen( self.command, cwd=self.cwd or None, shell=False )
             return self.process.pid
-        except Exception as e:
-            e.add_note( 'fonky.loco.Shell.launch_process' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Shell'
+            exception.method = 'launch_process( self, command: Sequence[str], cwd: str = \'\' ) -> int'
+            raise exception
 
     def list_processes( self ) -> list[dict[str, Any]]:
         """Enumerate local processes using optional psutil.
@@ -1817,9 +1948,12 @@ class Excel:
             else:
                 from openpyxl import load_workbook
                 self.workbook = load_workbook( self.path )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.open_workbook' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'open_workbook( self, path: str, visible: bool = False ) -> None'
+            raise exception
 
     def create_workbook( self, visible: bool = False ) -> None:
         """Create a new in-memory or COM workbook.
@@ -1886,9 +2020,12 @@ class Excel:
                 self.workbook.Worksheets.Add( ).Name = self.name
             else:
                 self.workbook.create_sheet( self.name )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.create_worksheet' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'create_worksheet( self, name: str ) -> None'
+            raise exception
 
     def read_cell( self, sheet: str, cell: str ) -> Any:
         """Read a workbook cell.
@@ -1912,9 +2049,12 @@ class Excel:
             if self.backend == 'com':
                 return self.workbook.Worksheets( self.sheet ).Range( self.cell ).Value
             return self.workbook[ self.sheet ][ self.cell ].value
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.read_cell' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'read_cell( self, sheet: str, cell: str ) -> Any'
+            raise exception
 
     def write_cell( self, sheet: str, cell: str, value: Any ) -> None:
         """Assign a cell value or formula.
@@ -1941,9 +2081,12 @@ class Excel:
                 self.workbook.Worksheets( self.sheet ).Range( self.cell ).Value = self.value
             else:
                 self.workbook[ self.sheet ][ self.cell ] = self.value
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.write_cell' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'write_cell( self, sheet: str, cell: str, value: Any ) -> None'
+            raise exception
 
     def read_range( self, sheet: str, address: str ) -> list[list[Any]]:
         """Read a rectangular range as rows.
@@ -1974,9 +2117,12 @@ class Excel:
             worksheet = self.workbook[ self.sheet ]
             return [ [ cell.value for cell in row ] for row in worksheet[ self.address ] ] if ':' in self.address else [
                 [ worksheet[ self.address ].value ] ]
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.read_range' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'read_range( self, sheet: str, address: str ) -> list[list[Any]]'
+            raise exception
 
     def write_range( self, sheet: str, start_cell: str, rows: Sequence[Sequence[Any]] ) -> None:
         """Write a rectangular sequence of values.
@@ -2015,9 +2161,12 @@ class Excel:
                 for i, values in enumerate( self.rows ):
                     for j, value in enumerate( values ):
                         worksheet.cell( row=row + i, column=start_column + j, value=value )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.write_range' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'write_range( self, sheet: str, start_cell: str, rows: Sequence[Sequence[Any]] ) -> None'
+            raise exception
 
     def calculate( self ) -> None:
         """Request recalculation with live Excel.
@@ -2105,9 +2254,12 @@ class Excel:
             if not self.formula.startswith( '=' ):
                 raise ValueError( 'Excel formula must start with =.' )
             self.write_cell( self.sheet, self.cell, self.formula )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.set_formula' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'set_formula( self, sheet: str, cell: str, formula: str ) -> None'
+            raise exception
 
     def read_dataframe( self, sheet: str, address: str ) -> Any:
         """Read a rectangular Excel range into a DataFrame.
@@ -2128,9 +2280,12 @@ class Excel:
             import pandas as pd
             self.rows = self.read_range( self.sheet, self.address )
             return pd.DataFrame( self.rows[ 1: ], columns=self.rows[ 0 ] ) if self.rows else pd.DataFrame( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.read_dataframe' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'read_dataframe( self, sheet: str, address: str ) -> Any'
+            raise exception
 
     def write_dataframe( self, sheet: str, start_cell: str, df_data: Any,
         include_index: bool = False ) -> None:
@@ -2159,9 +2314,12 @@ class Excel:
                 for i, index in enumerate( self.df_data.index ):
                     self.rows[ i + 1 ] = [ index, *self.rows[ i + 1 ] ]
             self.write_range( sheet, start_cell, self.rows )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.write_dataframe' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'write_dataframe( self, sheet: str, start_cell: str, df_data: Any, include_index: bool = False ) -> None'
+            raise exception
 
     def refresh_queries( self ) -> None:
         """Refresh all workbook data connections using Excel COM.
@@ -2204,9 +2362,12 @@ class Excel:
             if self.backend != 'com':
                 raise NotImplementedError( 'VBA execution requires Excel COM.' )
             return self.application.Run( self.name )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.run_macro' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'run_macro( self, name: str, approved: bool = False ) -> Any'
+            raise exception
 
     def export_pdf( self, path: str ) -> str:
         """Export an Excel workbook to PDF.
@@ -2228,9 +2389,12 @@ class Excel:
                 raise NotImplementedError( 'PDF export requires Excel COM.' )
             self.workbook.ExportAsFixedFormat( 0, self.pdf_path )
             return self.pdf_path
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.export_pdf' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'export_pdf( self, path: str ) -> str'
+            raise exception
 
 
 
@@ -2267,9 +2431,12 @@ class Excel:
                     showFirstColumn=False, showLastColumn=False, showRowStripes=True,
                     showColumnStripes=False )
                 self.workbook[ self.sheet ].add_table( table )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.create_table' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'create_table( self, sheet: str, address: str, name: str ) -> None'
+            raise exception
 
     def format_range( self, sheet: str, address: str, bold: bool = False,
         number_format: str = 'General' ) -> None:
@@ -2312,9 +2479,12 @@ class Excel:
                         existing.bold = self.bold
                         cell.font = existing
                         cell.number_format = self.number_format
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.format_range' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'format_range( self, sheet: str, address: str, bold: bool = False, number_format: str = \'General\' ) -> None'
+            raise exception
 
     def create_chart( self, sheet: str, address: str, anchor: str = 'E2' ) -> None:
         """Create a column chart from headers and numeric rows.
@@ -2356,9 +2526,12 @@ class Excel:
                 chart.add_data( values, titles_from_data=True )
                 chart.set_categories( labels )
                 worksheet.add_chart( chart, self.anchor )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Excel.create_chart' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Excel'
+            exception.method = 'create_chart( self, sheet: str, address: str, anchor: str = \'E2\' ) -> None'
+            raise exception
 
 
 class Word:
@@ -2454,9 +2627,12 @@ class Word:
             else:
                 from docx import Document
                 self.document = Document( self.path )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.open_document' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'open_document( self, path: str, visible: bool = False ) -> None'
+            raise exception
 
     def create_document( self, visible: bool = False ) -> None:
         """Create a new Word document.
@@ -2515,9 +2691,12 @@ class Word:
                 self.document.Content.InsertAfter( self.text + '\n' )
             else:
                 self.document.add_paragraph( self.text, style=self.style or None )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.append_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'append_text( self, text: str, style: str = \'\' ) -> None'
+            raise exception
 
     def replace_text( self, old: str, new: str ) -> int:
         """Replace text in normal paragraphs.
@@ -2551,9 +2730,12 @@ class Word:
                     if self.old in run.text:
                         run.text = run.text.replace( self.old, self.new )
             return count
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.replace_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'replace_text( self, old: str, new: str ) -> int'
+            raise exception
 
     def save_document( self, path: str = '' ) -> str:
         """Save a Word document.
@@ -2599,9 +2781,12 @@ class Word:
                 raise NotImplementedError( 'PDF export requires an open COM Word document.' )
             self.document.ExportAsFixedFormat( self.path_pdf, 17 )
             return self.path_pdf
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.export_pdf' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'export_pdf( self, path: str ) -> str'
+            raise exception
 
     def close_document( self, save_changes: bool = False ) -> None:
         """Close the document and the dedicated COM application.
@@ -2657,9 +2842,12 @@ class Word:
                 self.document.Tables.Add( position, self.rows, self.columns )
             else:
                 self.document.add_table( rows=self.rows, cols=self.columns )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.insert_table' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'insert_table( self, rows: int, columns: int ) -> None'
+            raise exception
 
     def insert_image( self, path: str ) -> None:
         """Insert a local image into Word.
@@ -2682,9 +2870,12 @@ class Word:
                 self.document.InlineShapes.AddPicture( self.image_path )
             else:
                 self.document.add_picture( self.image_path )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.insert_image' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'insert_image( self, path: str ) -> None'
+            raise exception
 
 
 
@@ -2704,9 +2895,12 @@ class Word:
             throw_if( 'value', value )
             self.value = value
             return self.value in self.read_document( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.find_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'find_text( self, value: str ) -> bool'
+            raise exception
 
     def set_header( self, text: str ) -> None:
         """Set the primary document header.
@@ -2731,9 +2925,12 @@ class Word:
                 section = self.document.sections[ 0 ]
                 paragraph = section.header.paragraphs[ 0 ]
                 paragraph.text = self.text
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.set_header' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'set_header( self, text: str ) -> None'
+            raise exception
 
     def set_footer( self, text: str ) -> None:
         """Set the primary document footer.
@@ -2758,9 +2955,12 @@ class Word:
                 section = self.document.sections[ 0 ]
                 paragraph = section.footer.paragraphs[ 0 ]
                 paragraph.text = self.text
-        except Exception as e:
-            e.add_note( 'fonky.loco.Word.set_footer' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Word'
+            exception.method = 'set_footer( self, text: str ) -> None'
+            raise exception
 
 
 class PowerPoint:
@@ -2877,9 +3077,12 @@ class PowerPoint:
             else:
                 from pptx import Presentation
                 self.presentation = Presentation( self.path )
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.open_presentation' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'open_presentation( self, path: str, visible: bool = False ) -> None'
+            raise exception
 
     def list_slides( self ) -> list[int]:
         """List one-based slide numbers.
@@ -2921,9 +3124,12 @@ class PowerPoint:
                 slide = self.presentation.slides.add_slide( self.presentation.slide_layouts[ self.layout ] )
                 slide.shapes.title.text = self.title
             return len( self.list_slides( ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.add_slide' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'add_slide( self, title: str, layout: int = 1 ) -> int'
+            raise exception
 
     def save_presentation( self, path: str = '' ) -> str:
         """Save the presentation.
@@ -2966,9 +3172,12 @@ class PowerPoint:
                 raise NotImplementedError( 'PDF export requires an open COM PowerPoint presentation.' )
             self.presentation.SaveAs( self.pdf_path, 32 )
             return self.pdf_path
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.export_pdf' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'export_pdf( self, path: str ) -> str'
+            raise exception
 
     def close_presentation( self ) -> None:
         """Release an open presentation and dedicated COM application.
@@ -3026,9 +3235,12 @@ class PowerPoint:
                 slide = self.presentation.slides[ self.slide_number - 1 ]
                 shape = slide.shapes.add_textbox( *(Inches( value ) for value in self.bounds) )
                 shape.text_frame.text = self.text
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.add_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'add_text( self, slide_number: int, text: str, left: float = 1.0, top: float = 1.0, width: float = 5.0, height: float = 1.0 ) -> None'
+            raise exception
 
     def add_image( self, slide_number: int, path: str, left: float = 1.0,
         top: float = 1.0, width: float = 4.0 ) -> None:
@@ -3063,9 +3275,12 @@ class PowerPoint:
                 from pptx.util import Inches
                 self.presentation.slides[ self.slide_number - 1 ].shapes.add_picture(
                     self.image_path, Inches( self.left ), Inches( self.top ), width=Inches( self.width ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.add_image' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'add_image( self, slide_number: int, path: str, left: float = 1.0, top: float = 1.0, width: float = 4.0 ) -> None'
+            raise exception
 
 
 
@@ -3093,9 +3308,12 @@ class PowerPoint:
                 slide_id = self.presentation.slides._sldIdLst[ self.slide_number - 1 ]
                 self.presentation.part.drop_rel( slide_id.rId )
                 self.presentation.slides._sldIdLst.remove( slide_id )
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.delete_slide' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'delete_slide( self, slide_number: int ) -> None'
+            raise exception
 
     def add_table( self, slide_number: int, rows: Sequence[Sequence[Any]],
         left: float = 1.0, top: float = 1.0, width: float = 8.0,
@@ -3145,9 +3363,12 @@ class PowerPoint:
                 for i, row in enumerate( self.rows ):
                     for j, value in enumerate( row ):
                         shape.table.cell( i, j ).text = str( value )
-        except Exception as e:
-            e.add_note( 'fonky.loco.PowerPoint.add_table' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'PowerPoint'
+            exception.method = 'add_table( self, slide_number: int, rows: Sequence[Sequence[Any]], left: float = 1.0, top: float = 1.0, width: float = 8.0, height: float = 3.0 ) -> None'
+            raise exception
 
 
 class Outlook:
@@ -3289,9 +3510,12 @@ class Outlook:
                 raise ValueError( 'Requested Outlook item is not a mail message.' )
             return { 'subject': str( item.Subject or '' ), 'sender': str( item.SenderName or '' ),
                 'body': str( item.Body or '' ) }
-        except Exception as e:
-            e.add_note( 'fonky.loco.Outlook.read_message' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Outlook'
+            exception.method = 'read_message( self, entry_id: str ) -> dict[str, str]'
+            raise exception
 
     def create_draft( self, recipient: str, subject: str, body: str ) -> str:
         """Create and save an Outlook email draft.
@@ -3321,9 +3545,12 @@ class Outlook:
             item.Body = self.body
             item.Save( )
             return str( item.EntryID )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Outlook.create_draft' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Outlook'
+            exception.method = 'create_draft( self, recipient: str, subject: str, body: str ) -> str'
+            raise exception
 
     def send_message( self, entry_id: str, approved: bool = False ) -> None:
         """Send an existing draft only with explicit approval.
@@ -3358,9 +3585,12 @@ class Outlook:
     # ==========================================================================================
     # WINDOWS UI AUTOMATION
     # ==========================================================================================
-        except Exception as e:
-            e.add_note( 'fonky.loco.Outlook.send_message' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Outlook'
+            exception.method = 'send_message( self, entry_id: str, approved: bool = False ) -> None'
+            raise exception
 
 
     def create_appointment( self, subject: str, start: str, end: str,
@@ -3396,9 +3626,12 @@ class Outlook:
             item.Location = self.location
             item.Save( )
             return str( item.EntryID )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Outlook.create_appointment' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Outlook'
+            exception.method = 'create_appointment( self, subject: str, start: str, end: str, location: str = \'\' ) -> str'
+            raise exception
 
 
 
@@ -3422,9 +3655,12 @@ class Outlook:
             messages = self.list_messages( self.limit )
             return [ message for message in messages if self.phrase in
                 message[ 'subject' ].casefold( ) or self.phrase in message[ 'sender' ].casefold( ) ]
-        except Exception as e:
-            e.add_note( 'fonky.loco.Outlook.search_messages' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Outlook'
+            exception.method = 'search_messages( self, phrase: str, limit: int = 100 ) -> list[dict[str, str]]'
+            raise exception
 
     def list_appointments( self, limit: int = 20 ) -> list[dict[str, str]]:
         """List appointments in the default Outlook Calendar.
@@ -3491,9 +3727,12 @@ class Outlook:
                 attachment.SaveAsFile( str( target ) )
                 saved.append( str( target ) )
             return saved
-        except Exception as e:
-            e.add_note( 'fonky.loco.Outlook.save_attachments' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Outlook'
+            exception.method = 'save_attachments( self, entry_id: str, directory: str ) -> list[str]'
+            raise exception
 
 
 class Windows:
@@ -3588,9 +3827,12 @@ class Windows:
             from pywinauto import Desktop
             self.window = Desktop( backend=self.backend ).window( title=self.title )
             self.window.wait( 'exists ready', timeout=10 )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Windows.find_window' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Windows'
+            exception.method = 'find_window( self, title: str ) -> None'
+            raise exception
 
     def activate_window( self ) -> None:
         """Focus an attached window.
@@ -3625,9 +3867,12 @@ class Windows:
             if self.window is None:
                 raise RuntimeError( 'No window has been selected.' )
             self.window.child_window( title=self.title, control_type=self.control_type ).click_input( )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Windows.click_control' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Windows'
+            exception.method = 'click_control( self, title: str, control_type: str = \'Button\' ) -> None'
+            raise exception
 
     def set_text( self, title: str, text: str ) -> None:
         """Write to an identified edit control.
@@ -3649,9 +3894,12 @@ class Windows:
             if self.window is None:
                 raise RuntimeError( 'No window has been selected.' )
             self.window.child_window( title=self.title, control_type='Edit' ).set_edit_text( self.text )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Windows.set_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Windows'
+            exception.method = 'set_text( self, title: str, text: str ) -> None'
+            raise exception
 
     def capture_window( self, path: str ) -> str:
         """Capture the attached window to an image.
@@ -3672,9 +3920,12 @@ class Windows:
                 raise RuntimeError( 'No window has been selected.' )
             self.window.capture_as_image( ).save( self.path )
             return self.path
-        except Exception as e:
-            e.add_note( 'fonky.loco.Windows.capture_window' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Windows'
+            exception.method = 'capture_window( self, path: str ) -> str'
+            raise exception
 
 
 
@@ -3699,9 +3950,12 @@ class Windows:
                 raise RuntimeError( 'No window has been selected.' )
             return str( self.window.child_window( title=self.title,
                 control_type=self.control_type ).window_text( ) )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Windows.get_text' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Windows'
+            exception.method = 'get_text( self, title: str, control_type: str = \'Edit\' ) -> str'
+            raise exception
 
     def close_window( self ) -> None:
         """Request that the selected window close.
@@ -3766,9 +4020,12 @@ class Windows:
             if self.window is None:
                 raise RuntimeError( 'No window has been selected.' )
             self.window.move_window( width=self.width, height=self.height )
-        except Exception as e:
-            e.add_note( 'fonky.loco.Windows.resize_window' )
-            raise
+        except Exception as exc:
+            exception = Error( exc )
+            exception.module = 'loco'
+            exception.cause = 'Windows'
+            exception.method = 'resize_window( self, width: int, height: int ) -> None'
+            raise exception
 
     def list_controls( self ) -> list[str]:
         """List textual descriptions of descendant controls.
