@@ -98,6 +98,7 @@ nav:
       - Models: api/models.md
       - Configuration: api/config.md
       - Error Handling: api/boogr.md
+      - Local Automation: api/loco.md
       - Provider Tools:
           - OpenAI Agents SDK: api/gpt-tools.md
           - Anthropic Claude: api/claude-tools.md
