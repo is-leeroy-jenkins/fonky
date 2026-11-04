@@ -326,7 +326,6 @@ def fetch_gov_data( mode: str='search', query: str='', page_size: int=10, offset
 	    sort_field=sort_field, sort_order=sort_order, package_id=package_id, collection=collection,
 	    start_date=start_date, time=time )
 
-
 def fetch_congress( mode: str='congresses', congress: int=0, bill_type: str='', bill_number: int=0,
 		law_type: str='', law_number: int=0, report_type: str='', report_number: int=0,
 		offset: int=0, limit: int=20, sort: str='updateDate+desc', from_date_time: str='',

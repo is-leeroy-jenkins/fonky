@@ -339,7 +339,6 @@ def fetch_gov_data( mode: str='search', query: str='', page_size: int=10, offset
 	    sort_field=sort_field, sort_order=sort_order, package_id=package_id, collection=collection,
 	    start_date=start_date, time=time )
 
-
 @beta_tool
 def fetch_congress( mode: str='congresses', congress: int=0, bill_type: str='', bill_number: int=0,
 		law_type: str='', law_number: int=0, report_type: str='', report_number: int=0,
@@ -380,7 +379,6 @@ def fetch_congress( mode: str='congresses', congress: int=0, bill_type: str='', 
 	    report_number=report_number, offset=offset, limit=limit, sort=sort,
 	    from_date_time=from_date_time, to_date_time=to_date_time, conference=conference, time=time )
 
-
 @beta_tool
 def fetch_internet_archive( keywords: str, fields: List[str] | None=None, rows: int=10, page: int=1,
 		sort: str='downloads desc', media_type: str='', collection: str='', time: int=20 ) -> Any:
@@ -410,7 +408,6 @@ def fetch_internet_archive( keywords: str, fields: List[str] | None=None, rows: 
     return _instance.fetch( keywords=keywords, fields=fields, rows=rows, page=page, sort=sort,
 	    media_type=media_type, collection=collection, time=time )
 
-
 @beta_tool
 def fetch_grokipedia( mode: str='search', query: str='', page: str='', limit: int=12,
 		offset: int=0, include_content: bool=True ) -> Any:
@@ -437,7 +434,6 @@ def fetch_grokipedia( mode: str='search', query: str='', page: str='', limit: in
     _instance = Grokipedia( )
     return _instance.fetch( mode=mode, query=query, page=page, limit=limit, offset=offset,
 	    include_content=include_content )
-
 
 @beta_tool
 def load_arxiv( question: str ) -> Any:
@@ -613,7 +609,6 @@ def fetch_open_science( mode: str='dataset', query: str='', accession: str='',
     return _instance.fetch( mode=mode, query=query, accession=accession,
 	    format_value=format_value, time=time )
 
-
 @beta_tool
 def fetch_space_weather( mode: str='cme', start_date: str='', end_date: str='', time: int=20,
 		location: str='ALL', catalog: str='ALL', notification_type: str='all',
@@ -652,7 +647,6 @@ def fetch_space_weather( mode: str='cme', start_date: str='', end_date: str='', 
 	    most_accurate_only=most_accurate_only, complete_entry_only=complete_entry_only,
 	    speed=speed, half_angle=half_angle, keyword=keyword, api_key=api_key )
 
-
 @beta_tool
 def fetch_astro_catalog( mode: str='object_query', query: str='', quantity: str='',
 		attributes: str='', arguments: str='', ra: str='', dec: str='', radius: int=2,
@@ -685,7 +679,6 @@ def fetch_astro_catalog( mode: str='object_query', query: str='', quantity: str=
     return _instance.fetch( mode=mode, query=query, quantity=quantity, attributes=attributes,
 	    arguments=arguments, ra=ra, dec=dec, radius=radius, data_format=data_format, time=time )
 
-
 @beta_tool
 def fetch_astro_query( mode: str='object_search', query: str='', ra: str='', dec: str='',
 		radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Any:
@@ -713,7 +706,6 @@ def fetch_astro_query( mode: str='object_search', query: str='', ra: str='', dec
     _instance = AstroQuery( )
     return _instance.fetch( mode=mode, query=query, ra=ra, dec=dec, radius=radius,
 	    radius_unit=radius_unit, row_limit=row_limit )
-
 
 @beta_tool
 def fetch_star_map( mode: str='object_link', query: str='', ra: float=0.0, dec: float=0.0,
@@ -752,7 +744,6 @@ def fetch_star_map( mode: str='object_link', query: str='', ra: float=0.0, dec: 
 	    image_source=image_source, box_color=box_color, show_box=show_box, show_grid=show_grid,
 	    show_lines=show_lines, show_boundaries=show_boundaries,
 	    show_const_names=show_const_names, time=time )
-
 
 @beta_tool
 def fetch_star_chart( mode: str='object_chart', query: str='', ra: float=0.0,
@@ -795,7 +786,6 @@ def fetch_star_chart( mode: str='object_chart', query: str='', ra: float=0.0,
 	    image_source=image_source, box_color=box_color, show_box=show_box, show_grid=show_grid,
 	    show_lines=show_lines, show_boundaries=show_boundaries, show_const_names=show_const_names,
 	    width=width, height=height, magnitude=magnitude, time=time )
-
 
 @beta_tool
 def fetch_open_sky( mode: str='states_bbox', icao24: str='', airport: str='', begin: int | None=None,
@@ -945,7 +935,8 @@ def load_aws_file( bucket: str, key: str, aws_access_key_id: Optional[str]=None,
         Any: LangChain documents loaded from the requested source.
 
     Raises:
-        Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the project error type.
+        Error: If the implementation wraps a provider, parsing, filesystem, or processing
+            failure in the project error type.
     """
     _instance = AwsFileLoader( )
     return _instance.load( bucket=bucket, key=key, aws_access_key_id=aws_access_key_id,
@@ -1318,7 +1309,6 @@ def load_markdown( path: str ) -> Any:
     _instance = MarkdownLoader( )
     return _instance.load( path=path )
 
-
 @beta_tool
 def load_html( path: str ) -> Any:
     """Load an HTML document.
@@ -1338,7 +1328,6 @@ def load_html( path: str ) -> Any:
     _instance = HtmlLoader( )
     return _instance.load( path=path )
 
-
 @beta_tool
 def load_outlook( path: str ) -> Any:
     """Load an Outlook message.
@@ -1357,7 +1346,6 @@ def load_outlook( path: str ) -> Any:
     """
     _instance = OutlookLoader( )
     return _instance.load( path=path )
-
 
 @beta_tool
 def load_spfx( library_id: str ) -> Any:
