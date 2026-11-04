@@ -8,9 +8,9 @@
       Last Modified By:        Terry D. Eppler
       Last Modified On:        05-01-2025
   ******************************************************************************************
-  <copyright file="guro.py" company="Terry D. Eppler">
+  <copyright file="loco.py" company="Terry D. Eppler">
 
-	     name.py
+	     loco.py
 	     Copyright ©  2022  Terry Eppler
 
      Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,7 +37,7 @@
 
   </copyright>
   <summary>
-    name.py
+    Local automation for Microsoft Office, SQLite, the filesystem, and Windows.
   </summary>
   ******************************************************************************************
   '''
@@ -68,6 +68,9 @@ from typing import Any, Callable, Sequence
 def throw_if( name: str, value: object ) -> None:
     """Validate a required argument.
 
+    Purpose:
+        Validate a required argument.
+
     Args:
         name (str): Parameter name.
         value (object): Parameter value.
@@ -85,6 +88,9 @@ def throw_if( name: str, value: object ) -> None:
 def sql_identifier( name: str ) -> str:
     """Quote a SQLite identifier without treating it as SQL syntax.
 
+    Purpose:
+        Quote a SQLite identifier without treating it as SQL syntax.
+
     Args:
         name (str): Database table or column name.
 
@@ -98,6 +104,9 @@ def sql_identifier( name: str ) -> str:
 def require_windows( ) -> None:
     """Require a Windows desktop environment.
 
+    Purpose:
+        Require a Windows desktop environment.
+
     Raises:
         OSError: If the current platform is not Windows.
     """
@@ -107,6 +116,9 @@ def require_windows( ) -> None:
 
 def office_application( prog_id: str, visible: bool = False ) -> Any:
     """Create a dedicated Office COM application instance.
+
+    Purpose:
+        Create a dedicated Office COM application instance.
 
     Args:
         prog_id (str): Registered Office COM identifier.
@@ -140,6 +152,9 @@ class File:
     def __init__( self, root: str = '' ) -> None:
         """Configure permitted filesystem scope.
 
+        Purpose:
+            Configure permitted filesystem scope.
+
         Args:
             root (str): Optional directory limiting access.
 
@@ -150,6 +165,9 @@ class File:
 
     def resolve( self, path: str ) -> Path:
         """Resolve a path within the configured root.
+
+        Purpose:
+            Resolve a path within the configured root.
 
         Args:
             path (str): File or directory path.
@@ -172,6 +190,9 @@ class File:
     def exists( self, path: str ) -> bool:
         """Check whether a local path exists.
 
+        Purpose:
+            Check whether a local path exists.
+
         Args:
             path (str): Target path.
 
@@ -183,6 +204,9 @@ class File:
 
     def list_files( self, directory: str = '.', pattern: str = '*', recursive: bool = False ) -> list[ str ]:
         """List files matching a glob pattern.
+
+        Purpose:
+            List files matching a glob pattern.
 
         Args:
             directory (str): Starting directory.
@@ -202,6 +226,9 @@ class File:
     def list_directories( self, directory: str = '.' ) -> list[ str ]:
         """List immediate child directories.
 
+        Purpose:
+            List immediate child directories.
+
         Args:
             directory (str): Parent directory.
 
@@ -214,6 +241,9 @@ class File:
 
     def read_text( self, path: str, encoding: str = 'utf-8' ) -> str:
         """Read a text file.
+
+        Purpose:
+            Read a text file.
 
         Args:
             path (str): Source file.
@@ -229,6 +259,9 @@ class File:
     def write_text( self, path: str, content: str, overwrite: bool = False,
         encoding: str = 'utf-8' ) -> int:
         """Write text without overwriting an existing file by default.
+
+        Purpose:
+            Write text without overwriting an existing file by default.
 
         Args:
             path (str): Output file.
@@ -249,6 +282,9 @@ class File:
     def copy_file( self, source: str, destination: str, overwrite: bool = False ) -> str:
         """Copy a file to a new destination.
 
+        Purpose:
+            Copy a file to a new destination.
+
         Args:
             source (str): Source file.
             destination (str): Destination file.
@@ -267,6 +303,9 @@ class File:
 
     def move_file( self, source: str, destination: str, overwrite: bool = False ) -> str:
         """Move a file without overwriting by default.
+
+        Purpose:
+            Move a file without overwriting by default.
 
         Args:
             source (str): Source file.
@@ -289,6 +328,9 @@ class File:
     def delete_file( self, path: str ) -> None:
         """Remove a specified file.
 
+        Purpose:
+            Remove a specified file.
+
         Args:
             path (str): File to delete.
 
@@ -300,6 +342,9 @@ class File:
 
     def create_directory( self, path: str ) -> str:
         """Create a directory and missing parents.
+
+        Purpose:
+            Create a directory and missing parents.
 
         Args:
             path (str): Directory path.
@@ -313,6 +358,9 @@ class File:
 
     def calculate_hash( self, path: str, algorithm: str = 'sha256' ) -> str:
         """Calculate a supported file digest.
+
+        Purpose:
+            Calculate a supported file digest.
 
         Args:
             path (str): Source file.
@@ -332,6 +380,9 @@ class File:
     def compress( self, directory: str, destination: str ) -> str:
         """Create a ZIP archive without following out-of-root symlinks.
 
+        Purpose:
+            Create a ZIP archive without following out-of-root symlinks.
+
         Args:
             directory (str): Directory to archive.
             destination (str): New ZIP path.
@@ -350,6 +401,9 @@ class File:
 
     def extract( self, archive: str, destination: str ) -> str:
         """Extract a ZIP archive into an allowed directory.
+
+        Purpose:
+            Extract a ZIP archive into an allowed directory.
 
         Args:
             archive (str): Source ZIP archive.
@@ -381,6 +435,9 @@ class File:
     def get_info( self, path: str ) -> dict[str, Any]:
         """Return filesystem metadata.
 
+        Purpose:
+            Return filesystem metadata.
+
         Args:
             path (str): Target path.
 
@@ -396,6 +453,9 @@ class File:
     def read_bytes( self, path: str ) -> bytes:
         """Read binary file contents.
 
+        Purpose:
+            Read binary file contents.
+
         Args:
             path (str): Source file.
 
@@ -407,6 +467,9 @@ class File:
 
     def write_bytes( self, path: str, content: bytes, overwrite: bool = False ) -> int:
         """Write binary file contents.
+
+        Purpose:
+            Write binary file contents.
 
         Args:
             path (str): Destination file.
@@ -425,6 +488,9 @@ class File:
 
     def rename_file( self, path: str, new_name: str ) -> str:
         """Rename a file within its existing directory.
+
+        Purpose:
+            Rename a file within its existing directory.
 
         Args:
             path (str): Existing path.
@@ -446,6 +512,9 @@ class File:
     def get_size( self, path: str ) -> int:
         """Get a file size in bytes.
 
+        Purpose:
+            Get a file size in bytes.
+
         Args:
             path (str): Source file path.
 
@@ -457,6 +526,9 @@ class File:
 
     def delete_directory( self, path: str, recursive: bool = False ) -> None:
         """Remove a directory, optionally including its contents.
+
+        Purpose:
+            Remove a directory, optionally including its contents.
 
         Args:
             path (str): Directory path.
@@ -488,6 +560,9 @@ class Data:
     def __init__( self, path: str, read_only: bool = False ) -> None:
         """Initialize a database wrapper without connecting.
 
+        Purpose:
+            Initialize a database wrapper without connecting.
+
         Args:
             path (str): Database file path.
             read_only (bool): Open using SQLite read-only mode.
@@ -502,6 +577,9 @@ class Data:
 
     def connect( self ) -> None:
         """Connect to SQLite.
+
+        Purpose:
+            Connect to SQLite.
 
         Returns:
             None: Creates a connection held on the instance.
@@ -518,6 +596,9 @@ class Data:
     def close( self ) -> None:
         """Close the database connection.
 
+        Purpose:
+            Close the database connection.
+
         Returns:
             None: Closes the connection if present.
         """
@@ -527,6 +608,9 @@ class Data:
 
     def execute_query( self, sql: str, parameters: Sequence[Any] = () ) -> list[ dict[ str, Any ] ]:
         """Execute parameterized SQL and return rows.
+
+        Purpose:
+            Execute parameterized SQL and return rows.
 
         Args:
             sql (str): SQL query.
@@ -552,6 +636,9 @@ class Data:
     def execute_nonquery( self, sql: str, parameters: Sequence[Any] = () ) -> int:
         """Execute a parameterized write statement without committing.
 
+        Purpose:
+            Execute a parameterized write statement without committing.
+
         Args:
             sql (str): SQL command.
             parameters (Sequence[Any]): Positional SQL parameters.
@@ -570,6 +657,9 @@ class Data:
 
     def execute_many( self, sql: str, rows: Sequence[Sequence[Any]] ) -> int:
         """Execute a parameterized write for multiple records.
+
+        Purpose:
+            Execute a parameterized write for multiple records.
 
         Args:
             sql (str): SQL command.
@@ -590,6 +680,9 @@ class Data:
     def list_tables( self ) -> list[ str ]:
         """List non-system SQLite tables.
 
+        Purpose:
+            List non-system SQLite tables.
+
         Returns:
             list[str]: Table names.
         """
@@ -598,6 +691,9 @@ class Data:
 
     def get_schema( self, table: str ) -> list[ dict[ str, Any ] ]:
         """Read a table schema.
+
+        Purpose:
+            Read a table schema.
 
         Args:
             table (str): Existing table name.
@@ -619,6 +715,9 @@ class Data:
     def commit( self ) -> None:
         """Commit pending changes.
 
+        Purpose:
+            Commit pending changes.
+
         Returns:
             None: Commits the active transaction.
         """
@@ -628,6 +727,9 @@ class Data:
     def rollback( self ) -> None:
         """Rollback pending changes.
 
+        Purpose:
+            Rollback pending changes.
+
         Returns:
             None: Rolls back the transaction.
         """
@@ -636,6 +738,9 @@ class Data:
 
     def backup_database( self, destination: str ) -> str:
         """Copy a consistent SQLite database snapshot.
+
+        Purpose:
+            Copy a consistent SQLite database snapshot.
 
         Args:
             destination (str): New SQLite database path.
@@ -658,6 +763,9 @@ class Data:
     def integrity_check( self ) -> list[ str ]:
         """Verify SQLite file integrity.
 
+        Purpose:
+            Verify SQLite file integrity.
+
         Returns:
             list[str]: SQLite integrity-check messages.
         """
@@ -665,6 +773,9 @@ class Data:
 
     def read_dataframe( self, sql: str, parameters: Sequence[Any] = () ) -> Any:
         """Read a query into a pandas DataFrame.
+
+        Purpose:
+            Read a query into a pandas DataFrame.
 
         Args:
             sql (str): SQL query.
@@ -683,6 +794,9 @@ class Data:
 
     def create_table( self, table: str, columns: dict[str, str] ) -> None:
         """Create a table with explicitly supported SQLite column types.
+
+        Purpose:
+            Create a table with explicitly supported SQLite column types.
 
         Args:
             table (str): New table name.
@@ -706,6 +820,9 @@ class Data:
     def drop_table( self, table: str, approved: bool = False ) -> None:
         """Drop a table when expressly approved.
 
+        Purpose:
+            Drop a table when expressly approved.
+
         Args:
             table (str): Table name.
             approved (bool): Explicit permission to drop the table.
@@ -722,6 +839,9 @@ class Data:
 
     def insert_record( self, table: str, values: dict[str, Any] ) -> int:
         """Insert a parameterized SQLite record.
+
+        Purpose:
+            Insert a parameterized SQLite record.
 
         Args:
             table (str): Table name.
@@ -742,6 +862,9 @@ class Data:
     def update_record( self, table: str, values: dict[str, Any],
         where: str, where_parameters: Sequence[Any] ) -> int:
         """Update selected records using bound values.
+
+        Purpose:
+            Update selected records using bound values.
 
         Args:
             table (str): Table name.
@@ -767,6 +890,9 @@ class Data:
         where_parameters: Sequence[Any], approved: bool = False ) -> int:
         """Delete selected SQLite records with explicit permission.
 
+        Purpose:
+            Delete selected SQLite records with explicit permission.
+
         Args:
             table (str): Table name.
             where (str): Trusted SQL WHERE clause.
@@ -789,6 +915,9 @@ class Data:
 
     def write_dataframe( self, table: str, df_data: Any, if_exists: str = 'fail' ) -> int:
         """Write a DataFrame to SQLite.
+
+        Purpose:
+            Write a DataFrame to SQLite.
 
         Args:
             table (str): Destination table.
@@ -827,6 +956,9 @@ class Calculator:
     def add( self, left: float, right: float ) -> float:
         """Add two numbers.
 
+        Purpose:
+            Add two numbers.
+
         Args:
             left (float): First number.
             right (float): Second number.
@@ -840,6 +972,9 @@ class Calculator:
 
     def subtract( self, left: float, right: float ) -> float:
         """Subtract two numbers.
+
+        Purpose:
+            Subtract two numbers.
 
         Args:
             left (float): First number.
@@ -855,6 +990,9 @@ class Calculator:
     def multiply( self, left: float, right: float ) -> float:
         """Multiply two numbers.
 
+        Purpose:
+            Multiply two numbers.
+
         Args:
             left (float): First number.
             right (float): Second number.
@@ -868,6 +1006,9 @@ class Calculator:
 
     def divide( self, left: float, right: float ) -> float:
         """Divide two numbers.
+
+        Purpose:
+            Divide two numbers.
 
         Args:
             left (float): Numerator.
@@ -883,6 +1024,9 @@ class Calculator:
     def square_root( self, value: float ) -> float:
         """Calculate a square root.
 
+        Purpose:
+            Calculate a square root.
+
         Args:
             value (float): Radicand.
 
@@ -894,6 +1038,9 @@ class Calculator:
 
     def percentage( self, value: float, percent: float ) -> float:
         """Calculate a percentage of a number.
+
+        Purpose:
+            Calculate a percentage of a number.
 
         Args:
             value (float): Base value.
@@ -908,6 +1055,9 @@ class Calculator:
 
     def evaluate_expression( self, expression: str ) -> float:
         """Evaluate arithmetic syntax without executing Python code.
+
+        Purpose:
+            Evaluate arithmetic syntax without executing Python code.
 
         Args:
             expression (str): Numeric expression.
@@ -925,6 +1075,9 @@ class Calculator:
 
     def evaluate_node( self, node: ast.AST ) -> float:
         """Evaluate a restricted arithmetic node.
+
+        Purpose:
+            Evaluate a restricted arithmetic node.
 
         Args:
             node (ast.AST): Validated expression subtree.
@@ -948,6 +1101,9 @@ class Calculator:
     def launch_calculator( self ) -> subprocess.Popen:
         """Launch Windows Calculator.
 
+        Purpose:
+            Launch Windows Calculator.
+
         Returns:
             subprocess.Popen: Launched process handle.
         """
@@ -963,6 +1119,9 @@ class Calculator:
     def power( self, base: float, exponent: float ) -> float:
         """Raise a base to a power.
 
+        Purpose:
+            Raise a base to a power.
+
         Args:
             base (float): Base number.
             exponent (float): Exponent.
@@ -976,6 +1135,9 @@ class Calculator:
 
     def round_value( self, value: float, digits: int = 2 ) -> float:
         """Round a number to a specified precision.
+
+        Purpose:
+            Round a number to a specified precision.
 
         Args:
             value (float): Input number.
@@ -997,6 +1159,9 @@ class Shell:
     def __init__( self, allowed_commands: Sequence[str] = () ) -> None:
         """Configure an optional executable allowlist.
 
+        Purpose:
+            Configure an optional executable allowlist.
+
         Args:
             allowed_commands (Sequence[str]): Names of allowed executables; empty denies execution.
 
@@ -1008,6 +1173,9 @@ class Shell:
     def run_command( self, command: Sequence[str], timeout: int = 30,
         cwd: str = '' ) -> dict[ str, Any ]:
         """Run a permitted executable without shell interpolation.
+
+        Purpose:
+            Run a permitted executable without shell interpolation.
 
         Args:
             command (Sequence[str]): Executable and argument tokens.
@@ -1034,6 +1202,9 @@ class Shell:
     def run_powershell( self, script: str, timeout: int = 30 ) -> dict[ str, Any ]:
         """Run a PowerShell command only when explicitly allowed.
 
+        Purpose:
+            Run a PowerShell command only when explicitly allowed.
+
         Args:
             script (str): PowerShell source.
             timeout (int): Maximum execution time.
@@ -1051,6 +1222,9 @@ class Shell:
     def which( self, command: str ) -> str | None:
         """Find an executable on PATH.
 
+        Purpose:
+            Find an executable on PATH.
+
         Args:
             command (str): Executable name.
 
@@ -1064,6 +1238,9 @@ class Shell:
     def get_system_info( self ) -> dict[ str, str ]:
         """Return non-sensitive platform information.
 
+        Purpose:
+            Return non-sensitive platform information.
+
         Returns:
             dict[str, str]: OS, Python, and architecture.
         """
@@ -1072,6 +1249,9 @@ class Shell:
 
     def get_disk_usage( self, path: str = '.' ) -> dict[ str, int ]:
         """Read local disk capacity.
+
+        Purpose:
+            Read local disk capacity.
 
         Args:
             path (str): Filesystem path.
@@ -1087,6 +1267,9 @@ class Shell:
 
     def launch_process( self, command: Sequence[str], cwd: str = '' ) -> int:
         """Launch an allowlisted executable without a shell.
+
+        Purpose:
+            Launch an allowlisted executable without a shell.
 
         Args:
             command (Sequence[str]): Executable and arguments.
@@ -1106,6 +1289,9 @@ class Shell:
     def list_processes( self ) -> list[dict[str, Any]]:
         """Enumerate local processes using optional psutil.
 
+        Purpose:
+            Enumerate local processes using optional psutil.
+
         Returns:
             list[dict[str, Any]]: Process IDs and names.
         """
@@ -1115,6 +1301,9 @@ class Shell:
 
     def get_memory_usage( self ) -> dict[str, Any]:
         """Read system RAM utilization with psutil.
+
+        Purpose:
+            Read system RAM utilization with psutil.
 
         Returns:
             dict[str, Any]: Available, total, and used bytes.
@@ -1126,6 +1315,9 @@ class Shell:
 
     def get_cpu_usage( self, interval: float = 0.1 ) -> float:
         """Read CPU utilization with psutil.
+
+        Purpose:
+            Read CPU utilization with psutil.
 
         Args:
             interval (float): Sampling interval in seconds.
@@ -1153,6 +1345,9 @@ class Excel:
     def __init__( self, backend: str = 'file' ) -> None:
         """Choose the file or COM backend.
 
+        Purpose:
+            Choose the file or COM backend.
+
         Args:
             backend (str): Either 'file' or 'com'.
 
@@ -1168,6 +1363,9 @@ class Excel:
 
     def open_workbook( self, path: str, visible: bool = False ) -> None:
         """Open an existing workbook.
+
+        Purpose:
+            Open an existing workbook.
 
         Args:
             path (str): Workbook file.
@@ -1188,6 +1386,9 @@ class Excel:
     def create_workbook( self, visible: bool = False ) -> None:
         """Create a new in-memory or COM workbook.
 
+        Purpose:
+            Create a new in-memory or COM workbook.
+
         Args:
             visible (bool): Show the Excel COM instance.
 
@@ -1204,6 +1405,9 @@ class Excel:
     def list_worksheets( self ) -> list[str]:
         """List worksheet names.
 
+        Purpose:
+            List worksheet names.
+
         Returns:
             list[str]: Worksheet names.
         """
@@ -1215,6 +1419,9 @@ class Excel:
     def ensure_open( self ) -> None:
         """Require an open workbook.
 
+        Purpose:
+            Require an open workbook.
+
         Raises:
             RuntimeError: If no workbook is open.
         """
@@ -1223,6 +1430,9 @@ class Excel:
 
     def create_worksheet( self, name: str ) -> None:
         """Add a worksheet.
+
+        Purpose:
+            Add a worksheet.
 
         Args:
             name (str): New sheet name.
@@ -1240,6 +1450,9 @@ class Excel:
 
     def read_cell( self, sheet: str, cell: str ) -> Any:
         """Read a workbook cell.
+
+        Purpose:
+            Read a workbook cell.
 
         Args:
             sheet (str): Worksheet name.
@@ -1259,6 +1472,9 @@ class Excel:
 
     def write_cell( self, sheet: str, cell: str, value: Any ) -> None:
         """Assign a cell value or formula.
+
+        Purpose:
+            Assign a cell value or formula.
 
         Args:
             sheet (str): Worksheet name.
@@ -1281,6 +1497,9 @@ class Excel:
 
     def read_range( self, sheet: str, address: str ) -> list[list[Any]]:
         """Read a rectangular range as rows.
+
+        Purpose:
+            Read a rectangular range as rows.
 
         Args:
             sheet (str): Worksheet name.
@@ -1307,6 +1526,9 @@ class Excel:
 
     def write_range( self, sheet: str, start_cell: str, rows: Sequence[Sequence[Any]] ) -> None:
         """Write a rectangular sequence of values.
+
+        Purpose:
+            Write a rectangular sequence of values.
 
         Args:
             sheet (str): Worksheet name.
@@ -1342,6 +1564,9 @@ class Excel:
     def calculate( self ) -> None:
         """Request recalculation with live Excel.
 
+        Purpose:
+            Request recalculation with live Excel.
+
         Raises:
             NotImplementedError: If using the file backend.
         """
@@ -1352,6 +1577,9 @@ class Excel:
 
     def save_workbook( self, path: str = '' ) -> str:
         """Save the workbook.
+
+        Purpose:
+            Save the workbook.
 
         Args:
             path (str): Optional destination.
@@ -1370,6 +1598,9 @@ class Excel:
 
     def close_workbook( self, save_changes: bool = False ) -> None:
         """Close the workbook and any dedicated COM instance.
+
+        Purpose:
+            Close the workbook and any dedicated COM instance.
 
         Args:
             save_changes (bool): Commit modifications before closing.
@@ -1395,6 +1626,9 @@ class Excel:
     def set_formula( self, sheet: str, cell: str, formula: str ) -> None:
         """Set an Excel formula.
 
+        Purpose:
+            Set an Excel formula.
+
         Args:
             sheet (str): Worksheet name.
             cell (str): Destination cell.
@@ -1404,13 +1638,20 @@ class Excel:
             None: Updates the selected cell.
         """
         throw_if( 'formula', formula )
+        throw_if( 'sheet', sheet )
+        throw_if( 'cell', cell )
+        self.sheet = sheet
+        self.cell = cell
         self.formula = formula
         if not self.formula.startswith( '=' ):
             raise ValueError( 'Excel formula must start with =.' )
-        self.write_cell( sheet, cell, self.formula )
+        self.write_cell( self.sheet, self.cell, self.formula )
 
     def read_dataframe( self, sheet: str, address: str ) -> Any:
         """Read a rectangular Excel range into a DataFrame.
+
+        Purpose:
+            Read a rectangular Excel range into a DataFrame.
 
         Args:
             sheet (str): Worksheet name.
@@ -1428,6 +1669,9 @@ class Excel:
     def write_dataframe( self, sheet: str, start_cell: str, df_data: Any,
         include_index: bool = False ) -> None:
         """Write a DataFrame and its column headers to a worksheet.
+
+        Purpose:
+            Write a DataFrame and its column headers to a worksheet.
 
         Args:
             sheet (str): Worksheet name.
@@ -1452,6 +1696,9 @@ class Excel:
     def refresh_queries( self ) -> None:
         """Refresh all workbook data connections using Excel COM.
 
+        Purpose:
+            Refresh all workbook data connections using Excel COM.
+
         Returns:
             None: Requests refresh.
 
@@ -1466,6 +1713,9 @@ class Excel:
 
     def run_macro( self, name: str, approved: bool = False ) -> Any:
         """Run an Excel macro only with explicit authorization.
+
+        Purpose:
+            Run an Excel macro only with explicit authorization.
 
         Args:
             name (str): Qualified VBA macro name.
@@ -1487,6 +1737,9 @@ class Excel:
     def export_pdf( self, path: str ) -> str:
         """Export an Excel workbook to PDF.
 
+        Purpose:
+            Export an Excel workbook to PDF.
+
         Args:
             path (str): PDF destination.
 
@@ -1505,6 +1758,9 @@ class Excel:
 
     def create_table( self, sheet: str, address: str, name: str ) -> None:
         """Create an Excel table over an existing rectangular range.
+
+        Purpose:
+            Create an Excel table over an existing rectangular range.
 
         Args:
             sheet (str): Worksheet name.
@@ -1536,6 +1792,9 @@ class Excel:
     def format_range( self, sheet: str, address: str, bold: bool = False,
         number_format: str = 'General' ) -> None:
         """Apply bold text and number formats to a worksheet range.
+
+        Purpose:
+            Apply bold text and number formats to a worksheet range.
 
         Args:
             sheet (str): Worksheet name.
@@ -1573,6 +1832,9 @@ class Excel:
 
     def create_chart( self, sheet: str, address: str, anchor: str = 'E2' ) -> None:
         """Create a column chart from headers and numeric rows.
+
+        Purpose:
+            Create a column chart from headers and numeric rows.
 
         Args:
             sheet (str): Worksheet name.
@@ -1615,6 +1877,9 @@ class Word:
     def __init__( self, backend: str = 'file' ) -> None:
         """Select the Word backend.
 
+        Purpose:
+            Select the Word backend.
+
         Args:
             backend (str): 'file' or 'com'.
 
@@ -1630,6 +1895,9 @@ class Word:
 
     def open_document( self, path: str, visible: bool = False ) -> None:
         """Open a Word document.
+
+        Purpose:
+            Open a Word document.
 
         Args:
             path (str): Document path.
@@ -1650,6 +1918,9 @@ class Word:
     def create_document( self, visible: bool = False ) -> None:
         """Create a new Word document.
 
+        Purpose:
+            Create a new Word document.
+
         Args:
             visible (bool): Show the COM application.
 
@@ -1666,6 +1937,9 @@ class Word:
     def read_document( self ) -> str:
         """Read paragraph text from the document.
 
+        Purpose:
+            Read paragraph text from the document.
+
         Returns:
             str: Document text.
         """
@@ -1677,6 +1951,9 @@ class Word:
 
     def append_text( self, text: str, style: str = '' ) -> None:
         """Append a paragraph.
+
+        Purpose:
+            Append a paragraph.
 
         Args:
             text (str): Paragraph text.
@@ -1697,6 +1974,9 @@ class Word:
 
     def replace_text( self, old: str, new: str ) -> int:
         """Replace text in normal paragraphs.
+
+        Purpose:
+            Replace text in normal paragraphs.
 
         Args:
             old (str): Text to find.
@@ -1727,6 +2007,9 @@ class Word:
     def save_document( self, path: str = '' ) -> str:
         """Save a Word document.
 
+        Purpose:
+            Save a Word document.
+
         Args:
             path (str): Optional output path.
 
@@ -1746,6 +2029,9 @@ class Word:
     def export_pdf( self, path: str ) -> str:
         """Export through installed Microsoft Word.
 
+        Purpose:
+            Export through installed Microsoft Word.
+
         Args:
             path (str): PDF output path.
 
@@ -1764,6 +2050,9 @@ class Word:
 
     def close_document( self, save_changes: bool = False ) -> None:
         """Close the document and the dedicated COM application.
+
+        Purpose:
+            Close the document and the dedicated COM application.
 
         Args:
             save_changes (bool): Save modifications before close.
@@ -1790,6 +2079,9 @@ class Word:
     def insert_table( self, rows: int, columns: int ) -> None:
         """Insert a Word table.
 
+        Purpose:
+            Insert a Word table.
+
         Args:
             rows (int): Number of rows.
             columns (int): Number of columns.
@@ -1813,6 +2105,9 @@ class Word:
     def insert_image( self, path: str ) -> None:
         """Insert a local image into Word.
 
+        Purpose:
+            Insert a local image into Word.
+
         Args:
             path (str): Image file path.
 
@@ -1833,6 +2128,9 @@ class Word:
     def find_text( self, value: str ) -> bool:
         """Check whether the document contains text.
 
+        Purpose:
+            Check whether the document contains text.
+
         Args:
             value (str): Target substring.
 
@@ -1845,6 +2143,9 @@ class Word:
 
     def set_header( self, text: str ) -> None:
         """Set the primary document header.
+
+        Purpose:
+            Set the primary document header.
 
         Args:
             text (str): Header text.
@@ -1865,6 +2166,9 @@ class Word:
 
     def set_footer( self, text: str ) -> None:
         """Set the primary document footer.
+
+        Purpose:
+            Set the primary document footer.
 
         Args:
             text (str): Footer text.
@@ -1890,6 +2194,9 @@ class PowerPoint:
     def __init__( self, backend: str = 'file' ) -> None:
         """Select the presentation backend.
 
+        Purpose:
+            Select the presentation backend.
+
         Args:
             backend (str): 'file' or 'com'.
 
@@ -1906,6 +2213,9 @@ class PowerPoint:
     def create_presentation( self, visible: bool = False ) -> None:
         """Create a presentation.
 
+        Purpose:
+            Create a presentation.
+
         Args:
             visible (bool): Show the PowerPoint application.
 
@@ -1921,6 +2231,9 @@ class PowerPoint:
 
     def open_presentation( self, path: str, visible: bool = False ) -> None:
         """Open an existing presentation.
+
+        Purpose:
+            Open an existing presentation.
 
         Args:
             path (str): Source path.
@@ -1941,6 +2254,9 @@ class PowerPoint:
     def list_slides( self ) -> list[int]:
         """List one-based slide numbers.
 
+        Purpose:
+            List one-based slide numbers.
+
         Returns:
             list[int]: Slide numbers.
         """
@@ -1951,6 +2267,9 @@ class PowerPoint:
 
     def add_slide( self, title: str, layout: int = 1 ) -> int:
         """Add a titled slide.
+
+        Purpose:
+            Add a titled slide.
 
         Args:
             title (str): Slide title.
@@ -1975,6 +2294,9 @@ class PowerPoint:
     def save_presentation( self, path: str = '' ) -> str:
         """Save the presentation.
 
+        Purpose:
+            Save the presentation.
+
         Args:
             path (str): Optional destination path.
 
@@ -1994,6 +2316,9 @@ class PowerPoint:
     def export_pdf( self, path: str ) -> str:
         """Export a presentation to PDF with PowerPoint COM.
 
+        Purpose:
+            Export a presentation to PDF with PowerPoint COM.
+
         Args:
             path (str): Destination PDF.
 
@@ -2009,6 +2334,9 @@ class PowerPoint:
 
     def close_presentation( self ) -> None:
         """Release an open presentation and dedicated COM application.
+
+        Purpose:
+            Release an open presentation and dedicated COM application.
 
         Returns:
             None: Clears presentation state.
@@ -2029,6 +2357,9 @@ class PowerPoint:
     def add_text( self, slide_number: int, text: str, left: float = 1.0,
         top: float = 1.0, width: float = 5.0, height: float = 1.0 ) -> None:
         """Add positioned text to a slide, using inches for coordinates.
+
+        Purpose:
+            Add positioned text to a slide, using inches for coordinates.
 
         Args:
             slide_number (int): One-based slide number.
@@ -2061,6 +2392,9 @@ class PowerPoint:
         top: float = 1.0, width: float = 4.0 ) -> None:
         """Insert a local image on a slide.
 
+        Purpose:
+            Insert a local image on a slide.
+
         Args:
             slide_number (int): One-based slide index.
             path (str): Image filename.
@@ -2092,6 +2426,9 @@ class PowerPoint:
     def delete_slide( self, slide_number: int ) -> None:
         """Delete a presentation slide.
 
+        Purpose:
+            Delete a presentation slide.
+
         Args:
             slide_number (int): One-based slide number.
 
@@ -2114,6 +2451,9 @@ class PowerPoint:
         left: float = 1.0, top: float = 1.0, width: float = 8.0,
         height: float = 3.0 ) -> None:
         """Insert a rectangular table on a slide.
+
+        Purpose:
+            Insert a rectangular table on a slide.
 
         Args:
             slide_number (int): One-based slide number.
@@ -2167,6 +2507,9 @@ class Outlook:
     def connect( self ) -> None:
         """Connect to the default Outlook MAPI profile.
 
+        Purpose:
+            Connect to the default Outlook MAPI profile.
+
         Returns:
             None: Holds a COM namespace.
         """
@@ -2175,6 +2518,9 @@ class Outlook:
 
     def list_folders( self, folder: str = 'Inbox' ) -> list[str]:
         """List subfolders of the default mailbox folder.
+
+        Purpose:
+            List subfolders of the default mailbox folder.
 
         Args:
             folder (str): Supported default folder name.
@@ -2193,6 +2539,9 @@ class Outlook:
 
     def list_messages( self, limit: int = 20 ) -> list[dict[str, str]]:
         """List recent messages in the default Inbox.
+
+        Purpose:
+            List recent messages in the default Inbox.
 
         Args:
             limit (int): Maximum number of messages.
@@ -2219,6 +2568,9 @@ class Outlook:
     def read_message( self, entry_id: str ) -> dict[str, str]:
         """Read an Outlook mail item by entry ID.
 
+        Purpose:
+            Read an Outlook mail item by entry ID.
+
         Args:
             entry_id (str): Outlook message identifier.
 
@@ -2237,6 +2589,9 @@ class Outlook:
 
     def create_draft( self, recipient: str, subject: str, body: str ) -> str:
         """Create and save an Outlook email draft.
+
+        Purpose:
+            Create and save an Outlook email draft.
 
         Args:
             recipient (str): Recipient address.
@@ -2262,6 +2617,9 @@ class Outlook:
 
     def send_message( self, entry_id: str, approved: bool = False ) -> None:
         """Send an existing draft only with explicit approval.
+
+        Purpose:
+            Send an existing draft only with explicit approval.
 
         Args:
             entry_id (str): Draft entry ID.
@@ -2295,6 +2653,9 @@ class Outlook:
         location: str = '' ) -> str:
         """Save an Outlook calendar appointment without inviting attendees.
 
+        Purpose:
+            Save an Outlook calendar appointment without inviting attendees.
+
         Args:
             subject (str): Appointment subject.
             start (str): Start time, parseable by Outlook.
@@ -2326,6 +2687,9 @@ class Outlook:
     def search_messages( self, phrase: str, limit: int = 100 ) -> list[dict[str, str]]:
         """Search recent Inbox messages by subject or sender.
 
+        Purpose:
+            Search recent Inbox messages by subject or sender.
+
         Args:
             phrase (str): Case-insensitive search phrase.
             limit (int): Maximum messages scanned.
@@ -2342,6 +2706,9 @@ class Outlook:
 
     def list_appointments( self, limit: int = 20 ) -> list[dict[str, str]]:
         """List appointments in the default Outlook Calendar.
+
+        Purpose:
+            List appointments in the default Outlook Calendar.
 
         Args:
             limit (int): Maximum number of calendar items.
@@ -2368,6 +2735,9 @@ class Outlook:
 
     def save_attachments( self, entry_id: str, directory: str ) -> list[str]:
         """Save a message's attachments to an existing local directory.
+
+        Purpose:
+            Save a message's attachments to an existing local directory.
 
         Args:
             entry_id (str): Outlook message identifier.
@@ -2406,6 +2776,9 @@ class Windows:
     def __init__( self, backend: str = 'uia' ) -> None:
         """Select a pywinauto backend.
 
+        Purpose:
+            Select a pywinauto backend.
+
         Args:
             backend (str): UIA or win32.
 
@@ -2421,6 +2794,9 @@ class Windows:
     def list_windows( self ) -> list[str]:
         """List visible top-level window titles.
 
+        Purpose:
+            List visible top-level window titles.
+
         Returns:
             list[str]: Window captions.
         """
@@ -2431,6 +2807,9 @@ class Windows:
 
     def find_window( self, title: str ) -> None:
         """Attach to an existing window by exact title.
+
+        Purpose:
+            Attach to an existing window by exact title.
 
         Args:
             title (str): Window title.
@@ -2448,6 +2827,9 @@ class Windows:
     def activate_window( self ) -> None:
         """Focus an attached window.
 
+        Purpose:
+            Focus an attached window.
+
         Returns:
             None: Activates the window.
         """
@@ -2457,6 +2839,9 @@ class Windows:
 
     def click_control( self, title: str, control_type: str = 'Button' ) -> None:
         """Click a named UI control.
+
+        Purpose:
+            Click a named UI control.
 
         Args:
             title (str): Visible control title.
@@ -2475,6 +2860,9 @@ class Windows:
     def set_text( self, title: str, text: str ) -> None:
         """Write to an identified edit control.
 
+        Purpose:
+            Write to an identified edit control.
+
         Args:
             title (str): Edit control name.
             text (str): Replacement text.
@@ -2491,6 +2879,9 @@ class Windows:
 
     def capture_window( self, path: str ) -> str:
         """Capture the attached window to an image.
+
+        Purpose:
+            Capture the attached window to an image.
 
         Args:
             path (str): Destination image path.
@@ -2510,6 +2901,9 @@ class Windows:
     def get_text( self, title: str, control_type: str = 'Edit' ) -> str:
         """Read text from a named UI Automation control.
 
+        Purpose:
+            Read text from a named UI Automation control.
+
         Args:
             title (str): Control title.
             control_type (str): UIA control type.
@@ -2528,6 +2922,9 @@ class Windows:
     def close_window( self ) -> None:
         """Request that the selected window close.
 
+        Purpose:
+            Request that the selected window close.
+
         Returns:
             None: Closes the window.
         """
@@ -2541,6 +2938,9 @@ class Windows:
     def minimize_window( self ) -> None:
         """Minimize the attached window.
 
+        Purpose:
+            Minimize the attached window.
+
         Returns:
             None: Minimizes the window.
         """
@@ -2551,6 +2951,9 @@ class Windows:
     def maximize_window( self ) -> None:
         """Maximize the attached window.
 
+        Purpose:
+            Maximize the attached window.
+
         Returns:
             None: Maximizes the window.
         """
@@ -2560,6 +2963,9 @@ class Windows:
 
     def resize_window( self, width: int, height: int ) -> None:
         """Resize the attached window.
+
+        Purpose:
+            Resize the attached window.
 
         Args:
             width (int): Width in pixels.
@@ -2578,6 +2984,9 @@ class Windows:
 
     def list_controls( self ) -> list[str]:
         """List textual descriptions of descendant controls.
+
+        Purpose:
+            List textual descriptions of descendant controls.
 
         Returns:
             list[str]: Window control descriptions.
