@@ -243,5 +243,33 @@ class OfficeFileTests( unittest.TestCase ):
             slides.close_presentation( )
 
 
+
+class PublicDocumentationTests( unittest.TestCase ):
+    """Verify public class metadata and exception diagnostics."""
+
+    def test_class_public_members_documented( self ) -> None:
+        """Require public Attributes and Methods in every local class docstring."""
+        for cls in (loco.Outlook, loco.Word, loco.PowerPoint, loco.Excel,
+            loco.Calculator, loco.File, loco.Data, loco.Windows, loco.Shell):
+            with self.subTest( cls=cls.__name__ ):
+                self.assertIn( 'Attributes:', cls.__doc__ )
+                self.assertIn( 'Methods:', cls.__doc__ )
+
+    def test_contextual_exception_without_logging( self ) -> None:
+        """Preserve an original ValueError and annotate the failing method."""
+        files = loco.File( )
+        with self.assertRaises( ValueError ) as caught:
+            files.resolve( '' )
+        self.assertTrue( any( 'fonky.loco.File.resolve' in note
+            for note in caught.exception.__notes__ ) )
+
+    def test_constructor_configuration_not_guard_checked( self ) -> None:
+        """Allow constructors to capture configuration without argument guards."""
+        self.assertEqual( loco.Data( '' ).path, '' )
+        self.assertEqual( loco.Excel( 'custom' ).backend, 'custom' )
+        self.assertEqual( loco.Windows( 'custom' ).backend, 'custom' )
+
+
+
 if __name__ == '__main__':
     unittest.main( )
