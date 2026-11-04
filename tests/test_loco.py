@@ -93,6 +93,29 @@ class DatabaseTests( unittest.TestCase ):
             readonly.close( )
 
 
+    def test_database_crud( self ) -> None:
+        """Create and change records using guarded SQL identifiers."""
+        with tempfile.TemporaryDirectory( ) as directory:
+            service = loco.Data( str( Path( directory ) / 'crud.db' ) )
+            service.create_table( 'items', { 'id': 'INTEGER PRIMARY KEY',
+                'name': 'TEXT', 'amount': 'REAL' } )
+            service.insert_record( 'items', { 'name': 'A', 'amount': 4.0 } )
+            service.commit( )
+            self.assertEqual( len( service.execute_query( 'SELECT * FROM items' ) ), 1 )
+            self.assertEqual( service.update_record( 'items', { 'amount': 5.0 },
+                'name=?', ('A',) ), 1 )
+            service.commit( )
+            self.assertEqual( service.execute_query( 'SELECT amount FROM items' )[ 0 ][ 'amount' ], 5.0 )
+            with self.assertRaises( PermissionError ):
+                service.delete_record( 'items', 'name=?', ('A',) )
+            self.assertEqual( service.delete_record( 'items', 'name=?', ('A',),
+                approved=True ), 1 )
+            service.commit( )
+            with self.assertRaises( PermissionError ):
+                service.drop_table( 'items' )
+            service.close( )
+
+
 class CalculatorTests( unittest.TestCase ):
     """Verify calculations use no arbitrary-code evaluation."""
 
@@ -176,6 +199,47 @@ class OfficeFileTests( unittest.TestCase ):
             slides.close_presentation( )
             slides.open_presentation( path )
             self.assertEqual( slides.list_slides( ), [1] )
+            slides.close_presentation( )
+
+
+    def test_extended_office_operations( self ) -> None:
+        """Verify supported file-backed charts, tables, headers, and slide text."""
+        try:
+            import openpyxl
+            import docx
+            import pptx
+        except ImportError:
+            self.skipTest( 'Office file libraries not installed' )
+        with tempfile.TemporaryDirectory( ) as directory:
+            excel = loco.Excel( )
+            excel.create_workbook( )
+            excel.write_range( 'Sheet', 'A1', [['Category', 'Amount'],
+                ['A', 2], ['B', 4]] )
+            excel.create_table( 'Sheet', 'A1:B3', 'BudgetTable' )
+            excel.create_chart( 'Sheet', 'A1:B3' )
+            excel.format_range( 'Sheet', 'B2:B3', number_format='#,##0.00' )
+            excel.save_workbook( str( Path( directory ) / 'extended.xlsx' ) )
+            excel.close_workbook( )
+
+            word = loco.Word( )
+            word.create_document( )
+            word.append_text( 'Budget' )
+            word.set_header( 'Internal Report' )
+            word.set_footer( 'Footer' )
+            word.insert_table( 2, 2 )
+            self.assertTrue( word.find_text( 'Budget' ) )
+            word.save_document( str( Path( directory ) / 'extended.docx' ) )
+            word.close_document( )
+
+            slides = loco.PowerPoint( )
+            slides.create_presentation( )
+            slides.add_slide( 'Overview' )
+            slides.add_text( 1, 'Budget analysis' )
+            slides.add_table( 1, [['Year', 'Amount'], ['2026', 100]] )
+            slides.add_slide( 'Temporary' )
+            slides.delete_slide( 2 )
+            self.assertEqual( slides.list_slides( ), [1] )
+            slides.save_presentation( str( Path( directory ) / 'extended.pptx' ) )
             slides.close_presentation( )
 
 
