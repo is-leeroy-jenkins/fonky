@@ -69,6 +69,7 @@ nav:
   - User Guide:
       - Overview: user-guide/index.md
       - Provider Setup: user-guide/providers.md
+      - Local Automation: user-guide/Local-Automation.md
       - Configuration & API Keys: user-guide/configuration.md
       - API Key Setup: user-guide/API-Setup.md
       - Tool Index: user-guide/Tools.md
