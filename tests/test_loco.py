@@ -74,8 +74,16 @@ class DatabaseTests( unittest.TestCase ):
             self.assertEqual( service.integrity_check( ), ['ok'] )
             service.backup_database( str( Path( directory ) / 'backup.db' ) )
             service.close( )
+
+    def test_readonly_database( self ) -> None:
+        """Verify SQLite read-only connection compatibility."""
+        with tempfile.TemporaryDirectory( ) as directory:
+            path = str( Path( directory ) / 'readonly.db' )
+            with sqlite3.connect( path ) as db:
+                db.execute( 'CREATE TABLE records(name TEXT)' )
+                db.execute( 'INSERT INTO records VALUES (?)', ('demo',) )
             readonly = loco.Data( path, read_only=True )
-            self.assertEqual( len( readonly.execute_query( 'SELECT * FROM records' ) ), 2 )
+            self.assertEqual( len( readonly.execute_query( 'SELECT * FROM records' ) ), 1 )
             with self.assertRaises( PermissionError ):
                 readonly.execute_nonquery( 'DELETE FROM records' )
             readonly.close( )
