@@ -60,11 +60,6 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-
-# ==========================================================================================
-# VALIDATION AND PLATFORM SUPPORT
-# ==========================================================================================
-
 def throw_if( name: str, value: object ) -> None:
     """Validate a required argument.
 
@@ -83,8 +78,6 @@ def throw_if( name: str, value: object ) -> None:
     if isinstance( value, (list, tuple, dict, set) ) and not value:
         raise ValueError( f'Argument "{name}" cannot be empty!' )
 
-
-
 def sql_identifier( name: str ) -> str:
     """Quote a SQLite identifier without treating it as SQL syntax.
 
@@ -100,7 +93,6 @@ def sql_identifier( name: str ) -> str:
     throw_if( 'name', name )
     return '"' + name.replace( '"', '""' ) + '"'
 
-
 def require_windows( ) -> None:
     """Require a Windows desktop environment.
 
@@ -112,7 +104,6 @@ def require_windows( ) -> None:
     """
     if sys.platform != 'win32':
         raise OSError( 'This operation requires Windows and a desktop session.' )
-
 
 def office_application( prog_id: str, visible: bool = False ) -> Any:
     """Create a dedicated Office COM application instance.
@@ -149,7 +140,7 @@ class File:
 
     root: Path | None
 
-    def __init__( self, root: str = '' ) -> None:
+    def __init__( self, root: str='' ) -> None:
         """Configure permitted filesystem scope.
 
         Purpose:
@@ -426,12 +417,6 @@ class File:
             source.extractall( self.destination )
         return str( self.destination )
 
-
-# ==========================================================================================
-# SQLITE DATABASE
-# ==========================================================================================
-
-
     def get_info( self, path: str ) -> dict[str, Any]:
         """Return filesystem metadata.
 
@@ -557,7 +542,7 @@ class Data:
     path: str
     read_only: bool
 
-    def __init__( self, path: str, read_only: bool = False ) -> None:
+    def __init__( self, path: str, read_only: bool=False ) -> None:
         """Initialize a database wrapper without connecting.
 
         Purpose:
@@ -570,7 +555,6 @@ class Data:
         Returns:
             None: Stores database configuration.
         """
-        throw_if( 'path', path )
         self.path = path
         self.read_only = read_only
         self.connection = None
@@ -789,8 +773,6 @@ class Data:
         self.parameters = parameters
         import pandas as pd
         return pd.DataFrame( self.execute_query( self.sql, self.parameters ) )
-
-
 
     def create_table( self, table: str, columns: dict[str, str] ) -> None:
         """Create a table with explicitly supported SQLite column types.
@@ -1156,7 +1138,7 @@ class Shell:
 
     allowed_commands: set[str] | None
 
-    def __init__( self, allowed_commands: Sequence[str] = () ) -> None:
+    def __init__( self, allowed_commands: Sequence[ str ]=( ) ) -> None:
         """Configure an optional executable allowlist.
 
         Purpose:
