@@ -79,9 +79,13 @@ class DatabaseTests( unittest.TestCase ):
         """Verify SQLite read-only connection compatibility."""
         with tempfile.TemporaryDirectory( ) as directory:
             path = str( Path( directory ) / 'readonly.db' )
-            with sqlite3.connect( path ) as db:
+            db = sqlite3.connect( path )
+            try:
                 db.execute( 'CREATE TABLE records(name TEXT)' )
                 db.execute( 'INSERT INTO records VALUES (?)', ('demo',) )
+                db.commit( )
+            finally:
+                db.close( )
             readonly = loco.Data( path, read_only=True )
             self.assertEqual( len( readonly.execute_query( 'SELECT * FROM records' ) ), 1 )
             with self.assertRaises( PermissionError ):
