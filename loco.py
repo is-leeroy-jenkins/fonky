@@ -152,22 +152,22 @@ class File:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        root (Any): root retained for the current operation or instance.
-        path (Any): path retained for the current operation or instance.
-        directory (Any): directory retained for the current operation or instance.
-        pattern (Any): pattern retained for the current operation or instance.
-        recursive (Any): recursive retained for the current operation or instance.
-        entries (Any): entries retained for the current operation or instance.
-        encoding (Any): encoding retained for the current operation or instance.
-        content (Any): content retained for the current operation or instance.
-        overwrite (Any): overwrite retained for the current operation or instance.
-        source (Any): source retained for the current operation or instance.
-        destination (Any): destination retained for the current operation or instance.
-        algorithm (Any): algorithm retained for the current operation or instance.
-        digest (Any): digest retained for the current operation or instance.
-        archive (Any): archive retained for the current operation or instance.
-        stat (Any): stat retained for the current operation or instance.
-        new_name (Any): new name retained for the current operation or instance.
+        root (Path | None): Configured filesystem access boundary, if supplied.
+        path (str | Path): Active local file, document, or database path.
+        directory (Path): Selected filesystem directory.
+        pattern (str): Glob expression used for file discovery.
+        recursive (bool): Whether the current operation traverses subdirectories.
+        entries (Any): Filesystem iterator used by the active search.
+        encoding (str): Character encoding for text file operations.
+        content (str | bytes): Content supplied for the active write operation.
+        overwrite (bool): Whether an existing target may be replaced.
+        source (Path): Resolved source of a copy or move.
+        destination (str | Path): Resolved destination of the active operation.
+        algorithm (str): Selected file hashing algorithm.
+        digest (Any): Incremental cryptographic hash state.
+        archive (Path): ZIP archive selected for compression or extraction.
+        stat (Any): Filesystem metadata returned by Path.stat().
+        new_name (str): Requested destination filename.
 
     Methods:
         resolve(): Resolve a path within the configured root.
@@ -670,24 +670,24 @@ class Data:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        path (Any): path retained for the current operation or instance.
-        read_only (Any): read only retained for the current operation or instance.
-        connection (Any): connection retained for the current operation or instance.
-        uri (Any): uri retained for the current operation or instance.
-        sql (Any): sql retained for the current operation or instance.
-        parameters (Any): parameters retained for the current operation or instance.
-        statement (Any): statement retained for the current operation or instance.
-        cursor (Any): cursor retained for the current operation or instance.
-        rows (Any): rows retained for the current operation or instance.
-        table (Any): table retained for the current operation or instance.
-        destination (Any): destination retained for the current operation or instance.
-        columns (Any): columns retained for the current operation or instance.
-        approved (Any): approved retained for the current operation or instance.
-        values (Any): values retained for the current operation or instance.
-        where (Any): where retained for the current operation or instance.
-        where_parameters (Any): where parameters retained for the current operation or instance.
-        df_data (Any): df data retained for the current operation or instance.
-        if_exists (Any): if exists retained for the current operation or instance.
+        path (str | Path): Active local file, document, or database path.
+        read_only (bool): Whether SQLite permits write operations.
+        connection (sqlite3.Connection | None): Managed SQLite connection, initialized on demand.
+        uri (str): SQLite URI used for a read-only database connection.
+        sql (str): SQL statement supplied to the current operation.
+        parameters (Sequence[Any]): Bound parameters for the active SQL statement.
+        statement (str): SQL statement prefix used to enforce read operations.
+        cursor (sqlite3.Cursor): Cursor for the most recent SQLite command.
+        rows (Any): Rows used for a database, spreadsheet, or presentation operation.
+        table (str): Selected SQLite table or Office table name.
+        destination (str | Path): Resolved destination of the active operation.
+        columns (Any): Column definitions or table dimensions.
+        approved (bool): Explicit authorization for a sensitive operation.
+        values (dict[str, Any]): Values mapped to database columns or document elements.
+        where (str): Trusted SQL WHERE clause supplied by the caller.
+        where_parameters (Sequence[Any]): Bound parameters used by the SQL WHERE clause.
+        df_data (Any): Pandas DataFrame supplied to the active data operation.
+        if_exists (str): SQLite DataFrame table replacement policy.
 
     Methods:
         connect(): Connect to SQLite.
@@ -1156,16 +1156,16 @@ class Calculator:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        left (Any): left retained for the current operation or instance.
-        right (Any): right retained for the current operation or instance.
-        value (Any): value retained for the current operation or instance.
-        percent (Any): percent retained for the current operation or instance.
-        expression (Any): expression retained for the current operation or instance.
-        tree (Any): tree retained for the current operation or instance.
-        node (Any): node retained for the current operation or instance.
-        base (Any): base retained for the current operation or instance.
-        exponent (Any): exponent retained for the current operation or instance.
-        digits (Any): digits retained for the current operation or instance.
+        left (float): Left arithmetic operand or horizontal slide position.
+        right (float): Right arithmetic operand.
+        value (Any): Value being read, written, calculated, or searched.
+        percent (float): Percentage applied to a base numeric value.
+        expression (str): Arithmetic expression supplied for parsing.
+        tree (ast.Expression): Parsed abstract syntax tree of an expression.
+        node (ast.AST): Current AST node during restricted arithmetic evaluation.
+        base (float): Base value for exponentiation.
+        exponent (float): Power used in exponentiation.
+        digits (int): Decimal places used for rounding.
 
     Methods:
         add(): Add two numbers.
@@ -1433,17 +1433,17 @@ class Shell:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        allowed_commands (Any): allowed commands retained for the current operation or instance.
-        command (Any): command retained for the current operation or instance.
-        timeout (Any): timeout retained for the current operation or instance.
-        cwd (Any): cwd retained for the current operation or instance.
-        result (Any): result retained for the current operation or instance.
-        script (Any): script retained for the current operation or instance.
-        path (Any): path retained for the current operation or instance.
-        usage (Any): usage retained for the current operation or instance.
-        process (Any): process retained for the current operation or instance.
-        memory (Any): memory retained for the current operation or instance.
-        interval (Any): interval retained for the current operation or instance.
+        allowed_commands (set[str]): Executable names explicitly permitted by the shell policy.
+        command (list[str] | str): Executable command or program selected for execution.
+        timeout (int): Maximum command execution duration in seconds.
+        cwd (str): Working directory for the launched process.
+        result (subprocess.CompletedProcess | Any): Most recent process execution result.
+        script (str): PowerShell script submitted for execution.
+        path (str | Path): Active local file, document, or database path.
+        usage (Any): Disk usage statistics returned by shutil.
+        process (subprocess.Popen): Process handle retained after launch.
+        memory (Any): Memory statistics returned by psutil.
+        interval (float): Duration for CPU utilization sampling.
 
     Methods:
         run_command(): Run a permitted executable without shell interpolation.
@@ -1661,26 +1661,26 @@ class Excel:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        backend (Any): backend retained for the current operation or instance.
-        workbook (Any): workbook retained for the current operation or instance.
-        application (Any): application retained for the current operation or instance.
-        path (Any): path retained for the current operation or instance.
-        name (Any): name retained for the current operation or instance.
-        sheet (Any): sheet retained for the current operation or instance.
-        cell (Any): cell retained for the current operation or instance.
-        value (Any): value retained for the current operation or instance.
-        address (Any): address retained for the current operation or instance.
-        start_cell (Any): start cell retained for the current operation or instance.
-        rows (Any): rows retained for the current operation or instance.
-        save_changes (Any): save changes retained for the current operation or instance.
-        formula (Any): formula retained for the current operation or instance.
-        df_data (Any): df data retained for the current operation or instance.
-        include_index (Any): include index retained for the current operation or instance.
-        approved (Any): approved retained for the current operation or instance.
-        pdf_path (Any): pdf path retained for the current operation or instance.
-        bold (Any): bold retained for the current operation or instance.
-        number_format (Any): number format retained for the current operation or instance.
-        anchor (Any): anchor retained for the current operation or instance.
+        backend (str): Selected file-based, COM, or UI Automation backend.
+        workbook (Any): Current open Excel workbook object.
+        application (Any): COM application or UI automation object owned by this instance.
+        path (str | Path): Active local file, document, or database path.
+        name (str): Name of the current worksheet, table, or resource.
+        sheet (str): Selected Excel worksheet name.
+        cell (str): A1-style selected cell address.
+        value (Any): Value being read, written, calculated, or searched.
+        address (str): A1-style range address.
+        start_cell (str): Top-left A1-style destination cell.
+        rows (Any): Rows used for a database, spreadsheet, or presentation operation.
+        save_changes (bool): Whether to save pending edits before closing.
+        formula (str): Excel formula, including its leading equals sign.
+        df_data (Any): Pandas DataFrame supplied to the active data operation.
+        include_index (bool): Whether to include a DataFrame index in exported rows.
+        approved (bool): Explicit authorization for a sensitive operation.
+        pdf_path (str): Destination PDF file path.
+        bold (bool): Whether text formatting uses bold weight.
+        number_format (str): Excel display format string applied to cells.
+        anchor (str): Excel destination cell for an embedded chart.
 
     Methods:
         open_workbook(): Open an existing workbook.
@@ -2302,20 +2302,20 @@ class Word:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        backend (Any): backend retained for the current operation or instance.
-        document (Any): document retained for the current operation or instance.
-        application (Any): application retained for the current operation or instance.
-        path (Any): path retained for the current operation or instance.
-        text (Any): text retained for the current operation or instance.
-        style (Any): style retained for the current operation or instance.
-        old (Any): old retained for the current operation or instance.
-        new (Any): new retained for the current operation or instance.
-        path_pdf (Any): path pdf retained for the current operation or instance.
-        save_changes (Any): save changes retained for the current operation or instance.
-        rows (Any): rows retained for the current operation or instance.
-        columns (Any): columns retained for the current operation or instance.
-        image_path (Any): image path retained for the current operation or instance.
-        value (Any): value retained for the current operation or instance.
+        backend (str): Selected file-based, COM, or UI Automation backend.
+        document (Any): Open Word document object.
+        application (Any): COM application or UI automation object owned by this instance.
+        path (str | Path): Active local file, document, or database path.
+        text (str): Text used in the current document or UI operation.
+        style (str): Word paragraph style identifier.
+        old (str): Text to search for replacement.
+        new (str): Replacement text.
+        path_pdf (str): Word PDF export destination.
+        save_changes (bool): Whether to save pending edits before closing.
+        rows (Any): Rows used for a database, spreadsheet, or presentation operation.
+        columns (Any): Column definitions or table dimensions.
+        image_path (str): Source path of an image inserted into an Office document.
+        value (Any): Value being read, written, calculated, or searched.
 
     Methods:
         open_document(): Open a Word document.
@@ -2689,22 +2689,22 @@ class PowerPoint:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        backend (Any): backend retained for the current operation or instance.
-        presentation (Any): presentation retained for the current operation or instance.
-        application (Any): application retained for the current operation or instance.
-        path (Any): path retained for the current operation or instance.
-        title (Any): title retained for the current operation or instance.
-        layout (Any): layout retained for the current operation or instance.
-        pdf_path (Any): pdf path retained for the current operation or instance.
-        slide_number (Any): slide number retained for the current operation or instance.
-        text (Any): text retained for the current operation or instance.
-        bounds (Any): bounds retained for the current operation or instance.
-        image_path (Any): image path retained for the current operation or instance.
-        left (Any): left retained for the current operation or instance.
-        top (Any): top retained for the current operation or instance.
-        width (Any): width retained for the current operation or instance.
-        rows (Any): rows retained for the current operation or instance.
-        height (Any): height retained for the current operation or instance.
+        backend (str): Selected file-based, COM, or UI Automation backend.
+        presentation (Any): Current open PowerPoint presentation object.
+        application (Any): COM application or UI automation object owned by this instance.
+        path (str | Path): Active local file, document, or database path.
+        title (str): Current slide, window, or control title.
+        layout (int): PowerPoint slide layout index.
+        pdf_path (str): Destination PDF file path.
+        slide_number (int): One-based slide index.
+        text (str): Text used in the current document or UI operation.
+        bounds (tuple[float, float, float, float]): Text-box position and dimensions measured in inches.
+        image_path (str): Source path of an image inserted into an Office document.
+        left (float): Left arithmetic operand or horizontal slide position.
+        top (float): Vertical slide coordinate measured in inches.
+        width (float): Object or window width.
+        rows (Any): Rows used for a database, spreadsheet, or presentation operation.
+        height (float): Object or window height.
 
     Methods:
         create_presentation(): Create a presentation.
@@ -3059,20 +3059,20 @@ class Outlook:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        application (Any): application retained for the current operation or instance.
-        namespace (Any): namespace retained for the current operation or instance.
-        folder (Any): folder retained for the current operation or instance.
-        limit (Any): limit retained for the current operation or instance.
-        entry_id (Any): entry id retained for the current operation or instance.
-        recipient (Any): recipient retained for the current operation or instance.
-        subject (Any): subject retained for the current operation or instance.
-        body (Any): body retained for the current operation or instance.
-        approved (Any): approved retained for the current operation or instance.
-        start (Any): start retained for the current operation or instance.
-        end (Any): end retained for the current operation or instance.
-        location (Any): location retained for the current operation or instance.
-        phrase (Any): phrase retained for the current operation or instance.
-        directory (Any): directory retained for the current operation or instance.
+        application (Any): COM application or UI automation object owned by this instance.
+        namespace (Any): MAPI namespace obtained from the Outlook COM application.
+        folder (str): Selected Outlook default mailbox folder.
+        limit (int): Maximum number of returned or scanned Outlook items.
+        entry_id (str): Outlook item identifier.
+        recipient (str): Message recipient address.
+        subject (str): Mail or calendar appointment subject.
+        body (str): Plain-text Outlook message body.
+        approved (bool): Explicit authorization for a sensitive operation.
+        start (str): Appointment start timestamp.
+        end (str): Appointment end timestamp.
+        location (str): Appointment location.
+        phrase (str): Case-folded term used for Outlook message searching.
+        directory (Path): Selected filesystem directory.
 
     Methods:
         connect(): Connect to the default Outlook MAPI profile.
@@ -3390,15 +3390,15 @@ class Windows:
         desktop-application backends without requiring a cloud-model API key.
 
     Attributes:
-        backend (Any): backend retained for the current operation or instance.
-        application (Any): application retained for the current operation or instance.
-        window (Any): window retained for the current operation or instance.
-        title (Any): title retained for the current operation or instance.
-        control_type (Any): control type retained for the current operation or instance.
-        text (Any): text retained for the current operation or instance.
-        path (Any): path retained for the current operation or instance.
-        width (Any): width retained for the current operation or instance.
-        height (Any): height retained for the current operation or instance.
+        backend (str): Selected file-based, COM, or UI Automation backend.
+        application (Any): COM application or UI automation object owned by this instance.
+        window (Any): Selected Windows top-level UI Automation window.
+        title (str): Current slide, window, or control title.
+        control_type (str): UI Automation category of the selected control.
+        text (str): Text used in the current document or UI operation.
+        path (str | Path): Active local file, document, or database path.
+        width (float): Object or window width.
+        height (float): Object or window height.
 
     Methods:
         list_windows(): List visible top-level window titles.
