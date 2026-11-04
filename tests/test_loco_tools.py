@@ -121,6 +121,17 @@ class LocalToolTests( unittest.TestCase ):
         with self.assertRaises( FileExistsError ):
             local.local_word_create( 'report.docx', 'Do not overwrite' )
 
+    def test_native_schema_generation( self ) -> None:
+        """Generate input schemas with required fields and optional defaults."""
+        schema = local.local_tool_schema( local.local_sqlite_query )
+        self.assertEqual( schema[ 'type' ], 'object' )
+        self.assertEqual( schema[ 'required' ], ['path', 'sql'] )
+        self.assertEqual( schema[ 'properties' ][ 'max_rows' ][ 'default' ], 50 )
+        self.assertIn( 'parameters_json', schema[ 'properties' ] )
+        excel = local.local_tool_schema( local.local_excel_write_range )
+        self.assertIn( 'rows', excel[ 'required' ] )
+        self.assertEqual( excel[ 'properties' ][ 'rows' ][ 'type' ], 'array' )
+
     def test_host_workspace_mandatory( self ) -> None:
         """Require an explicitly configured local workspace."""
         os.environ.pop( 'FONKY_LOCAL_ROOT', None )
@@ -143,6 +154,8 @@ class ProviderRegistrationTests( unittest.TestCase ):
                     for node in ast.walk( tree ) if isinstance( node, ast.Assign )
                     for target in node.targets if isinstance( target, ast.Name ) }
                 self.assertTrue( expected.issubset( assignments ) )
+                if provider in ('grok', 'mistral'):
+                    self.assertIn( 'local_tool_definitions', assignments )
                 for name in expected:
                     assignment = assignments[ name ]
                     if provider in ('gpt', 'claude', 'langchain'):
