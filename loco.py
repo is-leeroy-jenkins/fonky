@@ -329,7 +329,8 @@ class File:
         self.destination = self.resolve( destination )
         with zipfile.ZipFile( self.destination, 'x', zipfile.ZIP_DEFLATED ) as archive:
             for entry in self.directory.rglob( '*' ):
-                if entry.is_file( ) and (self.root is None or entry.resolve( ).is_relative_to( self.root )):
+                if entry.is_file( ) and entry.resolve( ) != self.destination and (
+                    self.root is None or entry.resolve( ).is_relative_to( self.root )):
                     archive.write( entry, entry.relative_to( self.directory ) )
         return str( self.destination )
 
@@ -422,6 +423,11 @@ class Data:
         throw_if( 'sql', sql )
         self.sql = sql
         self.parameters = parameters
+        self.statement = self.sql.lstrip( ).upper( )
+        if not (self.statement.startswith( 'SELECT ' ) or
+            self.statement.startswith( 'SELECT\n' ) or
+            self.statement.startswith( 'PRAGMA INTEGRITY_CHECK' )):
+            raise PermissionError( 'execute_query permits SELECT and integrity-check only.' )
         self.connect( )
         self.cursor = self.connection.execute( self.sql, self.parameters )
         if self.cursor.description is None:
@@ -678,16 +684,16 @@ class Calculator:
             float: Calculated value.
         """
         self.node = node
-        if isinstance( self.node, ast.Constant ) and type( self.node.value ) in (int, float):
-            return self.node.value
-        if isinstance( self.node, ast.UnaryOp ) and type( self.node.op ) in self._unary:
-            return self._unary[ type( self.node.op ) ]( self.evaluate_node( self.node.operand ) )
-        if isinstance( self.node, ast.BinOp ) and type( self.node.op ) in self._binary:
-            left = self.evaluate_node( self.node.left )
-            right = self.evaluate_node( self.node.right )
-            if type( self.node.op ) is ast.Pow and abs( right ) > 100:
+        if isinstance( node, ast.Constant ) and type( node.value ) in (int, float):
+            return node.value
+        if isinstance( node, ast.UnaryOp ) and type( node.op ) in self._unary:
+            return self._unary[ type( node.op ) ]( self.evaluate_node( node.operand ) )
+        if isinstance( node, ast.BinOp ) and type( node.op ) in self._binary:
+            left = self.evaluate_node( node.left )
+            right = self.evaluate_node( node.right )
+            if type( node.op ) is ast.Pow and abs( right ) > 100:
                 raise ValueError( 'Exponent is too large.' )
-            return self._binary[ type( self.node.op ) ]( left, right )
+            return self._binary[ type( node.op ) ]( left, right )
         raise ValueError( 'Only numeric literals and arithmetic operators are permitted.' )
 
     def launch_calculator( self ) -> subprocess.Popen:
