@@ -2412,36 +2412,55 @@ class GoogleMaps( Fetcher ):
 			'create_schema' ]
 	
 	def geocode_location( self, address: str ) -> Tuple[ float, float ]:
-		"""Geocode location.
+		"""Geocode an address or place description.
 
 		Purpose:
-		    Converts a street address or place description into latitude and longitude coordinates using
-		    Google Maps geocoding.
+		    Resolves the supplied address using the Google Maps Geocoding API, stores the
+		    request and response state, and returns latitude and longitude in decimal degrees.
 
 		Args:
-		    address: Street address or place description used for geocoding, validation, or routing.
+		    address (str): Address or place description to geocode.
 
 		Returns:
-		    Tuple[float, float]: Latitude and longitude coordinate pair.
+		    Tuple[float, float]: Latitude and longitude, in that order.
 
 		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
+		    ValueError: If the address or API key is missing, or the provider response
+		        contains no usable geographic coordinates.
+		    Error: If geocoding fails and the original exception is wrapped for diagnostics.
 		"""
 		try:
+			throw_if( 'address', address )
+			throw_if( 'api_key', self.api_key )
+			self.address = address
+			self.mode = 'geocode_location'
+			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
+			self.params = { 'address': self.address, 'key': self.api_key }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
-			results = self.payload.get( 'results', [] ) if isinstance( self.payload, dict ) else []
-			
-			if not results:
+
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'The Google Maps geocoding response was not a JSON object.' )
+
+			self.status = self.payload.get( 'status', '' )
+			if self.status and self.status != 'OK':
+				self.error_message = self.payload.get( 'error_message', '' )
+				raise ValueError(
+					f'Google Maps geocoding failed ({self.status}): {self.error_message}' )
+
+			self.results = self.payload.get( 'results', [ ] )
+			if not isinstance( self.results, list ) or not self.results:
 				raise ValueError( 'No geocoding results were returned for the supplied address.' )
-			
-			location = results[ 0 ].get( 'geometry', { } ).get( 'location', { } )
-			self.latitude = float( location.get( 'lat' ) )
-			self.longitude = float( location.get( 'lng' ) )
+
+			self.geometry = self.results[ 0 ].get( 'geometry', { } )
+			self.location = self.geometry.get( 'location', { } )
+			throw_if( 'latitude', self.location.get( 'lat' ) )
+			throw_if( 'longitude', self.location.get( 'lng' ) )
+
+			self.latitude = float( self.location[ 'lat' ] )
+			self.longitude = float( self.location[ 'lng' ] )
 			self.coordinates = (self.latitude, self.longitude)
 			self.result = self.coordinates
 			return self.coordinates
@@ -2449,9 +2468,10 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'geocode_location( self, *args, **kwargs ) -> Tuple[ float, float ]'
+			exception.method = ('geocode_location( self, address: str ) '
+				'-> Tuple[ float, float ]')
 			raise exception
-	
+
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
 		"""Geocode coordinates.
 
