@@ -4371,42 +4371,59 @@ class GlobalImagery( Fetcher ):
 			raise exception
 	
 	def fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None:
-		"""Fetch mercator map.
+		"""Fetch NASA GIBS imagery in the Web Mercator coordinate system.
 
 		Purpose:
-		    Retrieves mercator map using validated arguments and the stored GlobalImagery runtime
-		    configuration. The method assembles request parameters, executes the provider call or
-		    dispatches to a specialized helper, records response state when applicable, and returns a
-		    normalized payload for downstream analysis or tool execution.
+		    Retrieves the configured Landsat imagery from the EPSG:3857 WMS service.
+		    Checks an explicitly supplied CRS rather than silently ignoring it.
+		    The method does not reproject arbitrary Cartopy coordinate systems.
 
 		Args:
-		    ccrs (Any): Optional Cartopy coordinate reference system used to construct the map.
+		    ccrs (Any): Optional CRS specification. Accepts None, 'EPSG:3857',
+		        'epsg3857', the integer 3857, or a CRS object whose to_epsg()
+		        method resolves to 3857. Other coordinate systems are not
+		        supported by this Web Mercator convenience method.
 
 		Returns:
-		    Dict[str, Any] | None: Normalized provider response, result payload, or document collection
-		    returned by the operation.
+		    Dict[str, Any] | None: WMS imagery result and image file metadata.
 
 		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
+		    ValueError: If ccrs does not identify EPSG:3857.
+		    Error: If the implementation wraps a provider or processing failure.
 		"""
 		try:
+			self.ccrs = ccrs
+			if self.ccrs is not None:
+				if isinstance( self.ccrs, str ):
+					self.projection = self.ccrs.strip( ).lower( ).replace( ':', '' )
+				elif isinstance( self.ccrs, int ):
+					self.projection = f'epsg{self.ccrs}'
+				else:
+					self.projection = f'epsg{self.ccrs.to_epsg( )}'
+
+				if self.projection != 'epsg3857':
+					raise ValueError( 'fetch_mercator_map only supports EPSG:3857.' )
+			else:
+				self.projection = 'epsg3857'
+
 			self.mode = 'mercator_map'
 			return self.fetch_wms_map(
 				layer='Landsat_WELD_CorrectedReflectance_Bands157_Global_Annual',
 				image_date='2000-12-01', bbox=(
 					-8000000.0, -8000000.0, 8000000.0,
-					8000000.0), width=600, height=600, projection='epsg3857', quality='best',
-				image_format='image/png', transparent=True, output_dir='python-examples',
+					8000000.0), width=600, height=600, projection=self.projection,
+				quality='best', image_format='image/png', transparent=True,
+				output_dir='python-examples',
 				output_name='Landsat_WELD_CorrectedReflectance_Bands157_Global_Annual.png',
 				time=20 )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_mercator_map( self, ccrs=None ) -> Dict[ str, Any ] | None'
+			exception.method = (
+				'fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None' )
 			raise exception
-	
+
 	def create_schema( self, function: str, tool: str, description: str,
 			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
