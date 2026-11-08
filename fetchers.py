@@ -3212,7 +3212,8 @@ class NavalObservatory( Fetcher ):
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
 		return [ 'base_url', 'url', 'params', 'date_value', 'time_value', 'latitude', 'longitude',
-		         'location_label', 'fetch_celnav', 'fetch', 'create_schema' ]
+		         'location_label', 'validate_date', 'validate_time', 'validate_coordinates',
+		         'fetch_celnav', 'fetch', 'create_schema' ]
 	
 	def validate_date( self, date_value: str ) -> str:
 		"""Validate date.
@@ -3233,9 +3234,11 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'date_value', date_value )
 			value = str( date_value ).strip( )
-			throw_if( 'date_value', value )
-			dt.datetime.strptime( value, '%Y-%m-%d' )
+			calendar_date = dt.datetime.strptime( value, '%Y-%m-%d' )
+			if calendar_date.year < 1800 or calendar_date.year > 2050:
+				raise ValueError( 'Celestial navigation dates must be between 1800 and 2050.' )
 			return value
 		except Exception as e:
 			exception = Error( e )
@@ -3264,8 +3267,8 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'time_value', time_value )
 			value = str( time_value ).strip( )
-			throw_if( 'time_value', value )
 			pattern = (r'^(?:[01]\d|2[0-3]):[0-5]\d'
 			           r'(?:'
 			           r':[0-5]\d(?:\.\d{1,6})?'
@@ -3303,20 +3306,20 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
 			lat = float( latitude )
 			lon = float( longitude )
-			if lat < -90.0 or lat > 90.0:
-				raise ValueError( 'Latitude must be between -90 and 90.' )
-			
-			if lon < -180.0 or lon > 180.0:
-				raise ValueError( 'Longitude must be between -180 and 180.' )
-			
+			if not (-90.0 <= lat <= 90.0):
+				raise ValueError( 'Latitude must be between -90 and 90 and finite.' )
+			if not (-180.0 <= lon <= 180.0):
+				raise ValueError( 'Longitude must be between -180 and 180 and finite.' )
 			return lat, lon
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'validate_coordinates( self, *params ) -> tuple[ float, float ]'
+			exception.method = 'validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]'
 			raise exception
 	
 	def fetch_celnav( self, date_value: str, time_value: str, latitude: float,
@@ -3346,6 +3349,11 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'time', time )
+			self.timeout = int( time )
+			if self.timeout < 1:
+				raise ValueError( 'time must be greater than or equal to 1.' )
+
 			self.date_value = self.validate_date( date_value )
 			self.time_value = self.validate_time( time_value )
 			self.latitude, self.longitude = self.validate_coordinates( latitude=latitude,
@@ -3356,16 +3364,23 @@ class NavalObservatory( Fetcher ):
 			                'coords': f'{self.latitude},{self.longitude}' }
 			
 			self.response = requests.get( url=self.url, params=self.params,
-				headers=self.headers, timeout=int( time ) )
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': 'celnav', 'url': self.url, 'params': self.params,
-			         'location_label': self.location_label, 'data': payload }
+			self.payload = self.response.json( )
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'USNO celestial navigation response must be a JSON object.' )
+
+			if self.payload.get( 'error' ):
+				raise ValueError( f"USNO celestial navigation error: {self.payload[ 'error' ]}" )
+
+			self.result = { 'mode': 'celnav', 'url': self.url, 'params': self.params,
+				'location_label': self.location_label, 'data': self.payload }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'fetch_celnav( self, *params ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_celnav( self, date_value: str, time_value: str, latitude: float, longitude: float, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch( self, mode: str='celnav', date_value: str='',
@@ -3409,7 +3424,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch( self, mode: str='celnav', date_value: str='', time_value: str='', latitude: float=0.0, longitude: float=0.0, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -3454,7 +3469,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'create_schema( self, *params ) -> Dict[ str, str ]'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class SatelliteCenter( Fetcher ):
