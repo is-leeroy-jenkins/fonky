@@ -124,11 +124,9 @@ def encode_image( path: str ) -> str:
 	Raises:
 	    ValueError: If a required value is missing, blank, or outside the supported range.
 	"""
-	if path is None:
-		raise ValueError( f"Argument '{path}' cannot be empty!" )
-	else:
-		data = Path( path ).read_bytes( )
-		return base64.b64encode( data ).decode( "utf-8" )
+	throw_if( 'path', path )
+	data = Path( path ).read_bytes( )
+	return base64.b64encode( data ).decode( "utf-8" )
 
 class Fetcher:
 	"""Fetcher fetcher.
