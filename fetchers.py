@@ -2790,7 +2790,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'resolve_coordinates( self, *args, **kwargs ) -> Tuple[ float, float ]'
+			exception.method = 'resolve_coordinates( self, address: str ) -> Tuple[ float, float ]'
 			raise exception
 	
 	def request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None:
@@ -2803,7 +2803,7 @@ class GoogleWeather( Fetcher ):
 		    result consistently.
 
 		Args:
-		    path: Local filesystem path to the source file.
+		    path: Relative Google Weather API resource path.
 		    params: HTTP query-parameter mapping sent to the provider.
 		    time: Request timeout in seconds.
 
@@ -2821,6 +2821,8 @@ class GoogleWeather( Fetcher ):
 			throw_if( 'path', path )
 			throw_if( 'params', params )
 			throw_if( 'time', time )
+			if not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary.' )
 			self.path = str( path ).strip( ).lstrip( '/' )
 			self.timeout = int( time )
 			self.params = { }
@@ -2843,15 +2845,19 @@ class GoogleWeather( Fetcher ):
 			
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
-			self.result = { 'mode': self.mode, 'url': request_url, 'params': self.params,
-				'data': self.payload }
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'Google Weather response must be a JSON object.' )
+
+			self.result = { 'mode': self.mode, 'url': request_url,
+				'params': { key: value for key, value in self.params.items( )
+					if key != 'key' }, 'data': self.payload }
 			
 			return self.result
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def package_response( self ) -> Dict[ str, Any ]:
@@ -2876,7 +2882,8 @@ class GoogleWeather( Fetcher ):
 			if 'data' not in self.result:
 				self.result = { 'mode': self.mode,
 					'url': f'{self.url}/{self.path}' if self.path else self.url,
-					'params': self.params, 'data': self.payload or { } }
+					'params': { key: value for key, value in self.params.items( )
+						if key != 'key' }, 'data': self.payload or { } }
 			
 			return self.result
 		except Exception as exc:
@@ -2930,7 +2937,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_current( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -2984,7 +2991,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_forecast( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -3038,7 +3045,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_daily_forecast( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3092,7 +3099,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_history( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -3135,7 +3142,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_alerts( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 
 class NavalObservatory( Fetcher ):
