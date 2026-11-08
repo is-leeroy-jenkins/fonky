@@ -2514,7 +2514,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'geocode_coordinates( self, *args, **kwargs ) -> str | None'
+			exception.method = 'geocode_coordinates( self, lat: float, long: float ) -> str | None'
 			raise exception
 	
 	def validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None:
@@ -2563,7 +2563,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'validate_address( self, *args, **kwargs ) -> Dict[ Any, Any ]'
+			exception.method = 'validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None'
 			raise exception
 	
 	def request_directions( self, origin: str, destination: str,
@@ -2610,7 +2610,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'request_directions( self, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -2655,7 +2655,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ]'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class GoogleWeather( Fetcher ):
