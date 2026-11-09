@@ -124,7 +124,11 @@ jobs:
             ('USGS ScienceBase query','https://www.sciencebase.gov/catalog/items?q=bison&format=json&max=5'),
             ('USGS ScienceBase empty q','https://www.sciencebase.gov/catalog/items?q=&format=json&max=5'),
             ('USGS ScienceBase omitted q','https://www.sciencebase.gov/catalog/items?format=json&max=25'),
-            ('USGS ScienceBase corrected default','https://www.sciencebase.gov/catalog/items?q=&max=25&offset=0')
+            ('USGS ScienceBase corrected default','https://www.sciencebase.gov/catalog/items?q=&max=25&offset=0'),
+            ('ScienceBase json with offset0','https://www.sciencebase.gov/catalog/items?q=&format=json&max=25&offset=0'),
+            ('ScienceBase json without offset','https://www.sciencebase.gov/catalog/items?q=&format=json&max=25'),
+            ('ScienceBase json with offset5','https://www.sciencebase.gov/catalog/items?q=&format=json&max=25&offset=5'),
+            ('ScienceBase text format absent','https://www.sciencebase.gov/catalog/items?q=&max=5')
           ]
           def verify(c):
               name,url=c
