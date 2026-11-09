@@ -12,7 +12,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 
 PACKAGE_PATH = Path( __file__ ).resolve( ).parents[ 1 ]
@@ -108,9 +108,9 @@ class AstroQueryTests( unittest.TestCase ):
         self.assertEqual( self.query.headers[ 'Accept' ] if 'Accept' in
             self.query.headers else 'default', 'default' )
         self.assertIn( 'User-Agent', self.query.headers )
-        table = Mock( )
+        table = MagicMock( )
         table.colnames = [ 'main_id', 'ra' ]
-        table.__iter__ = Mock( return_value=iter([
+        table.__iter__.return_value = iter([
             { 'main_id': 'M31', 'ra': 10.6847 } ]) )
         self.assertEqual( self.query.table_to_records( table ),
             [ { 'main_id': 'M31', 'ra': '10.6847' } ] )
@@ -118,9 +118,9 @@ class AstroQueryTests( unittest.TestCase ):
 
     def test_object_queries(self ) -> None:
         """Verify SIMBAD object and identifier lookups preserve response schema."""
-        table = Mock( )
+        table = MagicMock( )
         table.colnames = [ 'main_id' ]
-        table.__iter__ = Mock( return_value=iter([
+        table.__iter__.return_value = iter([
             { 'main_id': 'M31' } ]) )
         simbad = Mock( )
         simbad.query_object.return_value = table
