@@ -106,9 +106,9 @@ jobs:
           calls.reset_mock()
           result=sb.fetch_items()
           assert calls.call_args.kwargs['url']=='https://www.sciencebase.gov/catalog/items'
-          assert calls.call_args.kwargs['params']=={'q':'','max':25,'offset':0}
+          assert calls.call_args.kwargs['params']=={'format':'json','q':'','max':25,'offset':0}
           assert result['rows']==response.json.return_value['items']
-          print('PASS actual ScienceBase.fetch_items() retains the required q= query')
+          print('PASS actual ScienceBase.fetch_items() sends q= with format=json')
           
           PY
       - name: Probe corrected UV routes and ScienceBase searches
@@ -124,7 +124,7 @@ jobs:
             ('USGS ScienceBase query','https://www.sciencebase.gov/catalog/items?q=bison&format=json&max=5'),
             ('USGS ScienceBase empty q','https://www.sciencebase.gov/catalog/items?q=&format=json&max=5'),
             ('USGS ScienceBase omitted q','https://www.sciencebase.gov/catalog/items?format=json&max=25'),
-            ('USGS ScienceBase corrected default','https://www.sciencebase.gov/catalog/items?q=&max=25&offset=0'),
+            ('USGS ScienceBase corrected default','https://www.sciencebase.gov/catalog/items?format=json&q=&max=25&offset=0'),
             ('ScienceBase json with offset0','https://www.sciencebase.gov/catalog/items?q=&format=json&max=25&offset=0'),
             ('ScienceBase json without offset','https://www.sciencebase.gov/catalog/items?q=&format=json&max=25'),
             ('ScienceBase json with offset5','https://www.sciencebase.gov/catalog/items?q=&format=json&max=25&offset=5'),
@@ -152,4 +152,7 @@ jobs:
                  for item in results[:4]):
               raise SystemExit('At least one corrected EPA UV route failed')
           print('PASS four live corrected EPA UV Index API routes')
+          default_item=next(item for item in results if item[0]=='USGS ScienceBase corrected default')
+          assert default_item[1]==200 and default_item[2]=='dict',default_item
+          print('PASS live ScienceBase default listing with q= and format=json')
           PY
