@@ -1,0 +1,68 @@
+name: Temporary API correction verification
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-api-corrections.yml'
+permissions:
+  contents: read
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install requests
+      - name: Compile and verify UV route construction
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          source=Path('fetchers.py').read_text(encoding='utf-8')
+          ast.parse(source)
+          cls=next(x for x in ast.parse(source).body if isinstance(x,ast.ClassDef) and x.name=='UvIndex')
+          ctor=next(x for x in cls.body if isinstance(x,ast.FunctionDef) and x.name=='__init__')
+          assigned=[x.value.value for x in ast.walk(ctor) if isinstance(x,ast.Assign)
+                    and any(isinstance(t,ast.Attribute) and t.attr=='base_url' for t in x.targets)
+                    and isinstance(x.value,ast.Constant) and isinstance(x.value.value,str)]
+          assert assigned==['https://data.epa.gov/dmapservice'],assigned
+          print('PASS UV index constructor base URL and Python syntax')
+          PY
+      - name: Probe corrected UV routes and ScienceBase searches
+        run: |
+          python - <<'PY'
+          import requests
+          from concurrent.futures import ThreadPoolExecutor
+          checks=[
+            ('UV daily ZIP','https://data.epa.gov/dmapservice/getEnvirofactsUVDAILY/ZIP/22201/JSON'),
+            ('UV hourly ZIP','https://data.epa.gov/dmapservice/getEnvirofactsUVHOURLY/ZIP/22201/JSON'),
+            ('UV daily city','https://data.epa.gov/dmapservice/getEnvirofactsUVDAILY/CITY/washington/STATE/dc/JSON'),
+            ('UV hourly city','https://data.epa.gov/dmapservice/getEnvirofactsUVHOURLY/CITY/washington/STATE/dc/JSON'),
+            ('USGS ScienceBase query','https://www.sciencebase.gov/catalog/items?q=bison&format=json&max=5'),
+            ('USGS ScienceBase empty q','https://www.sciencebase.gov/catalog/items?q=&format=json&max=5'),
+            ('USGS ScienceBase omitted q','https://www.sciencebase.gov/catalog/items?format=json&max=25')
+          ]
+          def verify(c):
+              name,url=c
+              try:
+                  response=requests.get(url,timeout=20)
+                  try:
+                      payload=response.json()
+                      shape=type(payload).__name__
+                      summary=repr(payload)[:100]
+                  except ValueError:
+                      shape='non-json'
+                      summary=response.text[:100]
+                  return (name,response.status_code,shape,summary,response.url)
+              except Exception as exc:
+                  return (name,type(exc).__name__,str(exc)[:100])
+          with ThreadPoolExecutor(max_workers=5) as pool:
+              results=list(pool.map(verify,checks))
+          for item in results:
+              print(repr(item))
+          if any(not isinstance(item[1],int) or item[1]>=400 or item[2] not in ('list','dict')
+                 for item in results[:4]):
+              raise SystemExit('At least one corrected EPA UV route failed')
+          print('PASS four live corrected EPA UV Index API routes')
+          PY
