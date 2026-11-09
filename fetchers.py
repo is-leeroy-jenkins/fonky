@@ -4483,7 +4483,8 @@ class GlobalImagery( Fetcher ):
 			self.output_dir = str( output_dir or 'python-examples' )
 			self.output_name = str( output_name or '' )
 			if self.output_name:
-				if Path( self.output_name ).name != self.output_name or self.output_name in ('.', '..'):
+				if (Path( self.output_name ).name != self.output_name or '\\' in self.output_name
+						or self.output_name in ('.', '..')):
 					raise ValueError( 'output_name must be a filename without directories.' )
 				filename = self.output_name
 			else:
