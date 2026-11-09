@@ -4259,9 +4259,52 @@ class GlobalImagery( Fetcher ):
 		return [ 'file_path', 'api_key', 'url', 'latitude', 'longitude', 'coordinates',
 			'calendar_date', 'julian_date', 'sidereal_time', 'utc_time', 'local_time', 'params',
 			'response', 'result', 'mode', 'timeout', 'headers', 'get_capabilities_url',
-			'build_wms_url', 'fetch_wms_map', 'fetch_map_services', 'fetch_mercator_map',
+			'validate_wms_options', 'build_wms_url', 'fetch_wms_map', 'fetch_map_services',
+			'fetch_mercator_map',
 			'create_schema' ]
 	
+	def validate_wms_options( self, projection: str, quality: str,
+			version: str ) -> Tuple[ str, str, str ]:
+		"""Validate supported NASA GIBS WMS endpoint options.
+
+		Purpose:
+		    Identifies the supported GIBS projection, service quality segment,
+		    and WMS specification version without altering the requested CRS.
+
+		Args:
+		    projection (str): NASA GIBS endpoint projection.
+		    quality (str): WMS endpoint quality identifier.
+		    version (str): WMS protocol version.
+
+		Returns:
+		    Tuple[str, str, str]: Checked projection, quality, and version.
+
+		Raises:
+		    Error: If a required value or service option is invalid.
+		"""
+		try:
+			throw_if( 'projection', projection )
+			throw_if( 'quality', quality )
+			throw_if( 'version', version )
+			self.projection = str( projection ).strip( ).lower( ).replace( ':', '' )
+			self.quality = str( quality ).strip( ).lower( )
+			self.version = str( version ).strip( )
+			if self.projection not in ('epsg4326', 'epsg3857', 'epsg3413', 'epsg3031'):
+				raise ValueError( 'Unsupported NASA GIBS WMS projection.' )
+			if not re.fullmatch( r'[a-z0-9_-]+', self.quality ):
+				raise ValueError( 'Invalid NASA GIBS service quality identifier.' )
+			if self.version not in ('1.1.1', '1.3.0'):
+				raise ValueError( 'GIBS WMS version must be 1.1.1 or 1.3.0.' )
+			return self.projection, self.quality, self.version
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GlobalImagery'
+			exception.method = (
+				'validate_wms_options( self, projection: str, quality: str, '
+				'version: str ) -> Tuple[ str, str, str ]' )
+			raise exception
+
 	def get_capabilities_url( self, projection: str='epsg4326',
 			quality: str='best', version: str='1.1.1' ) -> str:
 		"""Get capabilities url.
@@ -4283,28 +4326,20 @@ class GlobalImagery( Fetcher ):
 		        project error type.
 		"""
 		try:
-			projection_value = str( projection or 'epsg4326' ).strip( ).lower( )
-			quality_value = str( quality or 'best' ).strip( ).lower( )
-			version_value = str( version or '1.1.1' ).strip( )
-			
-			base_url = (
-					f'https://gibs.earthdata.nasa.gov/wms/'
-					f'{projection_value}/{quality_value}/wms.cgi'
-			)
-			
-			params = {
-					'SERVICE': 'WMS',
-					'REQUEST': 'GetCapabilities',
-					'VERSION': version_value
-			}
-			
-			return f'{base_url}?{urllib.parse.urlencode( params )}'
-		
+			self.projection, self.quality, self.version = self.validate_wms_options(
+				projection=projection, quality=quality, version=version )
+			self.capabilities_url = (
+				f'https://gibs.earthdata.nasa.gov/wms/'
+				f'{self.projection}/{self.quality}/wms.cgi' )
+			self.capabilities_params = { 'SERVICE': 'WMS',
+				'REQUEST': 'GetCapabilities', 'VERSION': self.version }
+			return (f'{self.capabilities_url}?'
+				f'{urllib.parse.urlencode( self.capabilities_params )}')
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'get_capabilities_url( self, **kwargs ) -> str'
+			exception.method = "get_capabilities_url( self, projection: str='epsg4326', quality: str='best', version: str='1.1.1' ) -> str"
 			raise exception
 	
 	def build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ],
@@ -4342,35 +4377,60 @@ class GlobalImagery( Fetcher ):
 			throw_if( 'layer', layer )
 			throw_if( 'image_date', image_date )
 			throw_if( 'bbox', bbox )
+			throw_if( 'width', width )
+			throw_if( 'height', height )
+			throw_if( 'image_format', image_format )
+			self.projection, self.quality, self.version = self.validate_wms_options(
+				projection=projection, quality=quality, version=version )
+			self.layer = str( layer ).strip( )
+			self.image_date = str( image_date ).strip( )
+			self.image_format = str( image_format ).strip( ).lower( )
+			self.width = int( width )
+			self.height = int( height )
 			if len( bbox ) != 4:
 				raise ValueError( 'bbox must contain west, south, east, north.' )
-			
-			projection_value = str( projection or 'epsg4326' ).strip( ).lower( )
-			quality_value = str( quality or 'best' ).strip( ).lower( )
-			version_value = str( version or '1.1.1' ).strip( )
-			west, south, east, north = [ float( value ) for value in bbox ]
-			width_value = max( 1, int( width ) )
-			height_value = max( 1, int( height ) )
-			
-			base_url = (f'https://gibs.earthdata.nasa.gov/wms/'
-					f'{projection_value}/{quality_value}/wms.cgi')
-			
-			params = { 'SERVICE': 'WMS', 'VERSION': version_value, 'REQUEST': 'GetMap',
-				'LAYERS': str( layer ).strip( ), 'STYLES': '',
-				'FORMAT': str( image_format or 'image/png' ).strip( ),
-				'TRANSPARENT': str( bool( transparent ) ).lower( ),
-				'SRS': 'EPSG:4326' if projection_value == 'epsg4326' else 'EPSG:3857',
-				'BBOX': f'{west},{south},{east},{north}', 'WIDTH': width_value,
-				'HEIGHT': height_value, 'TIME': str( image_date ).strip( ) }
-			
-			self.params = params
-			return f'{base_url}?{urllib.parse.urlencode( params )}'
-		
+			self.bbox = tuple( float( value ) for value in bbox )
+			west, south, east, north = self.bbox
+			if not all( float('-inf') < value < float('inf') for value in self.bbox ):
+				raise ValueError( 'bbox coordinates must be finite.' )
+			if west >= east or south >= north:
+				raise ValueError( 'bbox bounds must increase from west to east and south to north.' )
+			if self.width < 1 or self.height < 1:
+				raise ValueError( 'width and height must be positive.' )
+			if self.image_format not in ('image/png', 'image/jpeg'):
+				raise ValueError( 'GIBS WMS image_format must be image/png or image/jpeg.' )
+			if not re.fullmatch( r'[A-Za-z0-9_,-]+', self.layer ):
+				raise ValueError( 'Invalid WMS layer identifier.' )
+			if not isinstance( transparent, bool ):
+				raise ValueError( 'transparent must be a boolean.' )
+			self.transparent = transparent
+
+			self.wms_url = (f'https://gibs.earthdata.nasa.gov/wms/'
+				f'{self.projection}/{self.quality}/wms.cgi')
+			self.params = { 'SERVICE': 'WMS', 'VERSION': self.version,
+				'REQUEST': 'GetMap', 'LAYERS': self.layer, 'STYLES': '',
+				'FORMAT': self.image_format,
+				'TRANSPARENT': str( self.transparent ).lower( ),
+				'WIDTH': self.width, 'HEIGHT': self.height,
+				'TIME': self.image_date }
+
+			self.epsg = f"EPSG:{self.projection[ 4: ]}"
+			if self.version == '1.3.0':
+				self.params[ 'CRS' ] = self.epsg
+				if self.projection == 'epsg4326':
+					self.params[ 'BBOX' ] = f'{south},{west},{north},{east}'
+				else:
+					self.params[ 'BBOX' ] = f'{west},{south},{east},{north}'
+			else:
+				self.params[ 'SRS' ] = self.epsg
+				self.params[ 'BBOX' ] = f'{west},{south},{east},{north}'
+
+			return f'{self.wms_url}?{urllib.parse.urlencode( self.params )}'
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'build_wms_url( self, **kwargs ) -> str'
+			exception.method = "build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, version: str='1.1.1' ) -> str"
 			raise exception
 	
 	def fetch_wms_map( self, layer: str, image_date: str,
@@ -4411,51 +4471,56 @@ class GlobalImagery( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = 'wms_map'
+			throw_if( 'time', time )
 			self.timeout = int( time )
-			request_url = self.build_wms_url( layer=layer, image_date=image_date, bbox=bbox,
-				width=width, height=height, projection=projection, quality=quality,
-				image_format=image_format, transparent=transparent )
-			
-			directory = Path( output_dir or 'python-examples' )
-			directory.mkdir( parents=True, exist_ok=True )
-			if output_name:
-				filename = output_name
+			if self.timeout < 1:
+				raise ValueError( 'time must be greater than or equal to 1.' )
+			self.mode = 'wms_map'
+			self.url = self.build_wms_url( layer=layer, image_date=image_date,
+				bbox=bbox, width=width, height=height, projection=projection,
+				quality=quality, image_format=image_format, transparent=transparent )
+
+			self.output_dir = str( output_dir or 'python-examples' )
+			self.output_name = str( output_name or '' )
+			if self.output_name:
+				if Path( self.output_name ).name != self.output_name or self.output_name in ('.', '..'):
+					raise ValueError( 'output_name must be a filename without directories.' )
+				filename = self.output_name
 			else:
-				safe_layer = re.sub( r'[^A-Za-z0-9_\-]+', '_', str( layer ).strip( ) )
-				safe_date = re.sub( r'[^0-9\-]+', '_', str( image_date ).strip( ) )
-				extension = '.jpg' if image_format == 'image/jpeg' else '.png'
-				filename = f'{safe_layer}_{safe_date}{extension}'
-			
-			self.file_path = str( directory / filename )
-			self.url = request_url
-			self.response = requests.get( request_url, headers=self.headers,
+				filename = f'{self.layer}_{self.image_date}'
+				filename = re.sub( r'[^A-Za-z0-9_.-]+', '_', filename )
+				filename += '.jpg' if self.image_format == 'image/jpeg' else '.png'
+			self.file_path = str( Path( self.output_dir ) / filename )
+
+			self.response = requests.get( url=self.url, headers=self.headers,
 				timeout=self.timeout )
 			self.response.raise_for_status( )
 			content_type = self.response.headers.get( 'Content-Type', '' )
-			if 'image' not in content_type.lower( ):
-				message = ('NASA GIBS did not return an image. '
-						f'Content-Type: {content_type}. '
-						f'Response preview: {self.response.text[ :500 ]}')
-				raise ValueError( message )
-			
+			if content_type.split( ';' )[ 0 ].strip( ).lower( ) not in (
+					'image/png', 'image/jpeg' ):
+				raise ValueError( 'NASA GIBS did not return a supported image: '
+					f'{content_type}; response: {self.response.text[ :500 ]}' )
+			if not self.response.content:
+				raise ValueError( 'NASA GIBS returned an empty image.' )
+
+			Path( self.output_dir ).mkdir( parents=True, exist_ok=True )
 			Path( self.file_path ).write_bytes( self.response.content )
-			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
-				'image_path': self.file_path, 'content_type': content_type,
-				'status_code': self.response.status_code, 'bytes': len( self.response.content ),
-				'layer': layer, 'image_date': image_date,
-				'bbox': { 'west': float( bbox[ 0 ] ), 'south': float( bbox[ 1 ] ),
-					'east': float( bbox[ 2 ] ), 'north': float( bbox[ 3 ] ) },
+			self.result = { 'mode': self.mode, 'url': self.url,
+				'params': self.params, 'image_path': self.file_path,
+				'content_type': content_type,
+				'status_code': self.response.status_code,
+				'bytes': len( self.response.content ),
+				'layer': self.layer, 'image_date': self.image_date,
+				'bbox': { 'west': self.bbox[ 0 ], 'south': self.bbox[ 1 ],
+					'east': self.bbox[ 2 ], 'north': self.bbox[ 3 ] },
 				'summary': { 'rows': 1, 'columns': 8,
 					'description': 'NASA GIBS WMS image written to disk.' } }
-			
 			return self.result
-		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_wms_map( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_wms_map( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, output_dir: str='python-examples', output_name: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_map_services( self ) -> Dict[ str, Any ] | None:
@@ -4588,7 +4653,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'create_schema( self, **kwargs ) -> Dict[ str, str ]'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class NearbyObjects( Fetcher ):
