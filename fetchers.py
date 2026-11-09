@@ -5725,8 +5725,6 @@ class SpaceWeather( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'start_date', start_date )
-			throw_if( 'end_date', end_date )
 			throw_if( 'endpoint', endpoint )
 			self.timeout = int( time )
 			if self.timeout < 1:
@@ -5745,7 +5743,8 @@ class SpaceWeather( Fetcher ):
 				end = dt.datetime.strptime( self.end_date, '%Y-%m-%d' ).date( )
 				if start > end:
 					raise ValueError( 'start_date must precede or equal end_date.' )
-			self.active_key = str( api_key or self.api_key or '' ).strip( )
+			# NASA documents DEMO_KEY for limited unauthenticated use.
+			self.active_key = str( api_key or self.api_key or 'DEMO_KEY' ).strip( )
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { 'api_key': self.active_key }
 			if self.start_date:
@@ -11681,10 +11680,8 @@ class CensusData( Fetcher ):
 			self.dataset = str( dataset ).strip( ).strip( '/' )
 			self.timeout = int( time )
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}/variables.json'
+			# Census metadata endpoints do not require API credentials.
 			self.params = { }
-			
-			if self.api_key:
-				self.params[ 'key' ] = self.api_key
 			
 			self.response = requests.get(
 				url=self.url,
@@ -11696,8 +11693,9 @@ class CensusData( Fetcher ):
 			self.payload = self.response.json( )
 			self.result = {
 					'mode': self.mode,
-					'url': self.response.url,
-					'params': self.params,
+					'url': self.url,
+					'params': { key: value for key, value in self.params.items( )
+						if key != 'key' },
 					'data': self.payload,
 			}
 			
@@ -11744,6 +11742,7 @@ class CensusData( Fetcher ):
 			throw_if( 'year', year )
 			throw_if( 'dataset', dataset )
 			throw_if( 'fields', fields )
+			throw_if( 'CENSUS_API_KEY', self.api_key )
 			
 			self.mode = 'data'
 			self.year = str( year ).strip( )
@@ -11777,8 +11776,9 @@ class CensusData( Fetcher ):
 			self.payload = self.response.json( )
 			self.result = {
 					'mode': self.mode,
-					'url': self.response.url,
-					'params': self.params,
+					'url': self.url,
+					'params': { key: value for key, value in self.params.items( )
+						if key != 'key' },
 					'data': self.shape_table( self.payload ),
 					'raw': self.payload,
 			}
