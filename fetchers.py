@@ -6051,11 +6051,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		parts: list[ str ] = [ ]
 		if quantity and quantity.strip( ):
-			parts.append( quantity.strip( ) )
+			parts.append( urllib.parse.quote( quantity.strip( ), safe='' ) )
 		
 		if attributes and attributes.strip( ):
 			attr_parts = [ a.strip( ) for a in attributes.split( ',' ) if a.strip( ) ]
-			parts.extend( attr_parts )
+			parts.extend( urllib.parse.quote( item, safe='' ) for item in attr_parts )
 		
 		return '/'.join( parts )
 	
@@ -6451,9 +6451,10 @@ class AstroQuery( Fetcher ):
 			simbad.ROW_LIMIT = self.row_limit
 			result_table = simbad.query_object( self.name )
 			
-			return { 'mode': 'object_search', 'query': self.name, 'row_limit': self.row_limit,
+			self.result = { 'mode': 'object_search', 'query': self.name, 'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -6489,9 +6490,10 @@ class AstroQuery( Fetcher ):
 			simbad = Simbad( )
 			simbad.ROW_LIMIT = self.row_limit
 			result_table = simbad.query_objectids( self.name )
-			return { 'mode': 'object_ids', 'query': self.name, 'row_limit': self.row_limit,
+			self.result = { 'mode': 'object_ids', 'query': self.name, 'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -6549,11 +6551,12 @@ class AstroQuery( Fetcher ):
 			result_table = simbad.query_region( coordinates=coord,
 				radius=self.radius * active_unit )
 			
-			return { 'mode': 'region_search', 'ra': self.right_ascension, 'dec': self.declination,
+			self.result = { 'mode': 'region_search', 'ra': self.right_ascension, 'dec': self.declination,
 				'radius': self.radius, 'radius_unit': self.radius_unit,
 				'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
