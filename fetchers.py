@@ -1668,8 +1668,7 @@ class GoogleDrive( Fetcher ):
 					'gdrive-mime-type-in-folder'):
 					self.invoke_query = '*'
 				else:
-					raise ValueError(
-						'A query is required for the selected Google Drive template.' )
+					raise ValueError( 'A query is required for the selected Google Drive template.' )
 			
 			self.retriever_kwargs = { 'folder_id': self.folder_id, 'template': self.template,
 				'num_results': self.num_results, 'mode': self.mode, }
@@ -23107,6 +23106,7 @@ class OpenSky( Fetcher ):
 			                  "'departures_airport', or 'track_aircraft'." )
 		
 		return value
+	
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
 
@@ -23140,6 +23140,7 @@ class OpenSky( Fetcher ):
 			raise ValueError( 'Unsupported OpenSky endpoint path.' )
 		
 		return value
+	
 	def validate_icao24( self, icao24: str ) -> str:
 		"""Validate icao24.
 
