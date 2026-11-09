@@ -146,7 +146,7 @@ jobs:
                       line = re.sub(r"^(.*exception\.method\s*=).*$",r"\1 <metadata>",line)
                   line=line.replace("required: list[ str ] | None=None","required: list[ str ]")
                   clean.append(line)
-              return "\n".join(clean).strip()
+              return "\n".join(clean).rstrip()
 
           before_map = method_map(before)
           after_map = method_map(after)
