@@ -124,11 +124,9 @@ def encode_image( path: str ) -> str:
 	Raises:
 	    ValueError: If a required value is missing, blank, or outside the supported range.
 	"""
-	if path is None:
-		raise ValueError( f"Argument '{path}' cannot be empty!" )
-	else:
-		data = Path( path ).read_bytes( )
-		return base64.b64encode( data ).decode( "utf-8" )
+	throw_if( 'path', path )
+	data = Path( path ).read_bytes( )
+	return base64.b64encode( data ).decode( "utf-8" )
 
 class Fetcher:
 	"""Fetcher fetcher.
@@ -2412,35 +2410,55 @@ class GoogleMaps( Fetcher ):
 			'create_schema' ]
 	
 	def geocode_location( self, address: str ) -> Tuple[ float, float ]:
-		"""Geocode location.
+		"""Geocode an address or place description.
 
 		Purpose:
-		    Converts a street address or place description into latitude and longitude coordinates using
-		    Google Maps geocoding.
+		    Resolves the supplied address using the Google Maps Geocoding API, stores the
+		    request and response state, and returns latitude and longitude in decimal degrees.
 
 		Args:
-		    address: Street address or place description used for geocoding, validation, or routing.
+		    address (str): Address or place description to geocode.
 
 		Returns:
-		    Tuple[float, float]: Latitude and longitude coordinate pair.
+		    Tuple[float, float]: Latitude and longitude, in that order.
 
 		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
+		    ValueError: If the address or API key is missing, or the provider response
+		        contains no usable geographic coordinates.
+		    Error: If geocoding fails and the original exception is wrapped for diagnostics.
 		"""
 		try:
+			throw_if( 'address', address )
+			throw_if( 'api_key', self.api_key )
+			self.address = address
+			self.mode = 'geocode_location'
+			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
+			self.params = { 'address': self.address, 'key': self.api_key }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
-			results = self.payload.get( 'results', [] ) if isinstance( self.payload, dict ) else []
-			if not results:
+
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'The Google Maps geocoding response was not a JSON object.' )
+
+			self.status = self.payload.get( 'status', '' )
+			if self.status and self.status != 'OK':
+				self.error_message = self.payload.get( 'error_message', '' )
+				raise ValueError(
+					f'Google Maps geocoding failed ({self.status}): {self.error_message}' )
+
+			self.results = self.payload.get( 'results', [ ] )
+			if not isinstance( self.results, list ) or not self.results:
 				raise ValueError( 'No geocoding results were returned for the supplied address.' )
-			
-			location = results[ 0 ].get( 'geometry', { } ).get( 'location', { } )
-			self.latitude = float( location.get( 'lat' ) )
-			self.longitude = float( location.get( 'lng' ) )
+
+			self.geometry = self.results[ 0 ].get( 'geometry', { } )
+			self.location = self.geometry.get( 'location', { } )
+			throw_if( 'latitude', self.location.get( 'lat' ) )
+			throw_if( 'longitude', self.location.get( 'lng' ) )
+
+			self.latitude = float( self.location[ 'lat' ] )
+			self.longitude = float( self.location[ 'lng' ] )
 			self.coordinates = (self.latitude, self.longitude)
 			self.result = self.coordinates
 			return self.coordinates
@@ -2448,9 +2466,10 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'geocode_location( self, *args, **kwargs ) -> Tuple[ float, float ]'
+			exception.method = ('geocode_location( self, address: str ) '
+				'-> Tuple[ float, float ]')
 			raise exception
-	
+
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
 		"""Geocode coordinates.
 
@@ -2495,7 +2514,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'geocode_coordinates( self, *args, **kwargs ) -> str | None'
+			exception.method = 'geocode_coordinates( self, lat: float, long: float ) -> str | None'
 			raise exception
 	
 	def validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None:
@@ -2544,7 +2563,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'validate_address( self, *args, **kwargs ) -> Dict[ Any, Any ]'
+			exception.method = 'validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None'
 			raise exception
 	
 	def request_directions( self, origin: str, destination: str,
@@ -2591,7 +2610,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'request_directions( self, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -2636,7 +2655,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ]'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class GoogleWeather( Fetcher ):
@@ -2771,7 +2790,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'resolve_coordinates( self, *args, **kwargs ) -> Tuple[ float, float ]'
+			exception.method = 'resolve_coordinates( self, address: str ) -> Tuple[ float, float ]'
 			raise exception
 	
 	def request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None:
@@ -2784,7 +2803,7 @@ class GoogleWeather( Fetcher ):
 		    result consistently.
 
 		Args:
-		    path: Local filesystem path to the source file.
+		    path: Relative Google Weather API resource path.
 		    params: HTTP query-parameter mapping sent to the provider.
 		    time: Request timeout in seconds.
 
@@ -2802,6 +2821,8 @@ class GoogleWeather( Fetcher ):
 			throw_if( 'path', path )
 			throw_if( 'params', params )
 			throw_if( 'time', time )
+			if not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary.' )
 			self.path = str( path ).strip( ).lstrip( '/' )
 			self.timeout = int( time )
 			self.params = { }
@@ -2824,15 +2845,19 @@ class GoogleWeather( Fetcher ):
 			
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
-			self.result = { 'mode': self.mode, 'url': request_url, 'params': self.params,
-				'data': self.payload }
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'Google Weather response must be a JSON object.' )
+
+			self.result = { 'mode': self.mode, 'url': request_url,
+				'params': { key: value for key, value in self.params.items( )
+					if key != 'key' }, 'data': self.payload }
 			
 			return self.result
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def package_response( self ) -> Dict[ str, Any ]:
@@ -2857,7 +2882,8 @@ class GoogleWeather( Fetcher ):
 			if 'data' not in self.result:
 				self.result = { 'mode': self.mode,
 					'url': f'{self.url}/{self.path}' if self.path else self.url,
-					'params': self.params, 'data': self.payload or { } }
+					'params': { key: value for key, value in self.params.items( )
+						if key != 'key' }, 'data': self.payload or { } }
 			
 			return self.result
 		except Exception as exc:
@@ -2911,7 +2937,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_current( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -2965,7 +2991,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_forecast( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -3019,7 +3045,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_daily_forecast( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3073,7 +3099,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_history( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -3116,7 +3142,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_alerts( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 
 class NavalObservatory( Fetcher ):
@@ -3186,7 +3212,8 @@ class NavalObservatory( Fetcher ):
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
 		return [ 'base_url', 'url', 'params', 'date_value', 'time_value', 'latitude', 'longitude',
-		         'location_label', 'fetch_celnav', 'fetch', 'create_schema' ]
+		         'location_label', 'validate_date', 'validate_time', 'validate_coordinates',
+		         'fetch_celnav', 'fetch', 'create_schema' ]
 	
 	def validate_date( self, date_value: str ) -> str:
 		"""Validate date.
@@ -3207,9 +3234,11 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'date_value', date_value )
 			value = str( date_value ).strip( )
-			throw_if( 'date_value', value )
-			dt.datetime.strptime( value, '%Y-%m-%d' )
+			calendar_date = dt.datetime.strptime( value, '%Y-%m-%d' )
+			if calendar_date.year < 1800 or calendar_date.year > 2050:
+				raise ValueError( 'Celestial navigation dates must be between 1800 and 2050.' )
 			return value
 		except Exception as e:
 			exception = Error( e )
@@ -3238,8 +3267,8 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'time_value', time_value )
 			value = str( time_value ).strip( )
-			throw_if( 'time_value', value )
 			pattern = (r'^(?:[01]\d|2[0-3]):[0-5]\d'
 			           r'(?:'
 			           r':[0-5]\d(?:\.\d{1,6})?'
@@ -3277,20 +3306,20 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
 			lat = float( latitude )
 			lon = float( longitude )
-			if lat < -90.0 or lat > 90.0:
-				raise ValueError( 'Latitude must be between -90 and 90.' )
-			
-			if lon < -180.0 or lon > 180.0:
-				raise ValueError( 'Longitude must be between -180 and 180.' )
-			
+			if not (-90.0 <= lat <= 90.0):
+				raise ValueError( 'Latitude must be between -90 and 90 and finite.' )
+			if not (-180.0 <= lon <= 180.0):
+				raise ValueError( 'Longitude must be between -180 and 180 and finite.' )
 			return lat, lon
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'validate_coordinates( self, *params ) -> tuple[ float, float ]'
+			exception.method = 'validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]'
 			raise exception
 	
 	def fetch_celnav( self, date_value: str, time_value: str, latitude: float,
@@ -3320,6 +3349,11 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'time', time )
+			self.timeout = int( time )
+			if self.timeout < 1:
+				raise ValueError( 'time must be greater than or equal to 1.' )
+
 			self.date_value = self.validate_date( date_value )
 			self.time_value = self.validate_time( time_value )
 			self.latitude, self.longitude = self.validate_coordinates( latitude=latitude,
@@ -3330,16 +3364,23 @@ class NavalObservatory( Fetcher ):
 			                'coords': f'{self.latitude},{self.longitude}' }
 			
 			self.response = requests.get( url=self.url, params=self.params,
-				headers=self.headers, timeout=int( time ) )
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': 'celnav', 'url': self.url, 'params': self.params,
-			         'location_label': self.location_label, 'data': payload }
+			self.payload = self.response.json( )
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'USNO celestial navigation response must be a JSON object.' )
+
+			if self.payload.get( 'error' ):
+				raise ValueError( f"USNO celestial navigation error: {self.payload[ 'error' ]}" )
+
+			self.result = { 'mode': 'celnav', 'url': self.url, 'params': self.params,
+				'location_label': self.location_label, 'data': self.payload }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'fetch_celnav( self, *params ) -> Dict[ str, Any ]'
+			exception.method = "fetch_celnav( self, date_value: str, time_value: str, latitude: float, longitude: float, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='celnav', date_value: str='',
@@ -3383,7 +3424,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='celnav', date_value: str='', time_value: str='', latitude: float=0.0, longitude: float=0.0, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -3428,7 +3469,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'create_schema( self, *params ) -> Dict[ str, str ]'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class SatelliteCenter( Fetcher ):
@@ -3491,8 +3532,9 @@ class SatelliteCenter( Fetcher ):
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [ 'url', 'timeout', 'headers', 'fetch_observatories', 'fetch_ground_stations',
-		         'fetch_locations', 'fetch', ]
+		return [ 'ssc', 'url', 'params', 'observatories', 'ground_stations', 'timeout',
+			'headers', 'response', 'result', 'fetch_observatories', 'fetch_ground_stations',
+			'fetch_locations', 'fetch' ]
 	
 	def fetch_observatories( self ) -> Dict[ str, Any ] | None:
 		"""Retrieve observatories data.
@@ -3513,8 +3555,14 @@ class SatelliteCenter( Fetcher ):
 		"""
 		try:
 			self.ssc = SscWs( user_agent=self.agents, timeout=self.timeout )
-			result = self.ssc.get_observatories( )
-			return result
+			self.result = self.ssc.get_observatories( )
+			if not isinstance( self.result, dict ):
+				raise ValueError( 'SSC observatories response must be a dictionary.' )
+			if self.result.get( 'HttpStatus', 200 ) != 200:
+				raise ValueError( self.result.get( 'ErrorMessage',
+					self.result.get( 'HttpText', 'SSC observatories request failed.' ) ) )
+			self.observatories = self.result.get( 'Observatory', [ ] )
+			return self.result
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
@@ -3541,8 +3589,14 @@ class SatelliteCenter( Fetcher ):
 		"""
 		try:
 			self.ssc = SscWs( user_agent=self.agents, timeout=self.timeout )
-			result = self.ssc.get_ground_stations( )
-			return result
+			self.result = self.ssc.get_ground_stations( )
+			if not isinstance( self.result, dict ):
+				raise ValueError( 'SSC ground stations response must be a dictionary.' )
+			if self.result.get( 'HttpStatus', 200 ) != 200:
+				raise ValueError( self.result.get( 'ErrorMessage',
+					self.result.get( 'HttpText', 'SSC ground stations request failed.' ) ) )
+			self.ground_stations = self.result.get( 'GroundStation', [ ] )
+			return self.result
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
@@ -3582,26 +3636,58 @@ class SatelliteCenter( Fetcher ):
 			throw_if( 'observatories', observatories )
 			throw_if( 'start_time', start_time )
 			throw_if( 'end_time', end_time )
+			throw_if( 'coordinate_systems', coordinate_systems )
+			throw_if( 'resolution_factor', resolution_factor )
+			throw_if( 'time', time )
+
+			self.observatory_ids = str( observatories ).strip( )
+			self.start_time = str( start_time ).strip( )
+			self.end_time = str( end_time ).strip( )
+			self.coordinate_systems = str( coordinate_systems ).strip( ).lower( )
+			self.resolution_factor = int( resolution_factor )
 			self.timeout = int( time )
-			obs = observatories.strip( )
-			time_range = f'{start_time.strip( )},{end_time.strip( )}'
-			coords = (coordinate_systems or 'gse').strip( )
-			request_url = (f'{self.url}/locations/'
-			               f'{obs}/'
-			               f'{time_range}/'
-			               f'{coords}/')
-			
-			self.params = { 'resolutionFactor': max( 1, int( resolution_factor ) ) }
-			self.response = requests.get( url=request_url, params=self.params, headers=self.headers,
-				timeout=self.timeout )
-			
+
+			if self.timeout < 1:
+				raise ValueError( 'time must be greater than or equal to 1.' )
+			if self.resolution_factor < 1:
+				raise ValueError( 'resolution_factor must be greater than or equal to 1.' )
+			if not re.fullmatch( r'[A-Za-z0-9_-]+(?:,[A-Za-z0-9_-]+)*',
+					self.observatory_ids ):
+				raise ValueError( 'observatories must contain comma-separated SSC identifiers.' )
+
+			supported = { 'geo', 'gm', 'gse', 'gsm', 'sm', 'geitod', 'geij2000' }
+			requested = self.coordinate_systems.split( ',' )
+			if any( item not in supported for item in requested ):
+				raise ValueError( 'Unsupported SSC coordinate system.' )
+
+			pattern = r'\d{8}T\d{6}Z'
+			if not re.fullmatch( pattern, self.start_time ) or not re.fullmatch(
+					pattern, self.end_time ):
+				raise ValueError(
+					'SSC location times must use YYYYMMDDTHHMMSSZ (UTC).' )
+			start_date = dt.datetime.strptime( self.start_time, '%Y%m%dT%H%M%SZ' )
+			end_date = dt.datetime.strptime( self.end_time, '%Y%m%dT%H%M%SZ' )
+			if start_date >= end_date:
+				raise ValueError( 'start_time must precede end_time.' )
+
+			self.request_url = (f'{self.url}/locations/{self.observatory_ids}/'
+				f'{self.start_time},{self.end_time}/{self.coordinate_systems}/')
+			self.params = { 'resolutionFactor': self.resolution_factor }
+			self.response = requests.get( url=self.request_url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			return self.response.json( )
+			self.result = self.response.json( )
+			if not isinstance( self.result, dict ):
+				raise ValueError( 'SSC locations response must be a dictionary.' )
+			if self.result.get( 'HttpStatus', 200 ) != 200:
+				raise ValueError( self.result.get( 'ErrorMessage',
+					self.result.get( 'HttpText', 'SSC locations request failed.' ) ) )
+			return self.result
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'fetch_locations( self, *params ) -> Dict[ str, Any ]'
+			exception.method = "fetch_locations( self, observatories: str, start_time: str, end_time: str, coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='observatories', query: str='', start_time: str='',
@@ -3653,7 +3739,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'fetch( self, *kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='observatories', query: str='', start_time: str='', end_time: str='', coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 
 class EarthObservatory( Fetcher ):
@@ -3732,8 +3818,45 @@ class EarthObservatory( Fetcher ):
 		"""
 		return [ 'base_url', 'url', 'params', 'mode', 'status', 'category', 'source', 'days',
 			'limit', 'start_date', 'end_date', 'fetch_events', 'fetch_categories', 'fetch_sources',
-			'fetch_layers', 'fetch', 'create_schema' ]
+			'fetch_layers', 'request', 'fetch', 'create_schema' ]
 	
+	def request( self, time: int=20 ) -> Dict[ str, Any ]:
+		"""Retrieve a validated NASA EONET v3 JSON response.
+
+		Purpose:
+		    Performs the configured EONET request, rejects HTTP and API-level errors,
+		    and retains response state for all four public retrieval methods.
+
+		Args:
+		    time (int): Positive HTTP timeout in seconds.
+
+		Returns:
+		    Dict[str, Any]: The validated EONET JSON response.
+
+		Raises:
+		    Error: If timeout, HTTP request, or provider response validation fails.
+		"""
+		try:
+			throw_if( 'time', time )
+			self.timeout = int( time )
+			if self.timeout < 1:
+				raise ValueError( 'time must be greater than or equal to 1.' )
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
+			self.response.raise_for_status( )
+			self.payload = self.response.json( )
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'NASA EONET response must be a JSON object.' )
+			if self.payload.get( 'error' ):
+				raise ValueError( f"NASA EONET error: {self.payload[ 'error' ]}" )
+			return self.payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EarthObservatory'
+			exception.method = 'request( self, time: int=20 ) -> Dict[ str, Any ]'
+			raise exception
+
 	def fetch_events( self, status: str='open', category: str='', source: str='',
 		limit: int=20, days: int=30, start_date: str='',
 		end_date: str='', time: int=20 ) -> Dict[ str, Any ]:
@@ -3764,46 +3887,51 @@ class EarthObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'status', status )
+			throw_if( 'limit', limit )
+			throw_if( 'days', days )
 			self.mode = 'events'
-			self.status = str( status or 'open' ).strip( ).lower( )
+			self.status = str( status ).strip( ).lower( )
 			self.category = str( category or '' ).strip( )
 			self.source = str( source or '' ).strip( )
 			self.limit = int( limit )
 			self.days = int( days )
 			self.start_date = str( start_date or '' ).strip( )
 			self.end_date = str( end_date or '' ).strip( )
+			if self.status not in ('open', 'closed', 'all'):
+				raise ValueError( 'status must be open, closed, or all.' )
+			if self.limit < 1 or self.days < 1:
+				raise ValueError( 'limit and days must be positive integers.' )
+			if bool( self.start_date ) != bool( self.end_date ):
+				raise ValueError( 'start_date and end_date must be supplied together.' )
+			if self.start_date:
+				start = dt.datetime.strptime( self.start_date, '%Y-%m-%d' ).date( )
+				end = dt.datetime.strptime( self.end_date, '%Y-%m-%d' ).date( )
+				if start > end:
+					raise ValueError( 'start_date must be on or before end_date.' )
 			self.url = f'{self.base_url}/events'
-			self.params = { }
-			if self.status:
-				self.params[ 'status' ] = self.status
-			
+			self.params = { 'status': self.status, 'limit': self.limit }
 			if self.category:
 				self.params[ 'category' ] = self.category
-			
 			if self.source:
 				self.params[ 'source' ] = self.source
-			
-			if self.limit > 0:
-				self.params[ 'limit' ] = self.limit
-			
-			if self.start_date and self.end_date:
+			if self.start_date:
 				self.params[ 'start' ] = self.start_date
 				self.params[ 'end' ] = self.end_date
-			elif self.days > 0:
+			else:
 				self.params[ 'days' ] = self.days
-			
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
+			payload = self.request( time=time )
+			if not isinstance( payload.get( 'events', [ ] ), list ):
+				raise ValueError( 'NASA EONET events must be a list.' )
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
 				'events': payload.get( 'events', [ ] ), 'title': payload.get( 'title', '' ),
 				'description': payload.get( 'description', '' ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_events( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_events( self, status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3830,13 +3958,14 @@ class EarthObservatory( Fetcher ):
 			self.mode = 'categories'
 			self.url = f'{self.base_url}/categories'
 			self.params = { }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
-				'categories': payload.get( 'categories', [ ] ), 'title': payload.get( 'title', '' ),
+			payload = self.request( time=time )
+			if not isinstance( payload.get( 'categories', [ ] ), list ):
+				raise ValueError( 'NASA EONET categories must be a list.' )
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
+				'categories': payload.get( 'categories', [ ] ),
+				'title': payload.get( 'title', '' ),
 				'description': payload.get( 'description', '' ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -3868,13 +3997,13 @@ class EarthObservatory( Fetcher ):
 			self.mode = 'sources'
 			self.url = f'{self.base_url}/sources'
 			self.params = { }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
+			payload = self.request( time=time )
+			if not isinstance( payload.get( 'sources', [ ] ), list ):
+				raise ValueError( 'NASA EONET sources must be a list.' )
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
 				'sources': payload.get( 'sources', [ ] ), 'title': payload.get( 'title', '' ),
 				'description': payload.get( 'description', '' ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -3906,25 +4035,36 @@ class EarthObservatory( Fetcher ):
 		try:
 			self.mode = 'layers'
 			self.category = str( category or '' ).strip( )
+			if self.category and not re.fullmatch( r'[A-Za-z0-9_-]+', self.category ):
+				raise ValueError( 'category must be a valid EONET category identifier.' )
+			self.url = f'{self.base_url}/layers'
 			if self.category:
-				self.url = f'{self.base_url}/layers/{self.category}'
-			else:
-				self.url = f'{self.base_url}/layers'
-			
+				self.url = f'{self.url}/{self.category}'
 			self.params = { }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
-				'category': self.category, 'layers': payload.get( 'layers', [ ] ),
+			payload = self.request( time=time )
+			categories = payload.get( 'categories', [ ] )
+			if not isinstance( categories, list ):
+				raise ValueError( 'NASA EONET layer categories must be a list.' )
+			layers = [ ]
+			for item in categories:
+				if not isinstance( item, dict ) or not isinstance(
+						item.get( 'layers', [ ] ), list ):
+					raise ValueError( 'NASA EONET layer category is malformed.' )
+				layers.extend( item.get( 'layers', [ ] ) )
+			if not categories:
+				layers = payload.get( 'layers', [ ] )
+			if not isinstance( layers, list ):
+				raise ValueError( 'NASA EONET layers must be a list.' )
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
+				'category': self.category, 'layers': layers,
 				'title': payload.get( 'title', '' ),
 				'description': payload.get( 'description', '' ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_layers( self, c**kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='events', status: str='open', category: str='',
@@ -3978,7 +4118,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -4022,7 +4162,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'create_schema( self, **kwargs ) -> Dict[ str, str ]'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
 			raise exception
 
 class GlobalImagery( Fetcher ):
@@ -4119,9 +4259,52 @@ class GlobalImagery( Fetcher ):
 		return [ 'file_path', 'api_key', 'url', 'latitude', 'longitude', 'coordinates',
 			'calendar_date', 'julian_date', 'sidereal_time', 'utc_time', 'local_time', 'params',
 			'response', 'result', 'mode', 'timeout', 'headers', 'get_capabilities_url',
-			'build_wms_url', 'fetch_wms_map', 'fetch_map_services', 'fetch_mercator_map',
+			'validate_wms_options', 'build_wms_url', 'fetch_wms_map', 'fetch_map_services',
+			'fetch_mercator_map',
 			'create_schema' ]
 	
+	def validate_wms_options( self, projection: str, quality: str,
+			version: str ) -> Tuple[ str, str, str ]:
+		"""Validate supported NASA GIBS WMS endpoint options.
+
+		Purpose:
+		    Identifies the supported GIBS projection, service quality segment,
+		    and WMS specification version without altering the requested CRS.
+
+		Args:
+		    projection (str): NASA GIBS endpoint projection.
+		    quality (str): WMS endpoint quality identifier.
+		    version (str): WMS protocol version.
+
+		Returns:
+		    Tuple[str, str, str]: Checked projection, quality, and version.
+
+		Raises:
+		    Error: If a required value or service option is invalid.
+		"""
+		try:
+			throw_if( 'projection', projection )
+			throw_if( 'quality', quality )
+			throw_if( 'version', version )
+			self.projection = str( projection ).strip( ).lower( ).replace( ':', '' )
+			self.quality = str( quality ).strip( ).lower( )
+			self.version = str( version ).strip( )
+			if self.projection not in ('epsg4326', 'epsg3857', 'epsg3413', 'epsg3031'):
+				raise ValueError( 'Unsupported NASA GIBS WMS projection.' )
+			if not re.fullmatch( r'[a-z0-9_-]+', self.quality ):
+				raise ValueError( 'Invalid NASA GIBS service quality identifier.' )
+			if self.version not in ('1.1.1', '1.3.0'):
+				raise ValueError( 'GIBS WMS version must be 1.1.1 or 1.3.0.' )
+			return self.projection, self.quality, self.version
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GlobalImagery'
+			exception.method = (
+				'validate_wms_options( self, projection: str, quality: str, '
+				'version: str ) -> Tuple[ str, str, str ]' )
+			raise exception
+
 	def get_capabilities_url( self, projection: str='epsg4326',
 			quality: str='best', version: str='1.1.1' ) -> str:
 		"""Get capabilities url.
@@ -4143,28 +4326,20 @@ class GlobalImagery( Fetcher ):
 		        project error type.
 		"""
 		try:
-			projection_value = str( projection or 'epsg4326' ).strip( ).lower( )
-			quality_value = str( quality or 'best' ).strip( ).lower( )
-			version_value = str( version or '1.1.1' ).strip( )
-			
-			base_url = (
-					f'https://gibs.earthdata.nasa.gov/wms/'
-					f'{projection_value}/{quality_value}/wms.cgi'
-			)
-			
-			params = {
-					'SERVICE': 'WMS',
-					'REQUEST': 'GetCapabilities',
-					'VERSION': version_value
-			}
-			
-			return f'{base_url}?{urllib.parse.urlencode( params )}'
-		
+			self.projection, self.quality, self.version = self.validate_wms_options(
+				projection=projection, quality=quality, version=version )
+			self.capabilities_url = (
+				f'https://gibs.earthdata.nasa.gov/wms/'
+				f'{self.projection}/{self.quality}/wms.cgi' )
+			self.capabilities_params = { 'SERVICE': 'WMS',
+				'REQUEST': 'GetCapabilities', 'VERSION': self.version }
+			return (f'{self.capabilities_url}?'
+				f'{urllib.parse.urlencode( self.capabilities_params )}')
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'get_capabilities_url( self, **kwargs ) -> str'
+			exception.method = "get_capabilities_url( self, projection: str='epsg4326', quality: str='best', version: str='1.1.1' ) -> str"
 			raise exception
 	
 	def build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ],
@@ -4202,35 +4377,60 @@ class GlobalImagery( Fetcher ):
 			throw_if( 'layer', layer )
 			throw_if( 'image_date', image_date )
 			throw_if( 'bbox', bbox )
+			throw_if( 'width', width )
+			throw_if( 'height', height )
+			throw_if( 'image_format', image_format )
+			self.projection, self.quality, self.version = self.validate_wms_options(
+				projection=projection, quality=quality, version=version )
+			self.layer = str( layer ).strip( )
+			self.image_date = str( image_date ).strip( )
+			self.image_format = str( image_format ).strip( ).lower( )
+			self.width = int( width )
+			self.height = int( height )
 			if len( bbox ) != 4:
 				raise ValueError( 'bbox must contain west, south, east, north.' )
-			
-			projection_value = str( projection or 'epsg4326' ).strip( ).lower( )
-			quality_value = str( quality or 'best' ).strip( ).lower( )
-			version_value = str( version or '1.1.1' ).strip( )
-			west, south, east, north = [ float( value ) for value in bbox ]
-			width_value = max( 1, int( width ) )
-			height_value = max( 1, int( height ) )
-			
-			base_url = (f'https://gibs.earthdata.nasa.gov/wms/'
-					f'{projection_value}/{quality_value}/wms.cgi')
-			
-			params = { 'SERVICE': 'WMS', 'VERSION': version_value, 'REQUEST': 'GetMap',
-				'LAYERS': str( layer ).strip( ), 'STYLES': '',
-				'FORMAT': str( image_format or 'image/png' ).strip( ),
-				'TRANSPARENT': str( bool( transparent ) ).lower( ),
-				'SRS': 'EPSG:4326' if projection_value == 'epsg4326' else 'EPSG:3857',
-				'BBOX': f'{west},{south},{east},{north}', 'WIDTH': width_value,
-				'HEIGHT': height_value, 'TIME': str( image_date ).strip( ) }
-			
-			self.params = params
-			return f'{base_url}?{urllib.parse.urlencode( params )}'
-		
+			self.bbox = tuple( float( value ) for value in bbox )
+			west, south, east, north = self.bbox
+			if not all( float('-inf') < value < float('inf') for value in self.bbox ):
+				raise ValueError( 'bbox coordinates must be finite.' )
+			if west >= east or south >= north:
+				raise ValueError( 'bbox bounds must increase from west to east and south to north.' )
+			if self.width < 1 or self.height < 1:
+				raise ValueError( 'width and height must be positive.' )
+			if self.image_format not in ('image/png', 'image/jpeg'):
+				raise ValueError( 'GIBS WMS image_format must be image/png or image/jpeg.' )
+			if not re.fullmatch( r'[A-Za-z0-9_,-]+', self.layer ):
+				raise ValueError( 'Invalid WMS layer identifier.' )
+			if not isinstance( transparent, bool ):
+				raise ValueError( 'transparent must be a boolean.' )
+			self.transparent = transparent
+
+			self.wms_url = (f'https://gibs.earthdata.nasa.gov/wms/'
+				f'{self.projection}/{self.quality}/wms.cgi')
+			self.params = { 'SERVICE': 'WMS', 'VERSION': self.version,
+				'REQUEST': 'GetMap', 'LAYERS': self.layer, 'STYLES': '',
+				'FORMAT': self.image_format,
+				'TRANSPARENT': str( self.transparent ).lower( ),
+				'WIDTH': self.width, 'HEIGHT': self.height,
+				'TIME': self.image_date }
+
+			self.epsg = f"EPSG:{self.projection[ 4: ]}"
+			if self.version == '1.3.0':
+				self.params[ 'CRS' ] = self.epsg
+				if self.projection == 'epsg4326':
+					self.params[ 'BBOX' ] = f'{south},{west},{north},{east}'
+				else:
+					self.params[ 'BBOX' ] = f'{west},{south},{east},{north}'
+			else:
+				self.params[ 'SRS' ] = self.epsg
+				self.params[ 'BBOX' ] = f'{west},{south},{east},{north}'
+
+			return f'{self.wms_url}?{urllib.parse.urlencode( self.params )}'
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'build_wms_url( self, **kwargs ) -> str'
+			exception.method = "build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, version: str='1.1.1' ) -> str"
 			raise exception
 	
 	def fetch_wms_map( self, layer: str, image_date: str,
@@ -4271,51 +4471,57 @@ class GlobalImagery( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = 'wms_map'
+			throw_if( 'time', time )
 			self.timeout = int( time )
-			request_url = self.build_wms_url( layer=layer, image_date=image_date, bbox=bbox,
-				width=width, height=height, projection=projection, quality=quality,
-				image_format=image_format, transparent=transparent )
-			
-			directory = Path( output_dir or 'python-examples' )
-			directory.mkdir( parents=True, exist_ok=True )
-			if output_name:
-				filename = output_name
+			if self.timeout < 1:
+				raise ValueError( 'time must be greater than or equal to 1.' )
+			self.mode = 'wms_map'
+			self.url = self.build_wms_url( layer=layer, image_date=image_date,
+				bbox=bbox, width=width, height=height, projection=projection,
+				quality=quality, image_format=image_format, transparent=transparent )
+
+			self.output_dir = str( output_dir or 'python-examples' )
+			self.output_name = str( output_name or '' )
+			if self.output_name:
+				if (Path( self.output_name ).name != self.output_name or '\\' in self.output_name
+						or self.output_name in ('.', '..')):
+					raise ValueError( 'output_name must be a filename without directories.' )
+				filename = self.output_name
 			else:
-				safe_layer = re.sub( r'[^A-Za-z0-9_\-]+', '_', str( layer ).strip( ) )
-				safe_date = re.sub( r'[^0-9\-]+', '_', str( image_date ).strip( ) )
-				extension = '.jpg' if image_format == 'image/jpeg' else '.png'
-				filename = f'{safe_layer}_{safe_date}{extension}'
-			
-			self.file_path = str( directory / filename )
-			self.url = request_url
-			self.response = requests.get( request_url, headers=self.headers,
+				filename = f'{self.layer}_{self.image_date}'
+				filename = re.sub( r'[^A-Za-z0-9_.-]+', '_', filename )
+				filename += '.jpg' if self.image_format == 'image/jpeg' else '.png'
+			self.file_path = str( Path( self.output_dir ) / filename )
+
+			self.response = requests.get( url=self.url, headers=self.headers,
 				timeout=self.timeout )
 			self.response.raise_for_status( )
 			content_type = self.response.headers.get( 'Content-Type', '' )
-			if 'image' not in content_type.lower( ):
-				message = ('NASA GIBS did not return an image. '
-						f'Content-Type: {content_type}. '
-						f'Response preview: {self.response.text[ :500 ]}')
-				raise ValueError( message )
-			
+			if content_type.split( ';' )[ 0 ].strip( ).lower( ) not in (
+					'image/png', 'image/jpeg' ):
+				raise ValueError( 'NASA GIBS did not return a supported image: '
+					f'{content_type}; response: {self.response.text[ :500 ]}' )
+			if not self.response.content:
+				raise ValueError( 'NASA GIBS returned an empty image.' )
+
+			Path( self.output_dir ).mkdir( parents=True, exist_ok=True )
 			Path( self.file_path ).write_bytes( self.response.content )
-			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
-				'image_path': self.file_path, 'content_type': content_type,
-				'status_code': self.response.status_code, 'bytes': len( self.response.content ),
-				'layer': layer, 'image_date': image_date,
-				'bbox': { 'west': float( bbox[ 0 ] ), 'south': float( bbox[ 1 ] ),
-					'east': float( bbox[ 2 ] ), 'north': float( bbox[ 3 ] ) },
+			self.result = { 'mode': self.mode, 'url': self.url,
+				'params': self.params, 'image_path': self.file_path,
+				'content_type': content_type,
+				'status_code': self.response.status_code,
+				'bytes': len( self.response.content ),
+				'layer': self.layer, 'image_date': self.image_date,
+				'bbox': { 'west': self.bbox[ 0 ], 'south': self.bbox[ 1 ],
+					'east': self.bbox[ 2 ], 'north': self.bbox[ 3 ] },
 				'summary': { 'rows': 1, 'columns': 8,
 					'description': 'NASA GIBS WMS image written to disk.' } }
-			
 			return self.result
-		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_wms_map( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_wms_map( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, output_dir: str='python-examples', output_name: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_map_services( self ) -> Dict[ str, Any ] | None:
@@ -4350,42 +4556,59 @@ class GlobalImagery( Fetcher ):
 			raise exception
 	
 	def fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None:
-		"""Fetch mercator map.
+		"""Fetch NASA GIBS imagery in the Web Mercator coordinate system.
 
 		Purpose:
-		    Retrieves mercator map using validated arguments and the stored GlobalImagery runtime
-		    configuration. The method assembles request parameters, executes the provider call or
-		    dispatches to a specialized helper, records response state when applicable, and returns a
-		    normalized payload for downstream analysis or tool execution.
+		    Retrieves the configured Landsat imagery from the EPSG:3857 WMS service.
+		    Checks an explicitly supplied CRS rather than silently ignoring it.
+		    The method does not reproject arbitrary Cartopy coordinate systems.
 
 		Args:
-		    ccrs (Any): Optional Cartopy coordinate reference system used to construct the map.
+		    ccrs (Any): Optional CRS specification. Accepts None, 'EPSG:3857',
+		        'epsg3857', the integer 3857, or a CRS object whose to_epsg()
+		        method resolves to 3857. Other coordinate systems are not
+		        supported by this Web Mercator convenience method.
 
 		Returns:
-		    Dict[str, Any] | None: Normalized provider response, result payload, or document collection
-		    returned by the operation.
+		    Dict[str, Any] | None: WMS imagery result and image file metadata.
 
 		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
+		    ValueError: If ccrs does not identify EPSG:3857.
+		    Error: If the implementation wraps a provider or processing failure.
 		"""
 		try:
+			self.ccrs = ccrs
+			if self.ccrs is not None:
+				if isinstance( self.ccrs, str ):
+					self.projection = self.ccrs.strip( ).lower( ).replace( ':', '' )
+				elif isinstance( self.ccrs, int ):
+					self.projection = f'epsg{self.ccrs}'
+				else:
+					self.projection = f'epsg{self.ccrs.to_epsg( )}'
+
+				if self.projection != 'epsg3857':
+					raise ValueError( 'fetch_mercator_map only supports EPSG:3857.' )
+			else:
+				self.projection = 'epsg3857'
+
 			self.mode = 'mercator_map'
 			return self.fetch_wms_map(
 				layer='Landsat_WELD_CorrectedReflectance_Bands157_Global_Annual',
 				image_date='2000-12-01', bbox=(
 					-8000000.0, -8000000.0, 8000000.0,
-					8000000.0), width=600, height=600, projection='epsg3857', quality='best',
-				image_format='image/png', transparent=True, output_dir='python-examples',
+					8000000.0), width=600, height=600, projection=self.projection,
+				quality='best', image_format='image/png', transparent=True,
+				output_dir='python-examples',
 				output_name='Landsat_WELD_CorrectedReflectance_Bands157_Global_Annual.png',
 				time=20 )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_mercator_map( self, ccrs=None ) -> Dict[ str, Any ] | None'
+			exception.method = (
+				'fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None' )
 			raise exception
-	
+
 	def create_schema( self, function: str, tool: str, description: str,
 			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
@@ -4431,7 +4654,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'create_schema( self, **kwargs ) -> Dict[ str, str ]'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class NearbyObjects( Fetcher ):
@@ -4510,9 +4733,93 @@ class NearbyObjects( Fetcher ):
 		"""
 		return [ 'base_url', 'url', 'params', 'mode', 'start_date', 'end_date', 'query',
 			'dist_max', 'body', 'sort', 'limit', 'fetch_close_approaches', 'fetch_object_lookup',
-			'fetch_nhats_summary', 'fetch_nhats_object', 'fetch_fireballs', 'fetch',
+			'fetch_nhats_summary', 'fetch_nhats_object', 'fetch_fireballs', 'request',
+			'validate_nhats_options', 'fetch',
 			'create_schema' ]
 	
+	def request( self, time: int=20 ) -> Dict[ str, Any ]:
+		"""Issue a JPL SSD API request and retain validated response state.
+
+		Purpose:
+		    Centralizes positive timeout validation, HTTP response processing,
+		    JSON-object validation and provider error detection for all NEO modes.
+
+		Args:
+		    time (int): Request timeout in seconds.
+
+		Returns:
+		    Dict[str, Any]: Valid JSON response from the selected JPL service.
+
+		Raises:
+		    Error: If an invalid timeout, request failure or provider error occurs.
+		"""
+		try:
+			throw_if( 'time', time )
+			self.timeout = int( time )
+			if self.timeout < 1:
+				raise ValueError( 'time must be a positive integer.' )
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
+			self.response.raise_for_status( )
+			self.payload = self.response.json( )
+			if not isinstance( self.payload, dict ):
+				raise ValueError( 'JPL SSD response must be a JSON object.' )
+			if self.payload.get( 'error' ):
+				raise ValueError( f"JPL SSD API error: {self.payload[ 'error' ]}" )
+			return self.payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NearbyObjects'
+			exception.method = 'request( self, time: int=20 ) -> Dict[ str, Any ]'
+			raise exception
+
+	def validate_nhats_options( self, dv: float, dur: int, stay: int,
+			launch: str ) -> None:
+		"""Validate the NASA NHATS mission constraint options.
+
+		Purpose:
+		    Checks the documented enumerated NHATS filters before a provider request.
+
+		Args:
+		    dv (float): Maximum total mission delta-V in km/s.
+		    dur (int): Maximum total mission duration in days.
+		    stay (int): Minimum stay duration in days.
+		    launch (str): Supported NHATS launch window.
+
+		Returns:
+		    None: Checked values are stored on the instance.
+
+		Raises:
+		    Error: If any NHATS mission constraint is unsupported.
+		"""
+		try:
+			throw_if( 'dv', dv )
+			throw_if( 'dur', dur )
+			throw_if( 'stay', stay )
+			throw_if( 'launch', launch )
+			self.dv = float( dv )
+			self.dur = int( dur )
+			self.stay = int( stay )
+			self.launch = str( launch ).strip( )
+			if self.dv not in range( 4, 13 ):
+				raise ValueError( 'NHATS dv must be an integer from 4 through 12.' )
+			if self.dur not in range( 60, 451, 30 ):
+				raise ValueError( 'NHATS dur must be between 60 and 450 in 30-day steps.' )
+			if self.stay not in (8, 16, 24, 32):
+				raise ValueError( 'NHATS stay must be 8, 16, 24, or 32 days.' )
+			if self.launch not in ('2020-2025', '2025-2030', '2030-2035',
+					'2035-2040', '2040-2045', '2020-2045'):
+				raise ValueError( 'Unsupported NHATS launch window.' )
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NearbyObjects'
+			exception.method = (
+				'validate_nhats_options( self, dv: float, dur: int, '
+				'stay: int, launch: str ) -> None' )
+			raise exception
+
 	def fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD',
 			body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[
 				                                                                              str, Any ] | None:
@@ -4544,6 +4851,7 @@ class NearbyObjects( Fetcher ):
 		try:
 			throw_if( 'start_date', start_date )
 			throw_if( 'end_date', end_date )
+			throw_if( 'limit', limit )
 			self.mode = 'close_approaches'
 			self.start_date = str( start_date ).strip( )
 			self.end_date = str( end_date ).strip( )
@@ -4551,23 +4859,32 @@ class NearbyObjects( Fetcher ):
 			self.body = str( body or 'Earth' ).strip( )
 			self.sort = str( sort or 'date' ).strip( )
 			self.limit = int( limit )
+			self.start = dt.datetime.strptime( self.start_date, '%Y-%m-%d' ).date( )
+			self.end = dt.datetime.strptime( self.end_date, '%Y-%m-%d' ).date( )
+			if self.start > self.end:
+				raise ValueError( 'start_date must be on or before end_date.' )
+			if self.limit < 1:
+				raise ValueError( 'limit must be positive.' )
+			if self.sort.lstrip( '-' ) not in ('date', 'dist', 'dist-min',
+					'v-inf', 'v-rel', 'h', 'object'):
+				raise ValueError( 'Unsupported JPL CAD sort field.' )
+			if not re.fullmatch( r'[0-9]+(?:\.[0-9]+)?(?:LD|au|AU|km|KM)',
+					self.dist_max ):
+				raise ValueError( 'dist_max must contain a supported distance unit.' )
 			self.url = f'{self.base_url}/cad.api'
 			self.params = { 'date-min': self.start_date, 'date-max': self.end_date,
 				'dist-max': self.dist_max, 'body': self.body, 'sort': self.sort,
 				'limit': self.limit }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
+			payload = self.request( time=time )
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
 				'count': payload.get( 'count', 0 ), 'fields': payload.get( 'fields', [ ] ),
 				'data': payload.get( 'data', [ ] ), 'signature': payload.get( 'signature', { } ) }
-		
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_close_approaches( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_object_lookup( self, query: str, query_type: str='sstr',
@@ -4605,29 +4922,29 @@ class NearbyObjects( Fetcher ):
 			throw_if( 'query_type', query_type )
 			self.mode = 'object_lookup'
 			self.query = str( query ).strip( )
-			active_type = str( query_type ).strip( ).lower( )
-			if active_type not in [ 'sstr', 'spk', 'des' ]:
-				raise ValueError( "query_type must be 'sstr', 'spk', or 'des'." )
-			
+			self.query_type = str( query_type ).strip( ).lower( )
+			if self.query_type not in ('sstr', 'spk', 'des'):
+				raise ValueError( 'query_type must be sstr, spk, or des.' )
+			self.include_physical = include_physical
+			self.include_close_approaches = include_close_approaches
+			self.include_discovery = include_discovery
+			self.ca_body = str( ca_body or '' ).strip( )
 			self.url = f'{self.base_url}/sbdb.api'
-			self.params = { active_type: self.query,
-				'phys-par': '1' if bool( include_physical ) else '0',
-				'ca-data': '1' if bool( include_close_approaches ) else '0',
-				'discovery': '1' if bool( include_discovery ) else '0' }
-			
-			if include_close_approaches and str( ca_body or '' ).strip( ):
-				self.params[ 'ca-body' ] = str( ca_body ).strip( )
-			
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params, 'data': payload }
+			self.params = { self.query_type: self.query,
+				'phys-par': '1' if self.include_physical else '0',
+				'ca-data': '1' if self.include_close_approaches else '0',
+				'discovery': '1' if self.include_discovery else '0' }
+			if self.include_close_approaches and self.ca_body:
+				self.params[ 'ca-body' ] = self.ca_body
+			payload = self.request( time=time )
+			self.result = { 'mode': self.mode, 'url': self.url,
+				'params': self.params, 'data': payload }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_object_lookup( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_object_lookup( self, query: str, query_type: str='sstr', include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_nhats_summary( self, dv: float = 6.0, dur: int=360, stay: int=8,
@@ -4658,21 +4975,28 @@ class NearbyObjects( Fetcher ):
 		        project error type.
 		"""
 		try:
+			self.validate_nhats_options( dv=dv, dur=dur, stay=stay, launch=launch )
+			throw_if( 'h', h )
+			throw_if( 'occ', occ )
+			self.h = float( h )
+			self.occ = int( occ )
+			if self.h not in range( 16, 31 ):
+				raise ValueError( 'NHATS h must be an integer from 16 through 30.' )
+			if self.occ not in range( 9 ):
+				raise ValueError( 'NHATS occ must be between 0 and 8.' )
 			self.mode = 'nhats_summary'
 			self.url = f'{self.base_url}/nhats.api'
-			self.params = { 'dv': float( dv ), 'dur': int( dur ), 'stay': int( stay ),
-				'launch': str( launch ).strip( ), 'h': float( h ), 'occ': int( occ ) }
-			
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params, 'data': payload }
+			self.params = { 'dv': self.dv, 'dur': self.dur, 'stay': self.stay,
+				'launch': self.launch, 'h': self.h, 'occ': self.occ }
+			payload = self.request( time=time )
+			self.result = { 'mode': self.mode, 'url': self.url,
+				'params': self.params, 'data': payload }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_summary( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float = 6.0, dur: int=360, stay: int=8,
@@ -4703,23 +5027,21 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'designation', designation )
+			self.validate_nhats_options( dv=dv, dur=dur, stay=stay, launch=launch )
 			self.mode = 'nhats_object'
 			self.query = str( designation ).strip( )
 			self.url = f'{self.base_url}/nhats.api'
-			self.params = { 'des': self.query, 'dv': float( dv ), 'dur': int( dur ),
-				'stay': int( stay ), 'launch': str( launch ).strip( ) }
-			
-			self.response = requests.get( url=self.url, params=self.params,
-				headers=self.headers, timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params, 'data': payload }
-		
+			self.params = { 'des': self.query, 'dv': self.dv, 'dur': self.dur,
+				'stay': self.stay, 'launch': self.launch }
+			payload = self.request( time=time )
+			self.result = { 'mode': self.mode, 'url': self.url,
+				'params': self.params, 'data': payload }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_object( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ]:
@@ -4745,25 +5067,28 @@ class NearbyObjects( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'limit', limit )
+			self.limit = int( limit )
+			if self.limit < 1:
+				raise ValueError( 'limit must be positive.' )
+			self.start_date = str( date_min or '' ).strip( )
+			if self.start_date:
+				dt.datetime.strptime( self.start_date, '%Y-%m-%d' )
 			self.mode = 'fireballs'
 			self.url = f'{self.base_url}/fireball.api'
-			self.params = { 'limit': int( limit ) }
-			if str( date_min or '' ).strip( ):
-				self.params[ 'date-min' ] = str( date_min ).strip( )
-			
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
+			self.params = { 'limit': self.limit }
+			if self.start_date:
+				self.params[ 'date-min' ] = self.start_date
+			payload = self.request( time=time )
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
 				'count': payload.get( 'count', 0 ), 'fields': payload.get( 'fields', [ ] ),
 				'data': payload.get( 'data', [ ] ), 'signature': payload.get( 'signature', { } ) }
-		
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_fireballs( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch( self, mode: str='close_approaches', start_date: str='',
@@ -4844,7 +5169,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch( self, **kwargs) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='close_approaches', start_date: str='', end_date: str='', query: str='', query_type: str='sstr', dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -4889,7 +5214,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'create_schema( self, **kwargs ) -> Dict[ str, str ]'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
 			raise exception
 
 class OpenScience( Fetcher ):
@@ -4956,7 +5281,8 @@ class OpenScience( Fetcher ):
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
 		return [ 'base_url', 'url', 'params', 'query_text', 'format_value', 'size', 'endpoint',
-			'fetch_dataset', 'fetch_metadata', 'fetch_assays', 'fetch_data', 'fetch',
+			'validate_format', 'coerce_response', 'request', 'fetch_dataset',
+			'fetch_metadata', 'fetch_assays', 'fetch_data', 'fetch',
 			'create_schema' ]
 	
 	def validate_format( self, format_value: str ) -> str:
@@ -4979,7 +5305,8 @@ class OpenScience( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( format_value or 'json' ).strip( ).lower( )
+			throw_if( 'format_value', format_value )
+			value = str( format_value ).strip( ).lower( )
 			
 			allowed = { 'json', 'csv', 'tsv', 'browser' }
 			if value not in allowed:
@@ -5012,6 +5339,7 @@ class OpenScience( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'response', response )
 			content_type = str( response.headers.get( 'Content-Type', '' ) ).lower( )
 			if 'application/json' in content_type:
 				return response.json( )
@@ -5025,9 +5353,44 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'coerce_response( self, *args )-> Dict[ str, Any ] | str'
+			exception.method = "coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str"
 			raise exception
 	
+	def request( self, time: int=20 ) -> Dict[ str, Any ] | str:
+		"""Request and decode NASA OSDR data using its advertised content type.
+
+		Purpose:
+		    Validates the timeout, retrieves the configured OSDR resource, and
+		    stores its response and decoded payload for all retrieval methods.
+
+		Args:
+		    time (int): Positive HTTP timeout in seconds.
+
+		Returns:
+		    Dict[str, Any] | str: JSON or text response from OSDR.
+
+		Raises:
+		    Error: If the request, timeout or provider response fails.
+		"""
+		try:
+			throw_if( 'time', time )
+			self.timeout = int( time )
+			if self.timeout < 1:
+				raise ValueError( 'time must be a positive integer.' )
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
+			self.response.raise_for_status( )
+			self.payload = self.coerce_response( self.response )
+			if isinstance( self.payload, dict ) and self.payload.get( 'error' ):
+				raise ValueError( f"NASA OSDR API error: {self.payload[ 'error' ]}" )
+			return self.payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenScience'
+			exception.method = 'request( self, time: int=20 ) -> Dict[ str, Any ] | str'
+			raise exception
+
 	def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Retrieve dataset data.
 
@@ -5051,21 +5414,20 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'accession', accession )
-			value = str( accession ).strip( )
-			self.endpoint = f'/v2/dataset/{value}/'
+			self.accession = str( accession ).strip( )
+			if not re.fullmatch( r'[A-Za-z0-9_-]+', self.accession ):
+				raise ValueError( 'Invalid OSDR dataset accession.' )
+			self.endpoint = f'/v2/dataset/{self.accession}/'
 			self.url = f'{self.base_url}{self.endpoint}'
 			self.params = { }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			
-			return { 'mode': 'dataset', 'url': self.url, 'params': self.params,
-				'data': self.coerce_response( self.response ) }
+			self.result = { 'mode': 'dataset', 'url': self.url,
+				'params': self.params, 'data': self.request( time=time ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_dataset( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_metadata( self, query: str, format_value: str='json',
@@ -5097,17 +5459,18 @@ class OpenScience( Fetcher ):
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/metadata/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = { 'query': self.query_text, 'format': self.format_value }
-			self.response = requests.get( url=self.url, params=self.params,
-				headers=self.headers, timeout=int( time ) )
-			self.response.raise_for_status( )
-			return { 'mode': 'metadata', 'url': self.url, 'params': self.params,
-				'data': self.coerce_response( self.response ) }
+			self.params = dict( urllib.parse.parse_qsl( self.query_text,
+				keep_blank_values=True ) ) if '=' in self.query_text else {
+				'query': self.query_text }
+			self.params[ 'format' ] = self.format_value
+			self.result = { 'mode': 'metadata', 'url': self.url,
+				'params': self.params, 'data': self.request( time=time ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_metadata( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_metadata( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
@@ -5139,18 +5502,18 @@ class OpenScience( Fetcher ):
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/assays/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = { 'query': self.query_text, 'format': self.format_value }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			return { 'mode': 'assays', 'url': self.url, 'params': self.params,
-				'data': self.coerce_response( self.response ) }
-		
+			self.params = dict( urllib.parse.parse_qsl( self.query_text,
+				keep_blank_values=True ) ) if '=' in self.query_text else {
+				'query': self.query_text }
+			self.params[ 'format' ] = self.format_value
+			self.result = { 'mode': 'assays', 'url': self.url,
+				'params': self.params, 'data': self.request( time=time ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_assays( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_assays( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
@@ -5178,24 +5541,22 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			
 			self.query_text = str( query ).strip( )
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/data/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = { 'query': self.query_text, 'format': self.format_value }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
-			self.response.raise_for_status( )
-			
-			return { 'mode': 'data', 'url': self.url, 'params': self.params,
-				'data': self.coerce_response( self.response ) }
-		
+			self.params = dict( urllib.parse.parse_qsl( self.query_text,
+				keep_blank_values=True ) ) if '=' in self.query_text else {
+				'query': self.query_text }
+			self.params[ 'format' ] = self.format_value
+			self.result = { 'mode': 'data', 'url': self.url,
+				'params': self.params, 'data': self.request( time=time ) }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_data( self,**kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_data( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='dataset', query: str='',
@@ -5244,7 +5605,7 @@ class OpenScience( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -5296,7 +5657,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'create_schema( self, **kwargs ) -> Dict[ str, str ]'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
 			raise exception
 
 class SpaceWeather( Fetcher ):
@@ -5418,49 +5779,73 @@ class SpaceWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			throw_if( 'start_date', start_date )
-			throw_if( 'end_date', end_date )
-			active_key = str( api_key or self.api_key or '' ).strip( )
-			if not active_key:
-				raise ValueError( 'NASA API key is required for DONKI requests.' )
-			
-			self.url = f'{self.base_url}/{endpoint}'
-			self.params = { 'startDate': str( start_date ).strip( ),
-				'endDate': str( end_date ).strip( ), 'api_key': active_key }
-			
-			if endpoint == 'IPS' and location.strip( ):
-				self.params[ 'location' ] = location.strip( )
-			
-			if endpoint == 'IPS' and catalog.strip( ):
-				self.params[ 'catalog' ] = catalog.strip( )
-			
-			if endpoint == 'CMEAnalysis':
+			throw_if( 'time', time )
+			self.timeout = int( time )
+			if self.timeout < 1:
+				raise ValueError( 'time must be a positive integer.' )
+			self.endpoint = str( endpoint ).strip( )
+			supported = { 'CME', 'CMEAnalysis', 'GST', 'IPS', 'FLR', 'SEP',
+				'MPC', 'RBE', 'HSS', 'WSAEnlilSimulations', 'notifications' }
+			if self.endpoint not in supported:
+				raise ValueError( 'Unsupported NASA DONKI endpoint.' )
+			self.start_date = str( start_date or '' ).strip( )
+			self.end_date = str( end_date or '' ).strip( )
+			if bool( self.start_date ) != bool( self.end_date ):
+				raise ValueError( 'start_date and end_date must be supplied together.' )
+			if self.start_date:
+				start = dt.datetime.strptime( self.start_date, '%Y-%m-%d' ).date( )
+				end = dt.datetime.strptime( self.end_date, '%Y-%m-%d' ).date( )
+				if start > end:
+					raise ValueError( 'start_date must precede or equal end_date.' )
+			self.active_key = str( api_key or self.api_key or '' ).strip( )
+			throw_if( 'api_key', self.active_key )
+			self.url = f'{self.base_url}/{self.endpoint}'
+			self.params = { 'api_key': self.active_key }
+			if self.start_date:
+				self.params[ 'startDate' ] = self.start_date
+				self.params[ 'endDate' ] = self.end_date
+			self.location = str( location or '' ).strip( )
+			self.catalog = str( catalog or '' ).strip( )
+			self.notification_type = str( notification_type or '' ).strip( )
+			if self.endpoint == 'IPS':
+				if self.location:
+					self.params[ 'location' ] = self.location
+				if self.catalog:
+					self.params[ 'catalog' ] = self.catalog
+			if self.endpoint == 'CMEAnalysis':
+				self.speed = int( speed )
+				self.half_angle = int( half_angle )
+				if self.speed < 0 or not (0 <= self.half_angle <= 180):
+					raise ValueError( 'CME speed and half_angle must be nonnegative; half_angle <= 180.' )
 				self.params[ 'mostAccurateOnly' ] = str( bool( most_accurate_only ) ).lower( )
 				self.params[ 'completeEntryOnly' ] = str( bool( complete_entry_only ) ).lower( )
-				self.params[ 'speed' ] = int( speed )
-				self.params[ 'halfAngle' ] = int( half_angle )
-				if catalog.strip( ):
-					self.params[ 'catalog' ] = catalog.strip( )
-				
-				if keyword.strip( ):
-					self.params[ 'keyword' ] = keyword.strip( )
-			
-			if endpoint == 'notifications' and notification_type.strip( ):
-				self.params[ 'type' ] = notification_type.strip( )
-			
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=int( time ) )
+				self.params[ 'speed' ] = self.speed
+				self.params[ 'halfAngle' ] = self.half_angle
+				if self.catalog:
+					self.params[ 'catalog' ] = self.catalog
+				self.keyword = str( keyword or '' ).strip( )
+				if self.keyword:
+					self.params[ 'keyword' ] = self.keyword
+			if self.endpoint == 'notifications' and self.notification_type:
+				self.params[ 'type' ] = self.notification_type
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			payload = self.response.json( )
-			
-			return { 'mode': self.mode, 'endpoint': endpoint, 'url': self.url,
-				'params': self.params, 'data': payload }
-		
+			self.payload = self.response.json( )
+			if not isinstance( self.payload, (list, dict) ):
+				raise ValueError( 'NASA DONKI response must be JSON array or object.' )
+			if isinstance( self.payload, dict ) and self.payload.get( 'error' ):
+				raise ValueError( 'NASA DONKI returned an API error.' )
+			self.result = { 'mode': self.mode, 'endpoint': self.endpoint,
+				'url': self.url,
+				'params': { key: value for key, value in self.params.items( )
+					if key != 'api_key' }, 'data': self.payload }
+			return self.result
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = 'fetch_endpoint( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = "fetch_endpoint( self, endpoint: str, start_date: str, end_date: str, time: int=20, location: str='', catalog: str='', notification_type: str='', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='cme', start_date: str='', end_date: str='',
@@ -5526,7 +5911,7 @@ class SpaceWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = 'fetch( self, **kwargs) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='cme', start_date: str='', end_date: str='', time: int=20, location: str='ALL', catalog: str='ALL', notification_type: str='all', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -5577,7 +5962,7 @@ class SpaceWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = 'create_schema( self, **kwargs ) -> Dict[ str, str ]'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
 			raise exception
 
 class AstroCatalog( Fetcher ):
