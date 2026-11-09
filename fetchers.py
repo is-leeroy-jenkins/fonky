@@ -2214,8 +2214,6 @@ class GoogleSearch( Fetcher ):
 			if cse_id:
 				self.cse_id = str( cse_id ).strip( )
 			
-			throw_if( 'api_key', self.api_key )
-			throw_if( 'cse_id', self.cse_id )
 			self.timeout = int( time )
 			self.keywords = str( keywords ).strip( )
 			self.results = int( results )
@@ -2429,7 +2427,6 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'api_key', self.api_key )
 			self.address = address
 			self.mode = 'geocode_location'
 			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -2490,7 +2487,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'latitude', lat )
 			throw_if( 'longitude', long )
 			self.mode = 'geocode_coordinates'
@@ -2539,7 +2535,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'address', address )
 			if not isinstance( address, list ):
 				raise TypeError( 'address must be a list of address-line strings.' )
@@ -2586,7 +2581,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'origin', origin )
 			throw_if( 'destination', destination )
 			throw_if( 'mode', mode )
@@ -2817,7 +2811,6 @@ class GoogleWeather( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'path', path )
 			throw_if( 'params', params )
 			throw_if( 'time', time )
@@ -5798,7 +5791,6 @@ class SpaceWeather( Fetcher ):
 				if start > end:
 					raise ValueError( 'start_date must precede or equal end_date.' )
 			self.active_key = str( api_key or self.api_key or '' ).strip( )
-			throw_if( 'api_key', self.active_key )
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { 'api_key': self.active_key }
 			if self.start_date:
@@ -7235,7 +7227,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'query', query )
 			throw_if( 'offset_mark', offset_mark )
 			throw_if( 'time', time )
@@ -7290,7 +7281,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'package_id', package_id )
 			throw_if( 'time', time )
 			
@@ -7352,7 +7342,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'collection', collection )
 			throw_if( 'start_date', start_date )
 			throw_if( 'offset_mark', offset_mark )
@@ -8502,8 +8491,6 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
-			
 			self.limit = self.validate_limit( limit )
 			self.offset = self.validate_offset( offset )
 			self.sort = str( sort or 'updateDate+desc' ).strip( )
@@ -11020,8 +11007,6 @@ class GoogleGeocoding( Fetcher ):
 			
 			if api_key:
 				self.api_key = str( api_key ).strip( )
-			
-			throw_if( 'api_key', self.api_key )
 			
 			self.timeout = int( time )
 			self.params = { }
@@ -18558,7 +18543,6 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'time', time )
 			
@@ -23503,15 +23487,6 @@ class PurpleAir( Fetcher ):
 				'timeout',
 				'agents',
 				'headers',
-				'validate_api_key',
-				'validate_mode',
-				'validate_endpoint',
-				'validate_sensor_index',
-				'validate_longitude',
-				'validate_latitude',
-				'validate_bbox',
-				'validate_location_type',
-				'validate_non_negative_integer',
 				'normalize_fields',
 				'shape_sensor_list_rows',
 				'shape_sensor_detail_rows',
@@ -23523,346 +23498,6 @@ class PurpleAir( Fetcher ):
 				'fetch',
 				'create_schema'
 		]
-	
-	def validate_api_key( self ) -> str:
-		"""Validate api key.
-
-		Purpose:
-		    Validates and normalizes api key before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated api key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'api_key', self.api_key )
-			return str( self.api_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_api_key( self ) -> str'
-			raise exception
-	
-	def validate_mode( self, mode: str ) -> str:
-		"""Validate mode.
-
-		Purpose:
-		    Validates and normalizes mode before it is used in PurpleAir sensor and air quality records.
-		    The method converts incoming values to the expected representation, enforces visible range or
-		    format constraints, and returns the checked value for request construction.
-
-		Args:
-		    mode: Operation mode used to select the provider or processing workflow.
-
-		Returns:
-		    str: Validated mode value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'mode', mode )
-			
-			value = str( mode ).strip( ).lower( )
-			allowed = {
-					'sensors',
-					'sensor'
-			}
-			
-			if value not in allowed:
-				raise ValueError( "Unsupported PurpleAir mode. Use 'sensors' or 'sensor'." )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
-			raise exception
-	
-	def validate_endpoint( self, endpoint: str ) -> str:
-		"""Validate endpoint.
-
-		Purpose:
-		    Validates and normalizes endpoint before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    endpoint: Provider endpoint or endpoint family to request.
-
-		Returns:
-		    str: Validated endpoint value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'endpoint', endpoint )
-			
-			value = str( endpoint ).strip( ).strip( '/' )
-			
-			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
-				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
-			
-			if '..' in value:
-				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-			
-			if value != 'sensors' and not re.fullmatch( r'sensors/\d+', value ):
-				raise ValueError( "endpoint must be 'sensors' or 'sensors/{sensor_index}'." )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
-			raise exception
-	
-	def validate_sensor_index( self, sensor_index: int ) -> int:
-		"""Validate sensor index.
-
-		Purpose:
-		    Validates and normalizes sensor index before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    sensor_index: PurpleAir sensor identifier.
-
-		Returns:
-		    int: Validated sensor index value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'sensor_index', sensor_index )
-			
-			value = int( sensor_index )
-			if value < 1:
-				raise ValueError( 'sensor_index must be greater than or equal to 1.' )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_sensor_index( self, *args, **kwargs ) -> int'
-			raise exception
-	
-	def validate_longitude( self, name: str, value: float ) -> float:
-		"""Validate longitude.
-
-		Purpose:
-		    Validates and normalizes longitude before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    name: Argument name included in validation error messages.
-		    value: Candidate argument value to validate.
-
-		Returns:
-		    float: Validated longitude value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = float( value )
-			if number < -180.0 or number > 180.0:
-				raise ValueError( f'{name} must be between -180 and 180.' )
-			
-			return number
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_longitude( self, *args, **kwargs ) -> float'
-			raise exception
-	
-	def validate_latitude( self, name: str, value: float ) -> float:
-		"""Validate latitude.
-
-		Purpose:
-		    Validates and normalizes latitude before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    name: Argument name included in validation error messages.
-		    value: Candidate argument value to validate.
-
-		Returns:
-		    float: Validated latitude value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = float( value )
-			if number < -90.0 or number > 90.0:
-				raise ValueError( f'{name} must be between -90 and 90.' )
-			
-			return number
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_latitude( self, *args, **kwargs ) -> float'
-			raise exception
-	
-	def validate_bbox( self, nwlng: float, nwlat: float,
-			selng: float, selat: float ) -> Tuple[ float, float, float, float ]:
-		"""Validate bbox.
-
-		Purpose:
-		    Validates and normalizes bbox before it is used in PurpleAir sensor and air quality records.
-		    The method converts incoming values to the expected representation, enforces visible range or
-		    format constraints, and returns the checked value for request construction.
-
-		Args:
-		    nwlng: Northwest bounding-box longitude in decimal degrees.
-		    nwlat: Northwest bounding-box latitude in decimal degrees.
-		    selng: Southeast bounding-box longitude in decimal degrees.
-		    selat: Southeast bounding-box latitude in decimal degrees.
-
-		Returns:
-		    Tuple[float, float, float, float]: Validated bbox value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			nw_lng = self.validate_longitude( 'nwlng', nwlng )
-			nw_lat = self.validate_latitude( 'nwlat', nwlat )
-			se_lng = self.validate_longitude( 'selng', selng )
-			se_lat = self.validate_latitude( 'selat', selat )
-			
-			if nw_lng >= se_lng:
-				raise ValueError( 'nwlng must be less than selng.' )
-			
-			if nw_lat <= se_lat:
-				raise ValueError( 'nwlat must be greater than selat.' )
-			
-			return nw_lng, nw_lat, se_lng, se_lat
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = (
-					'validate_bbox( self, *args, **kwargs ) '
-					'-> Tuple[ float, float, float, float ]'
-			)
-			raise exception
-	
-	def validate_location_type( self, location_type: int ) -> int:
-		"""Validate location type.
-
-		Purpose:
-		    Validates and normalizes location type before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    location_type: Provider type selector for location.
-
-		Returns:
-		    int: Validated location type value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'location_type', location_type if location_type == 0 else location_type )
-			
-			value = int( location_type )
-			if value not in (0, 1):
-				raise ValueError( 'location_type must be 0 or 1.' )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_location_type( self, *args, **kwargs ) -> int'
-			raise exception
-	
-	def validate_non_negative_integer( self, name: str, value: int ) -> int:
-		"""Validate non negative integer.
-
-		Purpose:
-		    Validates and normalizes non negative integer before it is used in PurpleAir sensor and air
-		    quality records. The method converts incoming values to the expected representation, enforces
-		    visible range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    name: Argument name included in validation error messages.
-		    value: Candidate argument value to validate.
-
-		Returns:
-		    int: Validated non negative integer value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'name', name )
-			
-			if value is None:
-				raise ValueError( f'{name} cannot be None.' )
-			
-			number = int( value )
-			if number < 0:
-				raise ValueError( f'{name} must be greater than or equal to 0.' )
-			
-			return number
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = (
-					'validate_non_negative_integer( self, *args, **kwargs ) -> int'
-			)
-			raise exception
 	
 	def normalize_fields( self, fields: str, default_fields: str ) -> str:
 		"""Normalize fields.
@@ -24154,43 +23789,26 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_api_key( )
-			self.endpoint = self.validate_endpoint( endpoint )
+			throw_if( 'endpoint', endpoint )
 			throw_if( 'time', time )
-			
+			self.endpoint = str( endpoint ).strip( ).strip( '/' )
+			if self.endpoint != 'sensors' and not re.fullmatch(
+					r'sensors/[1-9][0-9]*', self.endpoint ):
+				raise ValueError( 'endpoint must identify sensors or a positive sensor index.' )
+
 			self.timeout = int( time )
-			self.url = f'{self.base_url}/{self.endpoint}'
-			self.params = { }
-			
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
-			
-			for key, value in (params or { }).items( ):
-				if value is None:
-					continue
-				
-				if isinstance( value, str ) and not value.strip( ):
-					continue
-				
-				self.params[ key ] = value
-			
-			self.headers[ 'X-API-Key' ] = self.validate_api_key( )
-			self.response = requests.get(
-				url=self.url,
-				params=self.params,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+
+			self.url = f'{self.base_url}/{self.endpoint}'
+			self.params = params if params is not None else { }
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			self.payload = self.response.json( ) or { }
-			self.result = {
-					'url': self.response.url,
-					'params': self.params,
-					'raw': self.payload
-			}
-			
+			self.payload = self.response.json( )
+			self.result = { 'url': self.response.url, 'params': self.params,
+				'raw': self.payload }
 			return self.result
-		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -24231,52 +23849,42 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			default_fields = (
-					'name,pm2.5,temperature,humidity,latitude,longitude,last_seen,'
-					'location_type'
-			)
-			
+			throw_if( 'nwlng', nwlng )
+			throw_if( 'nwlat', nwlat )
+			throw_if( 'selng', selng )
+			throw_if( 'selat', selat )
+			throw_if( 'location_type', location_type )
+			throw_if( 'max_age', max_age )
+			throw_if( 'modified_since', modified_since )
+			self.nwlng = float( nwlng )
+			self.nwlat = float( nwlat )
+			self.selng = float( selng )
+			self.selat = float( selat )
+			self.location_type = int( location_type )
+			self.max_age = int( max_age )
+			self.modified_since = int( modified_since )
+			if not (-180.0 <= self.nwlng < self.selng <= 180.0):
+				raise ValueError( 'Longitude bounds must satisfy -180 <= nwlng < selng <= 180.' )
+			if not (-90.0 <= self.selat < self.nwlat <= 90.0):
+				raise ValueError( 'Latitude bounds must satisfy -90 <= selat < nwlat <= 90.' )
+			if self.location_type not in (0, 1):
+				raise ValueError( 'location_type must be 0 or 1.' )
+			if self.max_age < 0 or self.modified_since < 0:
+				raise ValueError( 'max_age and modified_since cannot be negative.' )
+
 			self.mode = 'sensors'
-			self.nwlng, self.nwlat, self.selng, self.selat = self.validate_bbox(
-				nwlng=nwlng,
-				nwlat=nwlat,
-				selng=selng,
-				selat=selat
-			)
-			self.location_type = self.validate_location_type( location_type )
-			self.max_age = self.validate_non_negative_integer( 'max_age', max_age )
-			self.modified_since = self.validate_non_negative_integer(
-				'modified_since',
-				modified_since
-			)
-			self.fields = self.normalize_fields(
-				fields=fields,
-				default_fields=default_fields
-			)
-			self.timeout = int( time )
-			
-			self.request(
-				endpoint='sensors',
-				params={
-						'fields': self.fields,
-						'location_type': self.location_type,
-						'nwlng': self.nwlng,
-						'nwlat': self.nwlat,
-						'selng': self.selng,
-						'selat': self.selat,
-						'max_age': self.max_age,
-						'modified_since': self.modified_since
-				},
-				time=self.timeout
-			)
-			
+			default_fields = (
+				'name,pm2.5,temperature,humidity,latitude,longitude,last_seen,'
+				'location_type' )
+			self.fields = self.normalize_fields( fields=fields,
+				default_fields=default_fields )
+			self.request( endpoint='sensors', params={
+				'fields': self.fields, 'location_type': self.location_type,
+				'nwlng': self.nwlng, 'nwlat': self.nwlat,
+				'selng': self.selng, 'selat': self.selat,
+				'max_age': self.max_age, 'modified_since': self.modified_since }, time=time )
 			rows = self.shape_sensor_list_rows( self.payload )
-			
-			return self.package_response(
-				rows=rows,
-				params=self.params
-			)
-		
+			return self.package_response( rows=rows, params=self.params )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -24310,37 +23918,22 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			default_fields = (
-					'name,model,hardware,pm2.5_cf_1_a,pm2.5_cf_1_b,temperature,'
-					'humidity,pressure,latitude,longitude,last_seen,firmware_version,rssi'
-			)
-			
+			throw_if( 'sensor_index', sensor_index )
+			self.sensor_index = int( sensor_index )
+			if self.sensor_index < 1:
+				raise ValueError( 'sensor_index must be greater than or equal to 1.' )
+
 			self.mode = 'sensor'
-			self.sensor_index = self.validate_sensor_index( sensor_index )
-			self.fields = self.normalize_fields(
-				fields=fields,
-				default_fields=default_fields
-			)
-			self.timeout = int( time )
-			
-			self.request(
-				endpoint=f'sensors/{self.sensor_index}',
-				params={
-						'fields': self.fields
-				},
-				time=self.timeout
-			)
-			
+			default_fields = (
+				'name,model,hardware,pm2.5_cf_1_a,pm2.5_cf_1_b,temperature,'
+				'humidity,pressure,latitude,longitude,last_seen,firmware_version,rssi' )
+			self.fields = self.normalize_fields( fields=fields,
+				default_fields=default_fields )
+			self.request( endpoint=f'sensors/{self.sensor_index}',
+				params={ 'fields': self.fields }, time=time )
 			rows = self.shape_sensor_detail_rows( self.payload )
-			
-			return self.package_response(
-				rows=rows,
-				params={
-						'sensor_index': self.sensor_index,
-						'fields': self.fields
-				}
-			)
-		
+			return self.package_response( rows=rows,
+				params={ 'sensor_index': self.sensor_index, 'fields': self.fields } )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -24387,7 +23980,8 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = self.validate_mode( mode )
+			throw_if( 'mode', mode )
+			self.mode = str( mode ).strip( ).lower( )
 			
 			if self.mode == 'sensors':
 				return self.fetch_sensors(
@@ -24600,7 +24194,6 @@ class OpenAQ( Fetcher ):
 				'timeout',
 				'agents',
 				'headers',
-				'validate_api_key',
 				'validate_mode',
 				'validate_endpoint',
 				'validate_positive_integer',
@@ -24623,32 +24216,6 @@ class OpenAQ( Fetcher ):
 				'fetch',
 				'create_schema'
 		]
-	
-	def validate_api_key( self ) -> str:
-		"""Validate api key.
-
-		Purpose:
-		    Validates and normalizes api key before it is used in OpenAQ location, measurement, and air-
-		    quality records. The method converts incoming values to the expected representation, enforces
-		    visible range or format constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated api key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'api_key', self.api_key )
-			return str( self.api_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenAQ'
-			exception.method = 'validate_api_key( self ) -> str'
-			raise exception
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -25288,7 +24855,6 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_api_key( )
 			self.endpoint = self.validate_endpoint( endpoint )
 			throw_if( 'time', time )
 			self.timeout = int( time )
@@ -25307,7 +24873,7 @@ class OpenAQ( Fetcher ):
 				
 				self.params[ key ] = value
 			
-			self.headers[ 'X-API-Key' ] = self.validate_api_key( )
+
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( ) or { }
@@ -25801,36 +25367,10 @@ class Firms( Fetcher ):
 		"""
 		return [ 'base_url', 'map_key', 'mode', 'source', 'area_coordinates', 'day_range', 'date',
 				'sensor', 'params', 'payload', 'result', 'response', 'url', 'timeout', 'agents',
-				'headers', 'validate_map_key', 'validate_mode', 'validate_source',
+				'headers', 'validate_mode', 'validate_source',
 				'validate_sensor', 'validate_day_range', 'validate_date',
 				'validate_area_coordinates', 'csv_to_rows', 'summarize_rows', 'package_response',
 				'request_csv', 'fetch_area', 'fetch_data_availability', 'fetch', 'create_schema' ]
-	
-	def validate_map_key( self ) -> str:
-		"""Validate map key.
-
-		Purpose:
-		    Validates and normalizes map key before it is used in NASA FIRMS active fire data. The method
-		    converts incoming values to the expected representation, enforces visible range or format
-		    constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated map key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'map_key', self.map_key )
-			return str( self.map_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Firms'
-			exception.method = 'validate_map_key( self ) -> str'
-			raise exception
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -26194,7 +25734,7 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_map_key( )
+			self.map_key
 			throw_if( 'url', url )
 			throw_if( 'time', time )
 			self.url = str( url ).strip( )
@@ -26250,7 +25790,7 @@ class Firms( Fetcher ):
 			self.timeout = int( time )
 			self.params = { 'source': self.source, 'area_coordinates': self.area_coordinates,
 					'day_range': self.day_range, 'date': self.date }
-			self.url = (f'{self.base_url}/area/csv/{self.validate_map_key( )}/'
+			self.url = (f'{self.base_url}/area/csv/{self.map_key}/'
 			            f'{self.source}/{self.area_coordinates}/{self.day_range}')
 			
 			if self.date:
@@ -26294,7 +25834,7 @@ class Firms( Fetcher ):
 			self.timeout = int( time )
 			self.params = { 'sensor': self.sensor }
 			self.url = (f'{self.base_url}/data_availability/csv/'
-			            f'{self.validate_map_key( )}/{self.sensor}')
+			            f'{self.map_key}/{self.sensor}')
 			
 			self.request_csv( url=self.url, time=self.timeout )
 			rows = self.csv_to_rows( self.payload )
