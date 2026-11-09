@@ -6678,10 +6678,10 @@ class StarMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'base_url', base_url )
 			links: Dict[ str, str ] = { }
 			if not html or not isinstance( html, str ):
 				return links
+			throw_if( 'base_url', base_url )
 			
 			pattern = re.compile(
 				r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>\s*(jpeg|png|gif|bmp|tiff)\s*</a>',
