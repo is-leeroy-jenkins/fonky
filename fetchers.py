@@ -1057,7 +1057,6 @@ class WebFetcher( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -2628,7 +2627,6 @@ class GoogleMaps( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -3422,7 +3420,6 @@ class NavalObservatory( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -4117,7 +4114,6 @@ class EarthObservatory( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -4600,7 +4596,6 @@ class GlobalImagery( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -5153,7 +5148,6 @@ class NearbyObjects( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -5582,7 +5576,6 @@ class OpenScience( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -5891,7 +5884,6 @@ class SpaceWeather( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -7426,7 +7418,6 @@ class GovData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -8043,7 +8034,6 @@ class StarChart( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -9069,7 +9059,6 @@ class Congress( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -9413,7 +9402,6 @@ class InternetArchive( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -10038,7 +10026,6 @@ class OpenWeather( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -10449,7 +10436,6 @@ class HistoricalWeather( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -10755,7 +10741,6 @@ class Grokipedia( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -11265,7 +11250,6 @@ class GoogleGeocoding( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -11793,7 +11777,6 @@ class CensusData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -12347,7 +12330,6 @@ class Socrata( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -12903,7 +12885,6 @@ class HealthData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -13306,7 +13287,6 @@ class GlobalHealthData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -13682,7 +13662,6 @@ class UnitedNations( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -14218,7 +14197,6 @@ class WorldPopulation( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -14636,7 +14614,6 @@ class Wonder( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -15519,7 +15496,6 @@ class USGSEarthquakes( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -16600,7 +16576,6 @@ class USGSWaterData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -17436,7 +17411,6 @@ class USGSTheNationalMap( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -18141,7 +18115,6 @@ class USGSScienceBase( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -18827,7 +18800,6 @@ class AirNow( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -19581,7 +19553,6 @@ class ClimateData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -20462,7 +20433,6 @@ class EoNet( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -21108,7 +21078,6 @@ class EnviroFacts( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -22101,7 +22070,6 @@ class TidesAndCurrents( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -22916,7 +22884,6 @@ class UvIndex( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -23625,7 +23592,6 @@ class PurpleAir( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -24805,7 +24771,6 @@ class OpenAQ( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -25416,7 +25381,6 @@ class Firms( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
@@ -26594,7 +26558,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'required', required )
 		try:
 			throw_if( 'function', function )
 			throw_if( 'tool', tool )
