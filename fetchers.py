@@ -6030,7 +6030,9 @@ class AstroCatalog( Fetcher ):
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [ 'base_url', 'timeout', 'headers', 'fetch_object', 'cone_search', 'fetch', ]
+		return [ 'base_url', 'format', 'name', 'right_ascension', 'declination',
+			'radius', 'params', 'timeout', 'headers', 'request', 'normalize_attribute_path',
+			'parse_argument', 'fetch_object', 'cone_search', 'fetch' ]
 	
 	def normalize_attribute_path( self, quantity: str='', attributes: str='' ) -> str:
 		"""Normalize attribute path.
@@ -6049,11 +6051,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		parts: list[ str ] = [ ]
 		if quantity and quantity.strip( ):
-			parts.append( quantity.strip( ) )
+			parts.append( urllib.parse.quote( quantity.strip( ), safe='' ) )
 		
 		if attributes and attributes.strip( ):
 			attr_parts = [ a.strip( ) for a in attributes.split( ',' ) if a.strip( ) ]
-			parts.extend( attr_parts )
+			parts.extend( urllib.parse.quote( item, safe='' ) for item in attr_parts )
 		
 		return '/'.join( parts )
 	
@@ -6108,24 +6110,33 @@ class AstroCatalog( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'route', route )
+			throw_if( 'time', time )
 			self.timeout = int( time )
-			self.url = f'{self.base_url}/{route.lstrip( "/" )}'
-			self.params = params or { }
+			if self.timeout < 1:
+				raise ValueError( 'time must be a positive integer.' )
+			self.route = str( route ).strip( ).lstrip( '/' )
+			self.url = f'{self.base_url}/{self.route}'
+			self.params = params if params is not None else { }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=self.timeout )
 			
 			self.response.raise_for_status( )
 			content_type = (self.response.headers.get( 'Content-Type', '' ) or '').lower( )
 			if 'json' in content_type:
-				return self.response.json( )
-			
-			return self.response.text
+				self.payload = self.response.json( )
+			else:
+				self.payload = self.response.text
+			if isinstance( self.payload, dict ) and self.payload.get( 'error' ):
+				raise ValueError( f"AstroCatalog API error: {self.payload[ 'error' ]}" )
+			self.result = self.payload
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'request( self, *args ) -> Any'
+			exception.method = "request( self, route: str, params: Dict[ str, Any ] | None=None, time: int=20 ) -> Any"
 			raise exception
 	
 	def fetch_object( self, name: str, quantity: str='', attributes: str='',
@@ -6156,9 +6167,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
-			self.format = (data_format or 'json').strip( ).lower( )
-			route_parts = [ urllib.parse.quote( self.name ) ]
+			self.name = str( name ).strip( )
+			self.format = str( data_format or 'json' ).strip( ).lower( )
+			if self.format not in ('json', 'csv', 'tsv'):
+				raise ValueError( 'Unsupported AstroCatalog output format.' )
+			route_parts = [ urllib.parse.quote( self.name, safe='' ) ]
 			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
 				route_parts.append( attr_path )
@@ -6173,7 +6186,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'fetch_object( self, *args ) -> Any'
+			exception.method = "fetch_object( self, name: str, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 	
 	def cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='',
@@ -6205,10 +6218,15 @@ class AstroCatalog( Fetcher ):
 		try:
 			throw_if( 'ra', ra )
 			throw_if( 'dec', dec )
-			self.right_ascension = ra.strip( )
-			self.declination = dec.strip( )
-			self.radius = max( 1, int( radius ) )
-			self.format = (data_format or 'json').strip( ).lower( )
+			throw_if( 'radius', radius )
+			self.right_ascension = str( ra ).strip( )
+			self.declination = str( dec ).strip( )
+			self.radius = int( radius )
+			self.format = str( data_format or 'json' ).strip( ).lower( )
+			if self.radius < 1:
+				raise ValueError( 'radius must be positive.' )
+			if self.format not in ('json', 'csv', 'tsv'):
+				raise ValueError( 'Unsupported AstroCatalog output format.' )
 			route = 'catalog'
 			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
@@ -6226,7 +6244,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'cone_search( self, *args ) -> Any'
+			exception.method = "cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 	
 	def fetch( self, mode: str='object_query', query: str='', quantity: str='',
@@ -6290,7 +6308,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'fetch( self, *args ) -> Any'
+			exception.method = "fetch( self, mode: str='object_query', query: str='', quantity: str='', attributes: str='', arguments: str='', ra: str='', dec: str='', radius: int=2, data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 
 class AstroQuery( Fetcher ):
@@ -6336,6 +6354,7 @@ class AstroQuery( Fetcher ):
 		self.right_ascension = None
 		self.declination = None
 		self.params = { }
+		self.headers = { }
 		self.row_limit = 100
 		self.agents = cfg.AGENTS
 		
@@ -6353,7 +6372,9 @@ class AstroQuery( Fetcher ):
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [ 'headers', 'row_limit', 'object_search', 'object_ids', 'region_search', 'fetch', ]
+		return [ 'url', 'radius', 'name', 'declination', 'right_ascension', 'params',
+			'headers', 'row_limit', 'table_to_records', 'object_search', 'object_ids',
+			'region_search', 'fetch' ]
 	
 	def table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]:
 		"""Table to records.
@@ -6398,7 +6419,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'table_to_records( self, *args ) -> List[ Dict[ str, Any ] ]'
+			exception.method = "table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]"
 			raise exception
 	
 	def object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None:
@@ -6422,14 +6443,18 @@ class AstroQuery( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			self.row_limit = max( 1, int( row_limit ) )
+			throw_if( 'row_limit', row_limit )
+			self.row_limit = int( row_limit )
+			if self.row_limit < 1:
+				raise ValueError( 'row_limit must be a positive integer.' )
 			simbad = Simbad( )
 			simbad.ROW_LIMIT = self.row_limit
 			result_table = simbad.query_object( self.name )
 			
-			return { 'mode': 'object_search', 'query': self.name, 'row_limit': self.row_limit,
+			self.result = { 'mode': 'object_search', 'query': self.name, 'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -6458,19 +6483,23 @@ class AstroQuery( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			self.row_limit = max( 1, int( row_limit ) )
+			throw_if( 'row_limit', row_limit )
+			self.row_limit = int( row_limit )
+			if self.row_limit < 1:
+				raise ValueError( 'row_limit must be a positive integer.' )
 			simbad = Simbad( )
 			simbad.ROW_LIMIT = self.row_limit
 			result_table = simbad.query_objectids( self.name )
-			return { 'mode': 'object_ids', 'query': self.name, 'row_limit': self.row_limit,
+			self.result = { 'mode': 'object_ids', 'query': self.name, 'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'object_ids( self, *args ) -> Dict[ str, Any ]'
+			exception.method = "object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def region_search( self, ra: str, dec: str, radius: float = 0.5,
@@ -6500,10 +6529,20 @@ class AstroQuery( Fetcher ):
 			
 			self.right_ascension = ra.strip( )
 			self.declination = dec.strip( )
+			throw_if( 'radius', radius )
 			self.radius = float( radius )
-			self.row_limit = max( 1, int( row_limit ) )
+			if not (0.0 < self.radius <= 180.0):
+				raise ValueError( 'radius must be greater than zero and at most 180 degrees.' )
+			throw_if( 'row_limit', row_limit )
+			self.row_limit = int( row_limit )
+			if self.row_limit < 1:
+				raise ValueError( 'row_limit must be a positive integer.' )
 			unit_map = { 'deg': u.deg, 'arcmin': u.arcmin, 'arcsec': u.arcsec, }
-			active_unit = unit_map.get( (radius_unit or 'deg').strip( ).lower( ), u.deg )
+			throw_if( 'radius_unit', radius_unit )
+			self.radius_unit = str( radius_unit ).strip( ).lower( )
+			if self.radius_unit not in unit_map:
+				raise ValueError( 'radius_unit must be deg, arcmin, or arcsec.' )
+			active_unit = unit_map[ self.radius_unit ]
 			coord = SkyCoord( ra=self.right_ascension, dec=self.declination,
 				unit=(u.hourangle, u.deg) )
 			
@@ -6512,17 +6551,18 @@ class AstroQuery( Fetcher ):
 			result_table = simbad.query_region( coordinates=coord,
 				radius=self.radius * active_unit )
 			
-			return { 'mode': 'region_search', 'ra': self.right_ascension, 'dec': self.declination,
-				'radius': self.radius, 'radius_unit': (radius_unit or 'deg').strip( ).lower( ),
+			self.result = { 'mode': 'region_search', 'ra': self.right_ascension, 'dec': self.declination,
+				'radius': self.radius, 'radius_unit': self.radius_unit,
 				'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'region_search( self, *wargs) -> Dict[ str, Any ]'
+			exception.method = "region_search( self, ra: str, dec: str, radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='object_search', query: str='', ra: str='', dec: str='',
@@ -6570,7 +6610,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'fetch( self, *args ) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='object_search', query: str='', ra: str='', dec: str='', radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Dict[ str, Any ]"
 			raise exception
 
 class StarMap( Fetcher ):
