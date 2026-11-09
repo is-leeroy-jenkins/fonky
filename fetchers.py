@@ -2214,7 +2214,6 @@ class GoogleSearch( Fetcher ):
 			if cse_id:
 				self.cse_id = str( cse_id ).strip( )
 			
-			throw_if( 'cse_id', self.cse_id )
 			self.timeout = int( time )
 			self.keywords = str( keywords ).strip( )
 			self.results = int( results )
@@ -5792,7 +5791,6 @@ class SpaceWeather( Fetcher ):
 				if start > end:
 					raise ValueError( 'start_date must precede or equal end_date.' )
 			self.active_key = str( api_key or self.api_key or '' ).strip( )
-			throw_if( 'api_key', self.active_key )
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { 'api_key': self.active_key }
 			if self.start_date:
