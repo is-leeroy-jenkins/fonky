@@ -2435,7 +2435,6 @@ class GoogleMaps( Fetcher ):
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
 			results = self.payload.get( 'results', [] ) if isinstance( self.payload, dict ) else []
-			
 			if not results:
 				raise ValueError( 'No geocoding results were returned for the supplied address.' )
 			
