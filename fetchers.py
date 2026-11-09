@@ -316,7 +316,6 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
-			throw_if( 'time', time )
 			self.url = str( url ).strip( )
 			self.timeout = int( time )
 			self.response = requests.get( url=self.url, headers=self.headers,
@@ -453,7 +452,6 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'text', text )
-			throw_if( 'limit', limit )
 			self.text = str( text )
 			self.limit = int( limit )
 			if len( self.text ) <= self.limit:
@@ -1033,7 +1031,7 @@ class WebFetcher( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -1254,6 +1252,7 @@ class WebCrawler( WebFetcher ):
 			'title': '', 'plain_text': '', 'raw_html': '', 'links_discovered': [ ], 'data': { },
 			'errors': [ ], 'content_bytes': 0, 'truncated_by_max_bytes': False, }
 		try:
+			throw_if( 'url', url )
 			methods = selected_methods or [ ]
 			self.fetch( url=url, time=int( request_timeout ) )
 			raw_html = self.html or ''
@@ -1647,10 +1646,6 @@ class GoogleDrive( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'template', template )
-			throw_if( 'folder_id', folder_id )
-			throw_if( 'results', results )
-			throw_if( 'mode', mode )
 			self.query = str( question or '' ).strip( )
 			self.folder_id = str( folder_id or 'root' ).strip( ) or 'root'
 			self.num_results = int( results )
@@ -2207,7 +2202,6 @@ class GoogleSearch( Fetcher ):
 		"""
 		try:
 			throw_if( 'keywords', keywords )
-			throw_if( 'time', time )
 			if api_key:
 				self.api_key = str( api_key ).strip( )
 			
@@ -2583,7 +2577,6 @@ class GoogleMaps( Fetcher ):
 		try:
 			throw_if( 'origin', origin )
 			throw_if( 'destination', destination )
-			throw_if( 'mode', mode )
 			self.mode = str( mode ).strip( ).lower( )
 			self.origin = str( origin ).strip( )
 			self.destination = str( destination ).strip( )
@@ -2608,7 +2601,7 @@ class GoogleMaps( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -2813,7 +2806,6 @@ class GoogleWeather( Fetcher ):
 		try:
 			throw_if( 'path', path )
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			if not isinstance( params, dict ):
 				raise TypeError( 'params must be a dictionary.' )
 			self.path = str( path ).strip( ).lstrip( '/' )
@@ -2912,9 +2904,6 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'units_system', units_system )
-			throw_if( 'language_code', language_code )
-			throw_if( 'time', time )
 			self.mode = 'current'
 			self.units_system = str( units_system ).strip( )
 			self.language_code = str( language_code ).strip( )
@@ -2961,10 +2950,6 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'hours', hours )
-			throw_if( 'units_system', units_system )
-			throw_if( 'language_code', language_code )
-			throw_if( 'time', time )
 			self.mode = 'hourly_forecast'
 			self.hours = int( hours )
 			self.units_system = str( units_system ).strip( )
@@ -3015,10 +3000,6 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'days', days )
-			throw_if( 'units_system', units_system )
-			throw_if( 'language_code', language_code )
-			throw_if( 'time', time )
 			self.mode = 'daily_forecast'
 			self.days = int( days )
 			self.units_system = str( units_system ).strip( )
@@ -3069,10 +3050,6 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'hours', hours )
-			throw_if( 'units_system', units_system )
-			throw_if( 'language_code', language_code )
-			throw_if( 'time', time )
 			self.mode = 'hourly_history'
 			self.hours = int( hours )
 			self.units_system = str( units_system ).strip( )
@@ -3120,8 +3097,6 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'language_code', language_code )
-			throw_if( 'time', time )
 			self.mode = 'alerts'
 			self.language_code = str( language_code ).strip( )
 			self.timeout = int( time )
@@ -3342,7 +3317,10 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
+			throw_if( 'date_value', date_value )
+			throw_if( 'time_value', time_value )
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
@@ -3421,7 +3399,7 @@ class NavalObservatory( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -3629,9 +3607,6 @@ class SatelliteCenter( Fetcher ):
 			throw_if( 'observatories', observatories )
 			throw_if( 'start_time', start_time )
 			throw_if( 'end_time', end_time )
-			throw_if( 'coordinate_systems', coordinate_systems )
-			throw_if( 'resolution_factor', resolution_factor )
-			throw_if( 'time', time )
 
 			self.observatory_ids = str( observatories ).strip( )
 			self.start_time = str( start_time ).strip( )
@@ -3830,7 +3805,6 @@ class EarthObservatory( Fetcher ):
 		    Error: If timeout, HTTP request, or provider response validation fails.
 		"""
 		try:
-			throw_if( 'time', time )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
@@ -3880,9 +3854,6 @@ class EarthObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'status', status )
-			throw_if( 'limit', limit )
-			throw_if( 'days', days )
 			self.mode = 'events'
 			self.status = str( status ).strip( ).lower( )
 			self.category = str( category or '' ).strip( )
@@ -4115,7 +4086,7 @@ class EarthObservatory( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -4370,9 +4341,6 @@ class GlobalImagery( Fetcher ):
 			throw_if( 'layer', layer )
 			throw_if( 'image_date', image_date )
 			throw_if( 'bbox', bbox )
-			throw_if( 'width', width )
-			throw_if( 'height', height )
-			throw_if( 'image_format', image_format )
 			self.projection, self.quality, self.version = self.validate_wms_options(
 				projection=projection, quality=quality, version=version )
 			self.layer = str( layer ).strip( )
@@ -4464,7 +4432,9 @@ class GlobalImagery( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
+			throw_if( 'layer', layer )
+			throw_if( 'image_date', image_date )
+			throw_if( 'bbox', bbox )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
@@ -4603,7 +4573,7 @@ class GlobalImagery( Fetcher ):
 			raise exception
 
 	def create_schema( self, function: str, tool: str, description: str,
-			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
+			parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -4747,7 +4717,6 @@ class NearbyObjects( Fetcher ):
 		    Error: If an invalid timeout, request failure or provider error occurs.
 		"""
 		try:
-			throw_if( 'time', time )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
@@ -4844,7 +4813,6 @@ class NearbyObjects( Fetcher ):
 		try:
 			throw_if( 'start_date', start_date )
 			throw_if( 'end_date', end_date )
-			throw_if( 'limit', limit )
 			self.mode = 'close_approaches'
 			self.start_date = str( start_date ).strip( )
 			self.end_date = str( end_date ).strip( )
@@ -4912,7 +4880,6 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			throw_if( 'query_type', query_type )
 			self.mode = 'object_lookup'
 			self.query = str( query ).strip( )
 			self.query_type = str( query_type ).strip( ).lower( )
@@ -4969,8 +4936,6 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			self.validate_nhats_options( dv=dv, dur=dur, stay=stay, launch=launch )
-			throw_if( 'h', h )
-			throw_if( 'occ', occ )
 			self.h = float( h )
 			self.occ = int( occ )
 			if self.h not in range( 16, 31 ):
@@ -5060,7 +5025,6 @@ class NearbyObjects( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'limit', limit )
 			self.limit = int( limit )
 			if self.limit < 1:
 				raise ValueError( 'limit must be positive.' )
@@ -5166,7 +5130,7 @@ class NearbyObjects( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -5366,7 +5330,6 @@ class OpenScience( Fetcher ):
 		    Error: If the request, timeout or provider response fails.
 		"""
 		try:
-			throw_if( 'time', time )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
@@ -5602,7 +5565,7 @@ class OpenScience( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-		required: list[ str ] ) -> Dict[ str, str ] | None:
+		required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -5771,8 +5734,9 @@ class SpaceWeather( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'start_date', start_date )
+			throw_if( 'end_date', end_date )
 			throw_if( 'endpoint', endpoint )
-			throw_if( 'time', time )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
@@ -5908,7 +5872,7 @@ class SpaceWeather( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -6103,7 +6067,6 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'route', route )
-			throw_if( 'time', time )
 			self.timeout = int( time )
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
@@ -6210,7 +6173,6 @@ class AstroCatalog( Fetcher ):
 		try:
 			throw_if( 'ra', ra )
 			throw_if( 'dec', dec )
-			throw_if( 'radius', radius )
 			self.right_ascension = str( ra ).strip( )
 			self.declination = str( dec ).strip( )
 			self.radius = int( radius )
@@ -6435,7 +6397,6 @@ class AstroQuery( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			throw_if( 'row_limit', row_limit )
 			self.row_limit = int( row_limit )
 			if self.row_limit < 1:
 				raise ValueError( 'row_limit must be a positive integer.' )
@@ -6475,7 +6436,6 @@ class AstroQuery( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			throw_if( 'row_limit', row_limit )
 			self.row_limit = int( row_limit )
 			if self.row_limit < 1:
 				raise ValueError( 'row_limit must be a positive integer.' )
@@ -6521,16 +6481,13 @@ class AstroQuery( Fetcher ):
 			
 			self.right_ascension = ra.strip( )
 			self.declination = dec.strip( )
-			throw_if( 'radius', radius )
 			self.radius = float( radius )
 			if not (0.0 < self.radius <= 180.0):
 				raise ValueError( 'radius must be greater than zero and at most 180 degrees.' )
-			throw_if( 'row_limit', row_limit )
 			self.row_limit = int( row_limit )
 			if self.row_limit < 1:
 				raise ValueError( 'row_limit must be a positive integer.' )
 			unit_map = { 'deg': u.deg, 'arcmin': u.arcmin, 'arcsec': u.arcsec, }
-			throw_if( 'radius_unit', radius_unit )
 			self.radius_unit = str( radius_unit ).strip( ).lower( )
 			if self.radius_unit not in unit_map:
 				raise ValueError( 'radius_unit must be deg, arcmin, or arcsec.' )
@@ -6732,6 +6689,7 @@ class StarMap( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'base_url', base_url )
 			links: Dict[ str, str ] = { }
 			if not html or not isinstance( html, str ):
 				return links
@@ -7228,8 +7186,6 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			throw_if( 'offset_mark', offset_mark )
-			throw_if( 'time', time )
 			
 			self.mode = 'search'
 			self.query = str( query ).strip( )
@@ -7282,7 +7238,6 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'package_id', package_id )
-			throw_if( 'time', time )
 			
 			self.mode = 'package_summary'
 			self.package_id = str( package_id ).strip( )
@@ -7344,8 +7299,6 @@ class GovData( Fetcher ):
 		try:
 			throw_if( 'collection', collection )
 			throw_if( 'start_date', start_date )
-			throw_if( 'offset_mark', offset_mark )
-			throw_if( 'time', time )
 			
 			self.mode = 'collection'
 			self.collection = str( collection ).strip( )
@@ -7422,7 +7375,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			self.mode = str( mode or 'search' ).strip( ).lower( )
 			
 			if self.mode == 'search':
@@ -7466,7 +7418,7 @@ class GovData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -7849,6 +7801,8 @@ class StarChart( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'ra', ra )
+			throw_if( 'dec', dec )
 			self.mode = 'coordinate_chart'
 			self.ra = float( ra )
 			self.dec = float( dec )
@@ -7925,6 +7879,8 @@ class StarChart( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'ra', ra )
+			throw_if( 'dec', dec )
 			self.mode = 'static_chart'
 			self.ra = float( ra )
 			self.dec = float( dec )
@@ -8077,7 +8033,7 @@ class StarChart( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -8328,6 +8284,7 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'offset', offset )
 			if offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
@@ -8540,7 +8497,6 @@ class Congress( Fetcher ):
 			throw_if( 'mode', mode )
 			throw_if( 'url', url )
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			
 			self.mode = str( mode ).strip( )
 			self.url = str( url ).strip( )
@@ -9033,7 +8989,6 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			self.mode = str( mode or 'congresses' ).strip( ).lower( )
 			
 			if self.mode == 'congresses':
@@ -9114,7 +9069,7 @@ class Congress( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -9322,6 +9277,7 @@ class InternetArchive( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'page', page )
 			value = int( page )
 			if value < 1:
 				raise ValueError( 'page must be greater than or equal to 1.' )
@@ -9411,6 +9367,7 @@ class InternetArchive( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'keywords', keywords )
 			self.keywords = str( keywords ).strip( )
 			throw_if( 'keywords', self.keywords )
 			
@@ -9471,7 +9428,7 @@ class InternetArchive( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -9784,7 +9741,6 @@ class OpenWeather( Fetcher ):
 		try:
 			throw_if( 'lat', lat )
 			throw_if( 'long', long )
-			throw_if( 'zone', zone )
 			
 			self.mode = 'current'
 			self.latitude = float( lat )
@@ -9862,7 +9818,6 @@ class OpenWeather( Fetcher ):
 		try:
 			throw_if( 'lat', lat )
 			throw_if( 'long', long )
-			throw_if( 'zone', zone )
 			
 			self.mode = 'hourly'
 			self.latitude = float( lat )
@@ -9941,7 +9896,6 @@ class OpenWeather( Fetcher ):
 		try:
 			throw_if( 'lat', lat )
 			throw_if( 'long', long )
-			throw_if( 'zone', zone )
 			
 			self.mode = 'daily'
 			self.latitude = float( lat )
@@ -10022,8 +9976,6 @@ class OpenWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'location', location )
-			throw_if( 'mode', mode )
-			throw_if( 'zone', zone )
 			
 			selected = self.geocode_location( location=location, count=count )
 			
@@ -10095,7 +10047,7 @@ class OpenWeather( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -10380,7 +10332,6 @@ class HistoricalWeather( Fetcher ):
 			throw_if( 'lat', lat )
 			throw_if( 'long', long )
 			throw_if( 'date', date )
-			throw_if( 'zone', zone )
 			
 			self.latitude = float( lat )
 			self.longitude = float( long )
@@ -10459,7 +10410,6 @@ class HistoricalWeather( Fetcher ):
 		try:
 			throw_if( 'location', location )
 			throw_if( 'date', date )
-			throw_if( 'zone', zone )
 			
 			selected = self.geocode_location( location=location, count=count )
 			
@@ -10505,7 +10455,7 @@ class HistoricalWeather( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -10667,8 +10617,6 @@ class Grokipedia( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			throw_if( 'limit', limit )
-			throw_if( 'offset', offset )
 			
 			self.query = str( query ).strip( )
 			self.limit = int( limit )
@@ -10789,7 +10737,6 @@ class Grokipedia( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			mode_value = str( mode or 'search' ).strip( ).lower( )
 			
@@ -10810,7 +10757,7 @@ class Grokipedia( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -11003,7 +10950,6 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			
 			if api_key:
 				self.api_key = str( api_key ).strip( )
@@ -11082,7 +11028,6 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			throw_if( 'time', time )
 			
 			self.mode = 'forward'
 			self.query = str( query ).strip( )
@@ -11144,7 +11089,6 @@ class GoogleGeocoding( Fetcher ):
 		try:
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
-			throw_if( 'time', time )
 			
 			self.mode = 'reverse'
 			self.latitude = float( latitude )
@@ -11207,7 +11151,6 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'place_id', place_id )
-			throw_if( 'time', time )
 			
 			self.mode = 'place'
 			self.place_id = str( place_id ).strip( )
@@ -11274,7 +11217,6 @@ class GoogleGeocoding( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			self.mode = str( mode ).strip( ).lower( )
 			
 			if self.mode == 'forward':
@@ -11319,7 +11261,7 @@ class GoogleGeocoding( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -11657,7 +11599,6 @@ class CensusData( Fetcher ):
 		try:
 			throw_if( 'year', year )
 			throw_if( 'dataset', dataset )
-			throw_if( 'time', time )
 			self.mode = 'variables'
 			self.year = str( year ).strip( )
 			self.dataset = str( dataset ).strip( ).strip( '/' )
@@ -11726,8 +11667,6 @@ class CensusData( Fetcher ):
 			throw_if( 'year', year )
 			throw_if( 'dataset', dataset )
 			throw_if( 'fields', fields )
-			throw_if( 'geography_for', geography_for )
-			throw_if( 'time', time )
 			
 			self.mode = 'data'
 			self.year = str( year ).strip( )
@@ -11811,7 +11750,6 @@ class CensusData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode ).strip( ).lower( )
 			
@@ -11846,7 +11784,7 @@ class CensusData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -12151,6 +12089,7 @@ class Socrata( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'offset', offset )
 			if offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
@@ -12192,7 +12131,8 @@ class Socrata( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
+			throw_if( 'domain', domain )
+			throw_if( 'dataset_id', dataset_id )
 			
 			self.mode = 'metadata'
 			self.domain = self.normalize_domain( domain )
@@ -12270,7 +12210,8 @@ class Socrata( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
+			throw_if( 'domain', domain )
+			throw_if( 'dataset_id', dataset_id )
 			
 			self.mode = 'rows'
 			self.domain = self.normalize_domain( domain )
@@ -12373,7 +12314,6 @@ class Socrata( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'rows' ).strip( ).lower( )
 			
@@ -12410,7 +12350,7 @@ class Socrata( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -12717,6 +12657,7 @@ class HealthData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'offset', offset )
 			if offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
@@ -12758,7 +12699,8 @@ class HealthData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
+			throw_if( 'domain', domain )
+			throw_if( 'dataset_id', dataset_id )
 			
 			self.mode = 'metadata'
 			self.domain = self.normalize_domain( domain )
@@ -12836,7 +12778,8 @@ class HealthData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
+			throw_if( 'domain', domain )
+			throw_if( 'dataset_id', dataset_id )
 			
 			self.mode = 'rows'
 			self.domain = self.normalize_domain( domain )
@@ -12939,7 +12882,6 @@ class HealthData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'rows' ).strip( ).lower( )
 			
@@ -12976,7 +12918,7 @@ class HealthData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -13191,7 +13133,6 @@ class GlobalHealthData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
 			
 			self.mode = 'indicator_registry'
 			self.timeout = int( time )
@@ -13266,7 +13207,6 @@ class GlobalHealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'query_path', query_path )
-			throw_if( 'time', time )
 			
 			self.mode = 'athena'
 			self.query_path = self.normalize_query_path( query_path )
@@ -13346,7 +13286,6 @@ class GlobalHealthData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'indicator_registry' ).strip( ).lower( )
 			
@@ -13378,7 +13317,7 @@ class GlobalHealthData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -13582,7 +13521,6 @@ class UnitedNations( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
 			
 			self.mode = 'datasets'
 			self.timeout = int( time )
@@ -13652,7 +13590,6 @@ class UnitedNations( Fetcher ):
 		"""
 		try:
 			throw_if( 'query_path', query_path )
-			throw_if( 'time', time )
 			
 			self.mode = 'sdmx_query'
 			self.query_path = self.normalize_query_path( query_path )
@@ -13725,7 +13662,6 @@ class UnitedNations( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'datasets' ).strip( ).lower( )
 			
@@ -13753,7 +13689,7 @@ class UnitedNations( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -14042,7 +13978,6 @@ class WorldPopulation( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
 			
 			self.mode = 'catalog'
 			self.timeout = int( time )
@@ -14110,8 +14045,6 @@ class WorldPopulation( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'query', query )
-			throw_if( 'time', time )
 			
 			self.mode = 'search'
 			self.query_text = str( query or '' ).strip( )
@@ -14188,7 +14121,6 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			throw_if( 'asset_path', asset_path )
-			throw_if( 'time', time )
 			
 			self.mode = 'raster_metadata'
 			self.asset_path = self.normalize_asset_path( asset_path )
@@ -14265,7 +14197,6 @@ class WorldPopulation( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'catalog' ).strip( ).lower( )
 			
@@ -14304,7 +14235,7 @@ class WorldPopulation( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -14615,7 +14546,6 @@ class Wonder( Fetcher ):
 		try:
 			throw_if( 'dataset_id', dataset_id )
 			throw_if( 'request_xml', request_xml )
-			throw_if( 'time', time )
 			
 			self.mode = 'query_xml'
 			self.dataset_id = self.normalize_dataset_id( dataset_id )
@@ -14689,7 +14619,6 @@ class Wonder( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'metadata_template' ).strip( ).lower( )
 			
@@ -14720,7 +14649,7 @@ class Wonder( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -15433,7 +15362,6 @@ class USGSEarthquakes( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
 			
 			self.mode = 'feed'
 			self.feed = self.validate_feed( feed )
@@ -15504,8 +15432,6 @@ class USGSEarthquakes( Fetcher ):
 		try:
 			throw_if( 'start_date', start_date )
 			throw_if( 'end_date', end_date )
-			throw_if( 'event_type', event_type )
-			throw_if( 'time', time )
 			
 			self.mode = 'search'
 			self.feed = ''
@@ -15617,7 +15543,6 @@ class USGSEarthquakes( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'feed' ).strip( ).lower( )
 			
@@ -15655,7 +15580,7 @@ class USGSEarthquakes( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -16375,7 +16300,6 @@ class USGSWaterData( Fetcher ):
 		try:
 			throw_if( 'collection', collection )
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			
 			self.collection = self.validate_collection( collection )
 			self.timeout = int( time )
@@ -16450,8 +16374,6 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'limit', limit )
-			throw_if( 'time', time )
 			
 			self.mode = 'monitoring-locations'
 			self.monitoring_location_id = str( monitoring_location_id or '' ).strip( )
@@ -16514,9 +16436,6 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'monitoring_location_id', monitoring_location_id )
-			throw_if( 'limit', limit )
-			throw_if( 'time', time )
 			
 			self.mode = 'time-series-metadata'
 			self.monitoring_location_id = str( monitoring_location_id ).strip( )
@@ -16575,9 +16494,6 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'monitoring_location_id', monitoring_location_id )
-			throw_if( 'limit', limit )
-			throw_if( 'time', time )
 			
 			self.mode = 'latest-continuous'
 			self.monitoring_location_id = str( monitoring_location_id ).strip( )
@@ -16636,9 +16552,6 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'monitoring_location_id', monitoring_location_id )
-			throw_if( 'limit', limit )
-			throw_if( 'time', time )
 			
 			self.mode = 'latest-daily'
 			self.monitoring_location_id = str( monitoring_location_id ).strip( )
@@ -16705,7 +16618,6 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'monitoring-locations' ).strip( ).lower( )
 			
@@ -16759,7 +16671,7 @@ class USGSWaterData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -17029,6 +16941,7 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'offset', offset )
 			if offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
@@ -17403,7 +17316,6 @@ class USGSTheNationalMap( Fetcher ):
 		try:
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			
 			self.endpoint = self.validate_endpoint( endpoint )
 			self.timeout = int( time )
@@ -17468,7 +17380,6 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
 			
 			self.mode = 'datasets'
 			self.timeout = int( time )
@@ -17522,9 +17433,6 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'max_items', max_items )
-			throw_if( 'offset', offset )
-			throw_if( 'time', time )
 			
 			self.mode = 'products'
 			self.dataset = str( dataset or '' ).strip( )
@@ -17595,7 +17503,6 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'products' ).strip( ).lower( )
 			
@@ -17625,7 +17532,7 @@ class USGSTheNationalMap( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -17891,6 +17798,7 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'offset', offset )
 			if offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
@@ -18168,7 +18076,6 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			throw_if( 'time', time )
 			
 			self.endpoint = self.validate_endpoint( endpoint )
 			self.timeout = int( time )
@@ -18237,9 +18144,6 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'max_items', max_items )
-			throw_if( 'offset', offset )
-			throw_if( 'time', time )
 			self.mode = 'items'
 			self.query_text = str( q or '' ).strip( )
 			self.max_items = self.validate_max_items( max_items )
@@ -18289,7 +18193,6 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'item_id', item_id )
-			throw_if( 'time', time )
 			self.mode = 'item'
 			self.item_id = str( item_id ).strip( )
 			self.timeout = int( time )
@@ -18333,7 +18236,6 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			self.mode = str( mode or 'items' ).strip( ).lower( )
 			if self.mode == 'items':
 				return self.fetch_items( q=q, max_items=max_items, offset=offset, fields=fields,
@@ -18352,7 +18254,7 @@ class USGSScienceBase( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -18544,7 +18446,6 @@ class AirNow( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			throw_if( 'time', time )
 			
 			self.endpoint = str( endpoint ).strip( )
 			self.timeout = int( time )
@@ -18766,8 +18667,6 @@ class AirNow( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
-			throw_if( 'distance', distance )
-			throw_if( 'time', time )
 			
 			self.mode = 'current-zip'
 			self.zip_code = str( zip_code ).strip( )
@@ -18822,8 +18721,6 @@ class AirNow( Fetcher ):
 		try:
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
-			throw_if( 'distance', distance )
-			throw_if( 'time', time )
 			
 			self.mode = 'current-latlon'
 			self.latitude = float( latitude )
@@ -18880,8 +18777,6 @@ class AirNow( Fetcher ):
 		try:
 			throw_if( 'zip_code', zip_code )
 			throw_if( 'date', date )
-			throw_if( 'distance', distance )
-			throw_if( 'time', time )
 			
 			self.mode = 'forecast-zip'
 			self.zip_code = str( zip_code ).strip( )
@@ -18940,8 +18835,6 @@ class AirNow( Fetcher ):
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
 			throw_if( 'date', date )
-			throw_if( 'distance', distance )
-			throw_if( 'time', time )
 			
 			self.mode = 'forecast-latlon'
 			self.latitude = float( latitude )
@@ -19005,7 +18898,6 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			self.mode = str( mode ).strip( ).lower( )
 			
 			if self.mode == 'current-zip':
@@ -19038,7 +18930,7 @@ class AirNow( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -19267,6 +19159,7 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'offset', offset )
 			if offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
@@ -19587,7 +19480,6 @@ class ClimateData( Fetcher ):
 		try:
 			throw_if( 'url', url )
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			
 			self.url = str( url ).strip( )
 			self.timeout = int( time )
@@ -19657,9 +19549,6 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'limit', limit )
-			throw_if( 'offset', offset )
-			throw_if( 'time', time )
 			
 			self.mode = 'datasets'
 			self.keyword = str( keyword or '' ).strip( )
@@ -19723,8 +19612,6 @@ class ClimateData( Fetcher ):
 			throw_if( 'dataset', dataset )
 			throw_if( 'start_date', start_date )
 			throw_if( 'end_date', end_date )
-			throw_if( 'limit', limit )
-			throw_if( 'time', time )
 			
 			self.mode = 'data'
 			self.dataset = str( dataset ).strip( )
@@ -19787,7 +19674,6 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'datasets' ).strip( ).lower( )
 			
@@ -19815,7 +19701,7 @@ class ClimateData( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -20498,7 +20384,6 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			throw_if( 'time', time )
 			
 			self.endpoint = self.validate_endpoint( endpoint )
 			self.timeout = int( time )
@@ -20574,10 +20459,6 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'status', status )
-			throw_if( 'limit', limit )
-			throw_if( 'days', days )
-			throw_if( 'time', time )
 			
 			self.mode = 'events'
 			self.source = str( source or '' ).strip( )
@@ -20646,7 +20527,6 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'time', time )
 			
 			self.mode = 'categories'
 			self.timeout = int( time )
@@ -20710,7 +20590,6 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			
 			self.mode = str( mode or 'events' ).strip( ).lower( )
 			
@@ -20745,7 +20624,7 @@ class EoNet( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -21044,6 +20923,7 @@ class EnviroFacts( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'table_name', table_name )
 			self.table_name = self.validate_table_name( table_name )
 			self.state_code = self.validate_state_code( state_code )
 			self.facility_name = str( facility_name or '' ).strip( )
@@ -21271,7 +21151,6 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
-			throw_if( 'time', time )
 			
 			self.url = str( url ).strip( )
 			self.timeout = int( time )
@@ -21331,8 +21210,6 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'table_name', table_name )
-			throw_if( 'limit', limit )
-			throw_if( 'time', time )
 			
 			self.mode = 'table'
 			self.path = self.resolve_table_path(
@@ -21413,7 +21290,7 @@ class EnviroFacts( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -22137,7 +22014,6 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
-			throw_if( 'time', time )
 			
 			self.url = str( url ).strip( )
 			self.timeout = int( time )
@@ -22204,7 +22080,6 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'station_id', station_id )
-			throw_if( 'time', time )
 			
 			self.mode = 'station'
 			self.station_id = self.validate_station_id( station_id )
@@ -22261,7 +22136,6 @@ class TidesAndCurrents( Fetcher ):
 			throw_if( 'station_id', station_id )
 			throw_if( 'begin_date', begin_date )
 			throw_if( 'end_date', end_date )
-			throw_if( 'time', time )
 			
 			self.mode = 'water-level'
 			self.station_id = self.validate_station_id( station_id )
@@ -22337,7 +22211,6 @@ class TidesAndCurrents( Fetcher ):
 			throw_if( 'station_id', station_id )
 			throw_if( 'begin_date', begin_date )
 			throw_if( 'end_date', end_date )
-			throw_if( 'time', time )
 			
 			self.mode = 'tide-predictions'
 			self.station_id = self.validate_station_id( station_id )
@@ -22463,7 +22336,7 @@ class TidesAndCurrents( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -22960,7 +22833,6 @@ class UvIndex( Fetcher ):
 		try:
 			throw_if( 'url', url )
 			throw_if( 'params', params )
-			throw_if( 'time', time )
 			
 			self.url = str( url ).strip( )
 			self.params = params
@@ -23017,7 +22889,6 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
-			throw_if( 'time', time )
 			
 			self.mode = 'daily-zip'
 			self.zip_code = self.validate_zip_code( zip_code )
@@ -23077,7 +22948,6 @@ class UvIndex( Fetcher ):
 		try:
 			throw_if( 'city', city )
 			throw_if( 'state', state )
-			throw_if( 'time', time )
 			
 			self.mode = 'daily-city-state'
 			self.city = self.validate_city( city )
@@ -23139,7 +23009,6 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
-			throw_if( 'time', time )
 			
 			self.mode = 'hourly-zip'
 			self.zip_code = self.validate_zip_code( zip_code )
@@ -23199,7 +23068,6 @@ class UvIndex( Fetcher ):
 		try:
 			throw_if( 'city', city )
 			throw_if( 'state', state )
-			throw_if( 'time', time )
 			
 			self.mode = 'hourly-city-state'
 			self.city = self.validate_city( city )
@@ -23309,7 +23177,7 @@ class UvIndex( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -23790,7 +23658,6 @@ class PurpleAir( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			throw_if( 'time', time )
 			self.endpoint = str( endpoint ).strip( ).strip( '/' )
 			if self.endpoint != 'sensors' and not re.fullmatch(
 					r'sensors/[1-9][0-9]*', self.endpoint ):
@@ -23853,9 +23720,6 @@ class PurpleAir( Fetcher ):
 			throw_if( 'nwlat', nwlat )
 			throw_if( 'selng', selng )
 			throw_if( 'selat', selat )
-			throw_if( 'location_type', location_type )
-			throw_if( 'max_age', max_age )
-			throw_if( 'modified_since', modified_since )
 			self.nwlng = float( nwlng )
 			self.nwlat = float( nwlat )
 			self.selng = float( selng )
@@ -23980,7 +23844,6 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'mode', mode )
 			self.mode = str( mode ).strip( ).lower( )
 			
 			if self.mode == 'sensors':
@@ -24016,7 +23879,7 @@ class PurpleAir( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -24336,6 +24199,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'value', value )
 			throw_if( 'name', name )
 			throw_if( name, value )
 			
@@ -24380,6 +24244,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'value', value )
 			throw_if( 'name', name )
 			
 			if value is None:
@@ -24472,6 +24337,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'radius', radius )
 			value = self.validate_positive_integer(
 				name='radius',
 				value=radius,
@@ -24855,8 +24721,8 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'endpoint', endpoint )
 			self.endpoint = self.validate_endpoint( endpoint )
-			throw_if( 'time', time )
 			self.timeout = int( time )
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { }
@@ -25047,6 +24913,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'parameter_id', parameter_id )
 			self.mode = 'parameter_latest'
 			self.parameter_id = self.validate_positive_integer( name='parameter_id',
 				value=parameter_id )
@@ -25152,6 +25019,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'location_id', location_id )
 			self.mode = 'latest'
 			self.location_id = self.validate_positive_integer( name='location_id',
 				value=location_id )
@@ -25241,7 +25109,7 @@ class OpenAQ( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -25564,7 +25432,6 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'area_coordinates', area_coordinates )
 			value = str( area_coordinates ).strip( )
 			if value.lower( ) == 'world':
 				return 'world'
@@ -25736,7 +25603,6 @@ class Firms( Fetcher ):
 		try:
 			self.map_key
 			throw_if( 'url', url )
-			throw_if( 'time', time )
 			self.url = str( url ).strip( )
 			self.timeout = int( time )
 			if self.timeout < 1:
@@ -25782,6 +25648,7 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'source', source )
 			self.mode = 'area'
 			self.source = self.validate_source( source )
 			self.area_coordinates = self.validate_area_coordinates( area_coordinates )
@@ -25897,7 +25764,7 @@ class Firms( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
@@ -26233,6 +26100,7 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'value', value )
 			throw_if( 'name', name )
 			throw_if( name, value )
 			
@@ -26272,6 +26140,8 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'begin', begin )
+			throw_if( 'end', end )
 			start = self.validate_epoch( 'begin', begin )
 			stop = self.validate_epoch( 'end', end )
 			
@@ -26309,6 +26179,7 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'value', value )
 			throw_if( 'name', name )
 			throw_if( name, value )
 			
@@ -26348,6 +26219,7 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'value', value )
 			throw_if( 'name', name )
 			throw_if( name, value )
 			
@@ -26390,6 +26262,10 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'lamin', lamin )
+			throw_if( 'lomin', lomin )
+			throw_if( 'lamax', lamax )
+			throw_if( 'lomax', lomax )
 			min_lat = self.validate_latitude( 'lamin', lamin )
 			min_lon = self.validate_longitude( 'lomin', lomin )
 			max_lat = self.validate_latitude( 'lamax', lamax )
@@ -26515,6 +26391,7 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'endpoint', endpoint )
 			self.endpoint = self.validate_endpoint( endpoint )
 			self.assign_credentials( client_id=client_id, client_secret=client_secret )
 			self.authenticate( )
@@ -26631,6 +26508,7 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'mode', mode )
 			items: List[ Dict[ str, Any ] ] = [ ]
 			
 			for row in payload or [ ]:
@@ -26827,6 +26705,9 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'icao24', icao24 )
+			throw_if( 'begin', begin )
+			throw_if( 'end', end )
 			self.mode = 'flights_aircraft'
 			self.icao24 = self.validate_icao24( icao24 )
 			self.begin, self.end = self.validate_time_range( begin, end )
@@ -26871,6 +26752,9 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'airport', airport )
+			throw_if( 'begin', begin )
+			throw_if( 'end', end )
 			self.mode = 'arrivals_airport'
 			self.airport = self.validate_airport( airport )
 			self.begin, self.end = self.validate_time_range( begin, end )
@@ -26915,6 +26799,9 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'airport', airport )
+			throw_if( 'begin', begin )
+			throw_if( 'end', end )
 			self.mode = 'departures_airport'
 			self.airport = self.validate_airport( airport )
 			self.begin, self.end = self.validate_time_range( begin, end )
@@ -26957,6 +26844,7 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'icao24', icao24 )
 			self.mode = 'track_aircraft'
 			self.icao24 = self.validate_icao24( icao24 )
 			self.time_value = (
@@ -27057,7 +26945,7 @@ class OpenSky( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create an AI tool schema.
 
 		Purpose:
