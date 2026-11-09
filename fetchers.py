@@ -24857,7 +24857,6 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.api_key
 			self.endpoint = self.validate_endpoint( endpoint )
 			throw_if( 'time', time )
 			self.timeout = int( time )
@@ -25370,7 +25369,7 @@ class Firms( Fetcher ):
 		"""
 		return [ 'base_url', 'map_key', 'mode', 'source', 'area_coordinates', 'day_range', 'date',
 				'sensor', 'params', 'payload', 'result', 'response', 'url', 'timeout', 'agents',
-				'headers', 'validate_map_key', 'validate_mode', 'validate_source',
+				'headers', 'validate_mode', 'validate_source',
 				'validate_sensor', 'validate_day_range', 'validate_date',
 				'validate_area_coordinates', 'csv_to_rows', 'summarize_rows', 'package_response',
 				'request_csv', 'fetch_area', 'fetch_data_availability', 'fetch', 'create_schema' ]
