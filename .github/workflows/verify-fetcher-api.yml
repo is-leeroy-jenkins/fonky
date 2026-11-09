@@ -125,8 +125,8 @@ jobs:
           # normalizes only the diagnostic string at compile time; it does not edit the repo.
           def build_safe(source, cls, name):
               src = method(source, cls, name)
-              src = re.sub(r"^(\t+exception\.method\s*=).*$",
-                           r"\1 'diagnostic'",src,flags=re.M)
+              src = re.sub(r"(?ms)^(\t+exception\.method\s*=).*?(?=^\t+raise exception)",
+                           r"\1 'diagnostic'\n",src)
               env = dict(scope)
               exec(compile("from __future__ import annotations\nclass Target:\n"+src,
                            cls+"."+name,"exec"),env)
