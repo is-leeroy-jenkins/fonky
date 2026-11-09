@@ -1061,19 +1061,11 @@ class WebFetcher( Fetcher ):
 			throw_if( 'parameters', parameters )
 			if required is None:
 				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
+			return { 'name': function.strip( ),
+					'description': (f'{description.strip( )} This function uses the '
+					                f'{tool.strip( )} service.'),
+					'parameters': { 'type': 'object', 'properties': parameters,
+							'required': required, } }
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -3351,7 +3343,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = "fetch_celnav( self, date_value: str, time_value: str, latitude: float, longitude: float, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_celnav( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='celnav', date_value: str='',
@@ -3395,7 +3387,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = "fetch( self, mode: str='celnav', date_value: str='', time_value: str='', latitude: float=0.0, longitude: float=0.0, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -3440,7 +3432,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self, **args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class SatelliteCenter( Fetcher ):
@@ -3607,14 +3599,12 @@ class SatelliteCenter( Fetcher ):
 			throw_if( 'observatories', observatories )
 			throw_if( 'start_time', start_time )
 			throw_if( 'end_time', end_time )
-
 			self.observatory_ids = str( observatories ).strip( )
 			self.start_time = str( start_time ).strip( )
 			self.end_time = str( end_time ).strip( )
 			self.coordinate_systems = str( coordinate_systems ).strip( ).lower( )
 			self.resolution_factor = int( resolution_factor )
 			self.timeout = int( time )
-
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 			if self.resolution_factor < 1:
@@ -3655,7 +3645,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = "fetch_locations( self, observatories: str, start_time: str, end_time: str, coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_locations( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='observatories', query: str='', start_time: str='',
@@ -3707,7 +3697,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = "fetch( self, mode: str='observatories', query: str='', start_time: str='', end_time: str='', coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 
 class EarthObservatory( Fetcher ):
@@ -3895,7 +3885,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "fetch_events( self, status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
+			exception.method = "fetch_events( self, **args  ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
