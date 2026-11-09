@@ -8737,9 +8737,9 @@ class InternetArchive( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
+		throw_if( 'keywords', keywords )
 		try:
 			self.keywords = str( keywords ).strip( )
-			throw_if( 'keywords', self.keywords )
 			
 			self.timeout = int( time )
 			self.rows = self.validate_rows( rows )
