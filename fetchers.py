@@ -205,46 +205,6 @@ class Fetcher:
 		"""
 		raise NotImplementedError( 'Must be implemented by a subclass.' )
 
-	def create_schema( self, function: str, tool: str, description: str,
-			parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, Any ]:
-		"""Create a function-calling schema for a fetcher operation.
-
-		Purpose:
-		    Builds the shared tool schema used by fetcher subclasses without duplicating
-		    identical schema-construction logic in every provider.
-
-		Args:
-		    function: Public callable name represented by the schema.
-		    tool: Provider or service identifier.
-		    description: Description of the callable.
-		    parameters: JSON Schema property definitions.
-		    required: Required property names, or None to use all defined properties.
-
-		Returns:
-		    Dict[str, Any]: Tool schema containing the function name, description,
-		    and JSON Schema object definition.
-		"""
-		throw_if( 'function', function )
-		throw_if( 'tool', tool )
-		throw_if( 'description', description )
-		throw_if( 'parameters', parameters )
-		if not isinstance( parameters, dict ):
-			raise ValueError( 'parameters must be a dictionary of property schemas.' )
-		if required is None:
-			required = list( parameters.keys( ) )
-		return {
-				'name': function.strip( ),
-				'description': (
-						f'{description.strip( )} This function uses the '
-						f'{tool.strip( )} service.'
-				),
-				'parameters': {
-						'type': 'object',
-						'properties': parameters,
-						'required': required,
-				}
-		}
-
 class WebFetcher( Fetcher ):
 	"""Web Fetcher fetcher.
 
@@ -370,7 +330,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> Result | None'
 			raise exception
 	
 	def html_to_text( self, html: str ) -> str:
@@ -407,7 +367,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.html_to_text'
+			exception.method = 'html_to_text( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def coerce_items( self, value: Any ) -> List[ str ]:
@@ -424,7 +384,6 @@ class WebFetcher( Fetcher ):
 		Returns:
 		    List[str]: Text or identifier values produced by the operation.
 		"""
-		throw_if( 'value', value )
 		if value is None:
 			return [ ]
 		
@@ -470,7 +429,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.extract_title'
+			exception.method = 'extract_title( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def truncate_text( self, text: str, limit: int=12000 ) -> str:
@@ -505,7 +464,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.truncate_text'
+			exception.method = 'truncate_text( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def normalize_url( self, base_url: str, href: str ) -> str:
@@ -610,7 +569,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.extract_links'
+			exception.method = 'extract_links( self, *args, **kwargs ) -> List[ str ]'
 			raise exception
 	
 	def extract_structured_data( self, url: str, html: str,
@@ -760,7 +719,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.extract_structured_data'
+			exception.method = 'extract_structured_data( self, *args, **kwargs ) -> Dict[ str, List[ str ] ]'
 			raise exception
 	
 	def scrape_paragraphs( self, uri: str ) -> List[ str ] | None:
@@ -791,7 +750,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_paragraphs'
+			exception.method = 'scrape_paragraphs( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_lists( self, uri: str ) -> List[ str ] | None:
@@ -822,7 +781,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_lists'
+			exception.method = 'scrape_lists( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_tables( self, uri: str ) -> List[ str ] | None:
@@ -853,7 +812,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_tables'
+			exception.method = 'scrape_tables( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_articles( self, uri: str ) -> List[ str ] | None:
@@ -884,7 +843,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_articles'
+			exception.method = 'scrape_articles( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_headings( self, uri: str ) -> List[ str ] | None:
@@ -915,7 +874,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_headings'
+			exception.method = 'scrape_headings( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_divisions( self, uri: str ) -> List[ str ] | None:
@@ -946,7 +905,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_divisions'
+			exception.method = 'scrape_divisions( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_sections( self, uri: str ) -> List[ str ] | None:
@@ -977,7 +936,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_sections'
+			exception.method = 'scrape_sections( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_blockquotes( self, uri: str ) -> List[ str ] | None:
@@ -1008,7 +967,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_blockquotes'
+			exception.method = 'scrape_blockquotes( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_hyperlinks( self, uri: str ) -> List[ str ] | None:
@@ -1039,7 +998,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_hyperlinks'
+			exception.method = 'scrape_hyperlinks( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
 	def scrape_images( self, uri: str ) -> List[ str ] | None:
@@ -1070,9 +1029,61 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'WebFetcher.scrape_images'
+			exception.method = 'scrape_images( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'WebFetcher'
+			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			raise exception
+
 class WebCrawler( WebFetcher ):
 	"""Web Crawler fetcher.
 
@@ -1179,7 +1190,7 @@ class WebCrawler( WebFetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
-			exception.method = 'WebCrawler.fetch'
+			exception.method = 'fetch( self, url: str, time: int=10 ) -> Result | None'
 			raise exception
 	
 	def render_with_playwright( self, url: str, timeout: int=15 ) -> str:
@@ -1214,7 +1225,7 @@ class WebCrawler( WebFetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
-			exception.method = 'WebCrawler.render_with_playwright'
+			exception.method = 'render_with_playwright( self, url: str, timeout: int=15 ) -> str'
 			raise exception
 	
 	def scrape_page( self, url: str, include_title: bool=True, include_basic_text: bool=True,
@@ -1239,7 +1250,6 @@ class WebCrawler( WebFetcher ):
 		Returns:
 		    Dict[str, Any]: Extracted and normalized content values.
 		"""
-		throw_if( 'url', url )
 		page_result: Dict[ str, Any ] = { 'url': url, 'status_code': None, 'encoding': None,
 			'title': '', 'plain_text': '', 'raw_html': '', 'links_discovered': [ ], 'data': { },
 			'errors': [ ], 'content_bytes': 0, 'truncated_by_max_bytes': False, }
@@ -1248,8 +1258,8 @@ class WebCrawler( WebFetcher ):
 			self.fetch( url=url, time=int( request_timeout ) )
 			raw_html = self.html or ''
 			if self.response is not None:
-				page_result[ 'status_code' ] = self.response.status_code
-				page_result[ 'encoding' ] = self.response.encoding
+				page_result[ 'status_code' ] = getattr( self.response, 'status_code', None )
+				page_result[ 'encoding' ] = getattr( self.response, 'encoding', None )
 			else:
 				page_result[ 'status_code' ] = 200
 				page_result[ 'encoding' ] = 'rendered'
@@ -1388,7 +1398,7 @@ class WebCrawler( WebFetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
-			exception.method = 'WebCrawler.crawl'
+			exception.method = 'crawl( self, *args ) -> Dict[ str, Any ]'
 			raise exception
 
 class ArXiv( Fetcher ):
@@ -1485,7 +1495,7 @@ class ArXiv( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ArXiv'
-			exception.method = 'ArXiv.fetch'
+			exception.method = 'fetch( self, *kwargs ) -> List[ Document ]'
 			raise exception
 
 class GoogleDrive( Fetcher ):
@@ -1690,7 +1700,7 @@ class GoogleDrive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleDrive'
-			exception.method = 'GoogleDrive.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> List[ Document ] | None'
 			raise exception
 
 class Wikipedia( Fetcher ):
@@ -1786,7 +1796,7 @@ class Wikipedia( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'Wikipedia'
-			exception.method = 'Wikipedia.fetch'
+			exception.method = 'fetch( self, question: str, **kwargs ) -> List[ Document ]'
 			raise exception
 
 class TheNews( Fetcher ):
@@ -2013,7 +2023,7 @@ class TheNews( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'TheNews'
-			exception.method = 'TheNews.fetch'
+			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 
 class GoogleSearch( Fetcher ):
@@ -2292,7 +2302,7 @@ class GoogleSearch( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleSearch'
-			exception.method = 'GoogleSearch.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 
 class GoogleMaps( Fetcher ):
@@ -2453,7 +2463,8 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'GoogleMaps.geocode_location'
+			exception.method = ('geocode_location( self, address: str ) '
+				'-> Tuple[ float, float ]')
 			raise exception
 
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
@@ -2475,9 +2486,9 @@ class GoogleMaps( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'lat', lat )
-		throw_if( 'long', long )
 		try:
+			throw_if( 'latitude', lat )
+			throw_if( 'longitude', long )
 			self.mode = 'geocode_coordinates'
 			self.latitude = float( lat )
 			self.longitude = float( long )
@@ -2499,7 +2510,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'GoogleMaps.geocode_coordinates'
+			exception.method = 'geocode_coordinates( self, lat: float, long: float ) -> str | None'
 			raise exception
 	
 	def validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None:
@@ -2520,26 +2531,36 @@ class GoogleMaps( Fetcher ):
 		Raises:
 		    TypeError: If a supplied value has an unsupported type.
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'address', address )
-		if not isinstance( address, list ):
-			raise TypeError( 'address must be a list of address-line strings.' )
-		
-		self.mode = 'validate_address'
-		self.url = 'https://addressvalidation.googleapis.com/v1:validateAddress'
-		self.address_lines = [ str( line ).strip( ) for line in address if
-			line is not None and str( line ).strip( ) ]
-		
-		if not self.address_lines:
-			raise ValueError( 'At least one address line is required.' )
-		
-		self.params = { 'key': self.api_key }
-		self.payload = { 'address': { 'addressLines': self.address_lines } }
-		self.response = requests.post( url=self.url, params=self.params, json=self.payload,
-			headers=self.headers, timeout=self.timeout )
-		self.response.raise_for_status( )
-		self.result = self.response.json( )
-		return self.result
+		try:
+			throw_if( 'address', address )
+			if not isinstance( address, list ):
+				raise TypeError( 'address must be a list of address-line strings.' )
+			
+			self.mode = 'validate_address'
+			self.url = 'https://addressvalidation.googleapis.com/v1:validateAddress'
+			self.address_lines = [ str( line ).strip( ) for line in address if
+				line is not None and str( line ).strip( ) ]
+			
+			if not self.address_lines:
+				raise ValueError( 'At least one address line is required.' )
+			
+			self.params = { 'key': self.api_key }
+			self.payload = { 'address': { 'addressLines': self.address_lines } }
+			self.response = requests.post( url=self.url, params=self.params, json=self.payload,
+				headers=self.headers, timeout=self.timeout )
+			self.response.raise_for_status( )
+			self.result = self.response.json( )
+			return self.result
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GoogleMaps'
+			exception.method = 'validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None'
+			raise exception
+	
 	def request_directions( self, origin: str, destination: str,
 			mode: str='driving' ) -> Dict[ str, Any ] | None:
 		"""Request directions.
@@ -2583,9 +2604,54 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'GoogleMaps.request_directions'
+			exception.method = 'request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None'
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+					'description': ( f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service." ),
+					'parameters': { 'type': 'object', 'properties': parameters,
+							'required': required } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GoogleMaps'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
+			raise exception
+
 class GoogleWeather( Fetcher ):
 	"""Google Weather fetcher.
 
@@ -2718,7 +2784,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.resolve_coordinates'
+			exception.method = 'resolve_coordinates( self, address: str ) -> Tuple[ float, float ]'
 			raise exception
 	
 	def request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None:
@@ -2784,7 +2850,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.request'
+			exception.method = 'request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def package_response( self ) -> Dict[ str, Any ]:
@@ -2817,7 +2883,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.package_response'
+			exception.method = 'package_response( self ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_current( self, address: str, units_system: str='METRIC',
@@ -2864,7 +2930,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.fetch_current'
+			exception.method = 'fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -2918,7 +2984,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.fetch_hourly_forecast'
+			exception.method = 'fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -2972,7 +3038,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.fetch_daily_forecast'
+			exception.method = 'fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3026,7 +3092,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.fetch_hourly_history'
+			exception.method = 'fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -3069,7 +3135,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'GoogleWeather.fetch_alerts'
+			exception.method = 'fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 
 class NavalObservatory( Fetcher ):
@@ -3157,13 +3223,23 @@ class NavalObservatory( Fetcher ):
 		    str: Validated date value.
 
 		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'date_value', date_value )
-		value = str( date_value ).strip( )
-		calendar_date = dt.datetime.strptime( value, '%Y-%m-%d' )
-		if calendar_date.year < 1800 or calendar_date.year > 2050:
-			raise ValueError( 'Celestial navigation dates must be between 1800 and 2050.' )
-		return value
+		try:
+			throw_if( 'date_value', date_value )
+			value = str( date_value ).strip( )
+			calendar_date = dt.datetime.strptime( value, '%Y-%m-%d' )
+			if calendar_date.year < 1800 or calendar_date.year > 2050:
+				raise ValueError( 'Celestial navigation dates must be between 1800 and 2050.' )
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NavalObservatory'
+			exception.method = 'validate_date( self, date_value: str ) -> str'
+			raise exception
+	
 	def validate_time( self, time_value: str ) -> str:
 		"""Validate time.
 
@@ -3180,18 +3256,28 @@ class NavalObservatory( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'time_value', time_value )
-		value = str( time_value ).strip( )
-		pattern = (r'^(?:[01]\d|2[0-3]):[0-5]\d'
-		           r'(?:'
-		           r':[0-5]\d(?:\.\d{1,6})?'
-		           r')?$')
-		
-		if not re.fullmatch( pattern, value ):
-			raise ValueError( "Invalid time format. Use HH:MM, HH:MM:SS, or HH:MM:SS.S" )
-		
-		return value
+		try:
+			throw_if( 'time_value', time_value )
+			value = str( time_value ).strip( )
+			pattern = (r'^(?:[01]\d|2[0-3]):[0-5]\d'
+			           r'(?:'
+			           r':[0-5]\d(?:\.\d{1,6})?'
+			           r')?$')
+			
+			if not re.fullmatch( pattern, value ):
+				raise ValueError( "Invalid time format. Use HH:MM, HH:MM:SS, or HH:MM:SS.S" )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NavalObservatory'
+			exception.method = 'validate_time( self, time_value: str ) -> str'
+			raise exception
+	
 	def validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]:
 		"""Validate coordinates.
 
@@ -3209,16 +3295,26 @@ class NavalObservatory( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		lat = float( latitude )
-		lon = float( longitude )
-		if not (-90.0 <= lat <= 90.0):
-			raise ValueError( 'Latitude must be between -90 and 90 and finite.' )
-		if not (-180.0 <= lon <= 180.0):
-			raise ValueError( 'Longitude must be between -180 and 180 and finite.' )
-		return lat, lon
+		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			lat = float( latitude )
+			lon = float( longitude )
+			if not (-90.0 <= lat <= 90.0):
+				raise ValueError( 'Latitude must be between -90 and 90 and finite.' )
+			if not (-180.0 <= lon <= 180.0):
+				raise ValueError( 'Longitude must be between -180 and 180 and finite.' )
+			return lat, lon
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NavalObservatory'
+			exception.method = 'validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]'
+			raise exception
+	
 	def fetch_celnav( self, date_value: str, time_value: str, latitude: float,
 			longitude: float, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Retrieve celnav data.
@@ -3245,10 +3341,6 @@ class NavalObservatory( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'date_value', date_value )
-		throw_if( 'time_value', time_value )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
 		try:
 			throw_if( 'time', time )
 			self.timeout = int( time )
@@ -3281,7 +3373,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'NavalObservatory.fetch_celnav'
+			exception.method = "fetch_celnav( self, date_value: str, time_value: str, latitude: float, longitude: float, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='celnav', date_value: str='',
@@ -3325,9 +3417,54 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'NavalObservatory.fetch'
+			exception.method = "fetch( self, mode: str='celnav', date_value: str='', time_value: str='', latitude: float=0.0, longitude: float=0.0, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+					'description': ( f'{description.strip( )} '
+							f'This function uses the {tool.strip( )} service.' ),
+					'parameters': { 'type': 'object', 'properties': parameters,
+							'required': required } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NavalObservatory'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
+			raise exception
+
 class SatelliteCenter( Fetcher ):
 	"""Satellite Center fetcher.
 
@@ -3423,7 +3560,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'SatelliteCenter.fetch_observatories'
+			exception.method = 'fetch_observatories( self ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_ground_stations( self ) -> Dict[ str, Any ] | None:
@@ -3457,7 +3594,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'SatelliteCenter.fetch_ground_stations'
+			exception.method = 'fetch_ground_stations( self ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_locations( self, observatories: str, start_time: str, end_time: str,
@@ -3543,7 +3680,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'SatelliteCenter.fetch_locations'
+			exception.method = "fetch_locations( self, observatories: str, start_time: str, end_time: str, coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='observatories', query: str='', start_time: str='',
@@ -3595,7 +3732,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'SatelliteCenter.fetch'
+			exception.method = "fetch( self, mode: str='observatories', query: str='', start_time: str='', end_time: str='', coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 
 class EarthObservatory( Fetcher ):
@@ -3710,7 +3847,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'EarthObservatory.request'
+			exception.method = 'request( self, time: int=20 ) -> Dict[ str, Any ]'
 			raise exception
 
 	def fetch_events( self, status: str='open', category: str='', source: str='',
@@ -3787,7 +3924,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'EarthObservatory.fetch_events'
+			exception.method = "fetch_events( self, status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3826,7 +3963,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'EarthObservatory.fetch_categories'
+			exception.method = 'fetch_categories( self, time: int=20 ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_sources( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3864,7 +4001,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'EarthObservatory.fetch_sources'
+			exception.method = 'fetch_sources( self, time: int=20 ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3920,7 +4057,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'EarthObservatory.fetch_layers'
+			exception.method = "fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='events', status: str='open', category: str='',
@@ -3974,9 +4111,53 @@ class EarthObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'EarthObservatory.fetch'
+			exception.method = "fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
+				               f'service.', 'parameters': { 'type': 'object',
+					'properties': parameters, 'required': required } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EarthObservatory'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			raise exception
+
 class GlobalImagery( Fetcher ):
 	"""Global Imagery fetcher.
 
@@ -4094,19 +4275,29 @@ class GlobalImagery( Fetcher ):
 		Raises:
 		    Error: If a required value or service option is invalid.
 		"""
-		throw_if( 'projection', projection )
-		throw_if( 'quality', quality )
-		throw_if( 'version', version )
-		self.projection = str( projection ).strip( ).lower( ).replace( ':', '' )
-		self.quality = str( quality ).strip( ).lower( )
-		self.version = str( version ).strip( )
-		if self.projection not in ('epsg4326', 'epsg3857', 'epsg3413', 'epsg3031'):
-			raise ValueError( 'Unsupported NASA GIBS WMS projection.' )
-		if not re.fullmatch( r'[a-z0-9_-]+', self.quality ):
-			raise ValueError( 'Invalid NASA GIBS service quality identifier.' )
-		if self.version not in ('1.1.1', '1.3.0'):
-			raise ValueError( 'GIBS WMS version must be 1.1.1 or 1.3.0.' )
-		return self.projection, self.quality, self.version
+		try:
+			throw_if( 'projection', projection )
+			throw_if( 'quality', quality )
+			throw_if( 'version', version )
+			self.projection = str( projection ).strip( ).lower( ).replace( ':', '' )
+			self.quality = str( quality ).strip( ).lower( )
+			self.version = str( version ).strip( )
+			if self.projection not in ('epsg4326', 'epsg3857', 'epsg3413', 'epsg3031'):
+				raise ValueError( 'Unsupported NASA GIBS WMS projection.' )
+			if not re.fullmatch( r'[a-z0-9_-]+', self.quality ):
+				raise ValueError( 'Invalid NASA GIBS service quality identifier.' )
+			if self.version not in ('1.1.1', '1.3.0'):
+				raise ValueError( 'GIBS WMS version must be 1.1.1 or 1.3.0.' )
+			return self.projection, self.quality, self.version
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GlobalImagery'
+			exception.method = (
+				'validate_wms_options( self, projection: str, quality: str, '
+				'version: str ) -> Tuple[ str, str, str ]' )
+			raise exception
+
 	def get_capabilities_url( self, projection: str='epsg4326',
 			quality: str='best', version: str='1.1.1' ) -> str:
 		"""Get capabilities url.
@@ -4141,7 +4332,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'GlobalImagery.get_capabilities_url'
+			exception.method = "get_capabilities_url( self, projection: str='epsg4326', quality: str='best', version: str='1.1.1' ) -> str"
 			raise exception
 	
 	def build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ],
@@ -4232,7 +4423,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'GlobalImagery.build_wms_url'
+			exception.method = "build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, version: str='1.1.1' ) -> str"
 			raise exception
 	
 	def fetch_wms_map( self, layer: str, image_date: str,
@@ -4272,9 +4463,6 @@ class GlobalImagery( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'layer', layer )
-		throw_if( 'image_date', image_date )
-		throw_if( 'bbox', bbox )
 		try:
 			throw_if( 'time', time )
 			self.timeout = int( time )
@@ -4326,7 +4514,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'GlobalImagery.fetch_wms_map'
+			exception.method = "fetch_wms_map( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, output_dir: str='python-examples', output_name: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_map_services( self ) -> Dict[ str, Any ] | None:
@@ -4357,7 +4545,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'GlobalImagery.fetch_map_services'
+			exception.method = 'fetch_map_services( self ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None:
@@ -4410,7 +4598,56 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'GlobalImagery.fetch_mercator_map'
+			exception.method = (
+				'fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None' )
+			raise exception
+
+	def create_schema( self, function: str, tool: str, description: str,
+			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if not isinstance( parameters, dict ):
+				raise ValueError( 'parameters must be a dict of parameter schema definitions.' )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
+				               f'service.',
+				'parameters': { 'type': 'object', 'properties': parameters, 'required': required } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GlobalImagery'
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class NearbyObjects( Fetcher ):
@@ -4527,7 +4764,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.request'
+			exception.method = 'request( self, time: int=20 ) -> Dict[ str, Any ]'
 			raise exception
 
 	def validate_nhats_options( self, dv: float, dur: int, stay: int,
@@ -4549,23 +4786,33 @@ class NearbyObjects( Fetcher ):
 		Raises:
 		    Error: If any NHATS mission constraint is unsupported.
 		"""
-		throw_if( 'dv', dv )
-		throw_if( 'dur', dur )
-		throw_if( 'stay', stay )
-		throw_if( 'launch', launch )
-		self.dv = float( dv )
-		self.dur = int( dur )
-		self.stay = int( stay )
-		self.launch = str( launch ).strip( )
-		if self.dv not in range( 4, 13 ):
-			raise ValueError( 'NHATS dv must be an integer from 4 through 12.' )
-		if self.dur not in range( 60, 451, 30 ):
-			raise ValueError( 'NHATS dur must be between 60 and 450 in 30-day steps.' )
-		if self.stay not in (8, 16, 24, 32):
-			raise ValueError( 'NHATS stay must be 8, 16, 24, or 32 days.' )
-		if self.launch not in ('2020-2025', '2025-2030', '2030-2035',
-				'2035-2040', '2040-2045', '2020-2045'):
-			raise ValueError( 'Unsupported NHATS launch window.' )
+		try:
+			throw_if( 'dv', dv )
+			throw_if( 'dur', dur )
+			throw_if( 'stay', stay )
+			throw_if( 'launch', launch )
+			self.dv = float( dv )
+			self.dur = int( dur )
+			self.stay = int( stay )
+			self.launch = str( launch ).strip( )
+			if self.dv not in range( 4, 13 ):
+				raise ValueError( 'NHATS dv must be an integer from 4 through 12.' )
+			if self.dur not in range( 60, 451, 30 ):
+				raise ValueError( 'NHATS dur must be between 60 and 450 in 30-day steps.' )
+			if self.stay not in (8, 16, 24, 32):
+				raise ValueError( 'NHATS stay must be 8, 16, 24, or 32 days.' )
+			if self.launch not in ('2020-2025', '2025-2030', '2030-2035',
+					'2035-2040', '2040-2045', '2020-2045'):
+				raise ValueError( 'Unsupported NHATS launch window.' )
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NearbyObjects'
+			exception.method = (
+				'validate_nhats_options( self, dv: float, dur: int, '
+				'stay: int, launch: str ) -> None' )
+			raise exception
+
 	def fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD',
 			body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[
 				                                                                              str, Any ] | None:
@@ -4630,7 +4877,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_close_approaches'
+			exception.method = "fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_object_lookup( self, query: str, query_type: str='sstr',
@@ -4690,7 +4937,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_object_lookup'
+			exception.method = "fetch_object_lookup( self, query: str, query_type: str='sstr', include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_nhats_summary( self, dv: float = 6.0, dur: int=360, stay: int=8,
@@ -4742,7 +4989,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_nhats_summary'
+			exception.method = "fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float = 6.0, dur: int=360, stay: int=8,
@@ -4787,7 +5034,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_nhats_object'
+			exception.method = "fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ]:
@@ -4834,7 +5081,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_fireballs'
+			exception.method = "fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch( self, mode: str='close_approaches', start_date: str='',
@@ -4915,9 +5162,54 @@ class NearbyObjects( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch'
+			exception.method = "fetch( self, mode: str='close_approaches', start_date: str='', end_date: str='', query: str='', query_type: str='sstr', dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
+				               f'service.',
+				'parameters': { 'type': 'object', 'properties': parameters, 'required': required } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'NearbyObjects'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			raise exception
+
 class OpenScience( Fetcher ):
 	"""Open Science fetcher.
 
@@ -5002,15 +5294,25 @@ class OpenScience( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'format_value', format_value )
-		value = str( format_value ).strip( ).lower( )
-		
-		allowed = { 'json', 'csv', 'tsv', 'browser' }
-		if value not in allowed:
-			raise ValueError( "Unsupported format. Use one of: json, csv, tsv, browser." )
-		
-		return value
+		try:
+			throw_if( 'format_value', format_value )
+			value = str( format_value ).strip( ).lower( )
+			
+			allowed = { 'json', 'csv', 'tsv', 'browser' }
+			if value not in allowed:
+				raise ValueError( "Unsupported format. Use one of: json, csv, tsv, browser." )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenScience'
+			exception.method = 'validate_format( self, format_value: str ) -> str'
+			raise exception
+	
 	def coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str:
 		"""Coerce response.
 
@@ -5044,7 +5346,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.coerce_response'
+			exception.method = "coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str"
 			raise exception
 	
 	def request( self, time: int=20 ) -> Dict[ str, Any ] | str:
@@ -5079,7 +5381,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.request'
+			exception.method = 'request( self, time: int=20 ) -> Dict[ str, Any ] | str'
 			raise exception
 
 	def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -5118,7 +5420,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.fetch_dataset'
+			exception.method = "fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_metadata( self, query: str, format_value: str='json',
@@ -5161,7 +5463,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.fetch_metadata'
+			exception.method = "fetch_metadata( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
@@ -5204,7 +5506,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.fetch_assays'
+			exception.method = "fetch_assays( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
@@ -5247,7 +5549,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.fetch_data'
+			exception.method = "fetch_data( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='dataset', query: str='',
@@ -5296,9 +5598,61 @@ class OpenScience( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience.fetch'
+			exception.method = "fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+		required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} '
+							f'This function uses the {tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenScience'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			raise exception
+
 class SpaceWeather( Fetcher ):
 	"""Space Weather fetcher.
 
@@ -5416,8 +5770,6 @@ class SpaceWeather( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'start_date', start_date )
-		throw_if( 'end_date', end_date )
 		try:
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'time', time )
@@ -5485,7 +5837,7 @@ class SpaceWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = 'SpaceWeather.fetch_endpoint'
+			exception.method = "fetch_endpoint( self, endpoint: str, start_date: str, end_date: str, time: int=20, location: str='', catalog: str='', notification_type: str='', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='cme', start_date: str='', end_date: str='',
@@ -5551,9 +5903,60 @@ class SpaceWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = 'SpaceWeather.fetch'
+			exception.method = "fetch( self, mode: str='cme', start_date: str='', end_date: str='', time: int=20, location: str='ALL', catalog: str='ALL', notification_type: str='all', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'SpaceWeather'
+			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			raise exception
+
 class AstroCatalog( Fetcher ):
 	"""Astro Catalog fetcher.
 
@@ -5661,7 +6064,6 @@ class AstroCatalog( Fetcher ):
 		Returns:
 		    Dict[str, Any]: Structured mapping produced by the operation.
 		"""
-		throw_if( 'argument_string', argument_string )
 		params: Dict[ str, Any ] = { }
 		if not argument_string or not argument_string.strip( ):
 			return params
@@ -5726,7 +6128,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'AstroCatalog.request'
+			exception.method = "request( self, route: str, params: Dict[ str, Any ] | None=None, time: int=20 ) -> Any"
 			raise exception
 	
 	def fetch_object( self, name: str, quantity: str='', attributes: str='',
@@ -5776,7 +6178,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'AstroCatalog.fetch_object'
+			exception.method = "fetch_object( self, name: str, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 	
 	def cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='',
@@ -5834,7 +6236,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'AstroCatalog.cone_search'
+			exception.method = "cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 	
 	def fetch( self, mode: str='object_query', query: str='', quantity: str='',
@@ -5898,7 +6300,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'AstroCatalog.fetch'
+			exception.method = "fetch( self, mode: str='object_query', query: str='', quantity: str='', attributes: str='', arguments: str='', ra: str='', dec: str='', radius: int=2, data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 
 class AstroQuery( Fetcher ):
@@ -5993,6 +6395,11 @@ class AstroQuery( Fetcher ):
 				for col in table.colnames:
 					try:
 						value = row[ col ]
+						if hasattr( value, 'item' ):
+							try:
+								value = value.item( )
+							except Exception:
+								pass
 						record[ str( col ) ] = str( value )
 					except Exception:
 						record[ str( col ) ] = ''
@@ -6004,7 +6411,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'AstroQuery.table_to_records'
+			exception.method = "table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]"
 			raise exception
 	
 	def object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None:
@@ -6045,7 +6452,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'AstroQuery.object_search'
+			exception.method = 'object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None:
@@ -6084,7 +6491,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'AstroQuery.object_ids'
+			exception.method = "object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def region_search( self, ra: str, dec: str, radius: float = 0.5,
@@ -6147,7 +6554,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'AstroQuery.region_search'
+			exception.method = "region_search( self, ra: str, dec: str, radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='object_search', query: str='', ra: str='', dec: str='',
@@ -6195,7 +6602,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'AstroQuery.fetch'
+			exception.method = "fetch( self, mode: str='object_search', query: str='', ra: str='', dec: str='', radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Dict[ str, Any ]"
 			raise exception
 
 class StarMap( Fetcher ):
@@ -6324,7 +6731,6 @@ class StarMap( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'base_url', base_url )
 		try:
 			links: Dict[ str, str ] = { }
 			if not html or not isinstance( html, str ):
@@ -6344,7 +6750,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = 'StarMap.extract_links'
+			exception.method = 'extract_links( self, html: str, base_url: str ) -> Dict[ str, str ]'
 			raise exception
 	
 	def fetch_object_link( self, name: str, zoom: int=5, box_color: str='yellow',
@@ -6397,7 +6803,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = 'StarMap.fetch_object_link'
+			exception.method = 'fetch_object_link( self, *args ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_coordinate_link( self, ra: float, dec: float, zoom: int=5, box_color: str='yellow',
@@ -6462,7 +6868,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = 'StarMap.fetch_coordinate_link'
+			exception.method = 'fetch_coordinate_link( self, *args ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_snapshot( self, ra: float, dec: float, zoom: int=10, image_source: str='DSS2',
@@ -6531,7 +6937,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = 'StarMap.fetch_snapshot'
+			exception.method = 'fetch_snapshot( self, *args ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch( self, mode: str='object_link', query: str='', ra: float = 0.0, dec: float = 0.0,
@@ -6591,7 +6997,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = 'StarMap.fetch'
+			exception.method =  'fetch( self, **kwargs) -> Dict[ str, Any ]'
 			raise exception
 
 class GovData( Fetcher ):
@@ -6702,15 +7108,25 @@ class GovData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'page_size', page_size )
+		try:
+			throw_if( 'page_size', page_size )
+			
+			value = int( page_size )
+			if value < 1 or value > 1000:
+				raise ValueError( 'page_size must be between 1 and 1000.' )
+			
+			return value
 		
-		value = int( page_size )
-		if value < 1 or value > 1000:
-			raise ValueError( 'page_size must be between 1 and 1000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GovData'
+			exception.method = 'validate_page_size( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_sort_field( self, sort_field: str ) -> str:
 		"""Validate sort field.
 
@@ -6727,18 +7143,27 @@ class GovData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'sort_field', sort_field )
-		value = str( sort_field or 'score' ).strip( )
-		allowed = { 'score', 'lastModified' }
+		try:
+			value = str( sort_field or 'score' ).strip( )
+			allowed = { 'score', 'lastModified' }
+			
+			if value not in allowed:
+				raise ValueError(
+					"Unsupported sort field. Use 'score' or 'lastModified'."
+				)
+			
+			return value
 		
-		if value not in allowed:
-			raise ValueError(
-				"Unsupported sort field. Use 'score' or 'lastModified'."
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GovData'
+			exception.method = 'validate_sort_field( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_sort_order( self, sort_order: str ) -> str:
 		"""Validate sort order.
 
@@ -6755,16 +7180,25 @@ class GovData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'sort_order', sort_order )
-		value = str( sort_order or 'DESC' ).strip( ).upper( )
-		allowed = { 'ASC', 'DESC' }
+		try:
+			value = str( sort_order or 'DESC' ).strip( ).upper( )
+			allowed = { 'ASC', 'DESC' }
+			
+			if value not in allowed:
+				raise ValueError( "Unsupported sort order. Use 'ASC' or 'DESC'." )
+			
+			return value
 		
-		if value not in allowed:
-			raise ValueError( "Unsupported sort order. Use 'ASC' or 'DESC'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GovData'
+			exception.method = 'validate_sort_order( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def fetch_search( self, query: str, page_size: int=10, offset_mark: str='*',
 			sort_field: str='score', sort_order: str='DESC', time: int=20 ) -> Dict[
 				                                                                         str, Any ] | None:
@@ -6822,7 +7256,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'GovData.fetch_search'
+			exception.method = 'fetch_search( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_package_summary( self, package_id: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -6879,7 +7313,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'GovData.fetch_package_summary'
+			exception.method = 'fetch_package_summary( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_collection( self, collection: str, start_date: str, page_size: int=10,
@@ -6949,7 +7383,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'GovData.fetch_collection'
+			exception.method = 'fetch_collection( self, *args, **kwargs ) -> Dict[ str, Any ] '
 			raise exception
 	
 	def fetch( self, mode: str='search', query: str='',
@@ -7025,9 +7459,67 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'GovData.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GovData'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class StarChart( Fetcher ):
 	"""Star Chart fetcher.
 
@@ -7173,7 +7665,6 @@ class StarChart( Fetcher ):
 		Returns:
 		    int: Binary integer flag representing the requested enabled or disabled state.
 		"""
-		throw_if( 'value', value )
 		if invert:
 			return 0 if bool( value ) else 1
 		
@@ -7250,7 +7741,10 @@ class StarChart( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'StarChart'
-			exception.method = 'StarChart.search_object'
+			exception.method = (
+					'search_object( self, name: str, time: int=20 ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_object_chart( self, name: str, zoom: int=5, box_color: str='yellow',
@@ -7316,7 +7810,11 @@ class StarChart( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'StarChart'
-			exception.method = 'StarChart.fetch_object_chart'
+			exception.method = (
+					'fetch_object_chart( self, name: str, zoom: int=5, '
+					'box_color: str=yellow, show_box: bool=True, image_source: str=, '
+					'time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_coordinate_chart( self, ra: float, dec: float, zoom: int=5,
@@ -7350,8 +7848,6 @@ class StarChart( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'ra', ra )
-		throw_if( 'dec', dec )
 		try:
 			self.mode = 'coordinate_chart'
 			self.ra = float( ra )
@@ -7392,7 +7888,7 @@ class StarChart( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'StarChart'
-			exception.method = 'StarChart.fetch_coordinate_chart'
+			exception.method = 'fetch_coordinate_chart( self, *args ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_static_chart( self, ra: float, dec: float, zoom: int=5,
@@ -7428,8 +7924,6 @@ class StarChart( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'ra', ra )
-		throw_if( 'dec', dec )
 		try:
 			self.mode = 'static_chart'
 			self.ra = float( ra )
@@ -7475,7 +7969,13 @@ class StarChart( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'StarChart'
-			exception.method = 'StarChart.fetch_static_chart'
+			exception.method = (
+					'fetch_static_chart( self, ra: float, dec: float, zoom: int=5, '
+					'image_source: str=DSS2, show_grid: bool=True, show_lines: bool=True, '
+					'show_boundaries: bool=True, show_const_names: bool=False, '
+					'width: int=900, height: int=450, magnitude: float=7.5 ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='object_chart', query: str='',
@@ -7565,9 +8065,69 @@ class StarChart( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarChart'
-			exception.method = 'StarChart.fetch'
+			exception.method = (
+					'fetch( self, mode: str=object_chart, query: str=, ra: float=0.0, '
+					'dec: float=0.0, zoom: int=5, image_source: str=DSS2, '
+					'box_color: str=yellow, show_box: bool=True, show_grid: bool=True, '
+					'show_lines: bool=True, show_boundaries: bool=True, '
+					'show_const_names: bool=False, width: int=900, height: int=450, '
+					'magnitude: float=7.5, time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'StarChart'
+			exception.method = (
+					'create_schema( self, function: str, tool: str, description: str, '
+					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
+			)
+			raise exception
+
 class Congress( Fetcher ):
 	"""Congress fetcher.
 
@@ -7729,15 +8289,25 @@ class Congress( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 250:
+				raise ValueError( 'limit must be between 1 and 250.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 250:
-			raise ValueError( 'limit must be between 1 and 250.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Congress'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_offset( self, offset: int ) -> int:
 		"""Validate offset.
 
@@ -7754,17 +8324,26 @@ class Congress( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'offset', offset )
-		if offset is None:
-			raise ValueError( 'offset cannot be None.' )
+		try:
+			if offset is None:
+				raise ValueError( 'offset cannot be None.' )
+			
+			value = int( offset )
+			if value < 0:
+				raise ValueError( 'offset must be greater than or equal to 0.' )
+			
+			return value
 		
-		value = int( offset )
-		if value < 0:
-			raise ValueError( 'offset must be greater than or equal to 0.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Congress'
+			exception.method = 'validate_offset( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def normalize_bill_type( self, bill_type: str ) -> str:
 		"""Normalize bill type.
 
@@ -7784,7 +8363,6 @@ class Congress( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'bill_type', bill_type )
 		try:
 			value = str( bill_type or '' ).strip( ).lower( )
 			throw_if( 'bill_type', value )
@@ -7812,7 +8390,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.normalize_bill_type'
+			exception.method = 'normalize_bill_type( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def normalize_law_type( self, law_type: str ) -> str:
@@ -7834,7 +8412,6 @@ class Congress( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'law_type', law_type )
 		try:
 			value = str( law_type or '' ).strip( ).lower( )
 			throw_if( 'law_type', value )
@@ -7850,7 +8427,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.normalize_law_type'
+			exception.method = 'normalize_law_type( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def normalize_report_type( self, report_type: str ) -> str:
@@ -7872,7 +8449,6 @@ class Congress( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'report_type', report_type )
 		try:
 			value = str( report_type or '' ).strip( ).lower( )
 			throw_if( 'report_type', value )
@@ -7890,7 +8466,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.normalize_report_type'
+			exception.method = 'normalize_report_type( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def build_params( self, limit: int=20, offset: int=0,
@@ -7931,7 +8507,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.build_params'
+			exception.method = (
+					'build_params( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, mode: str, url: str, params: Dict[ str, Any ],
@@ -7990,7 +8568,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_congresses( self, limit: int=20, offset: int=0,
@@ -8035,7 +8615,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_congresses'
+			exception.method = (
+					'fetch_congresses( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_bills( self, congress: int, bill_type: str='',
@@ -8105,7 +8687,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_bills'
+			exception.method = (
+					'fetch_bills( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_bill( self, congress: int, bill_type: str, bill_number: int,
@@ -8160,7 +8744,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_bill'
+			exception.method = (
+					'fetch_bill( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_laws( self, congress: int, law_type: str='',
@@ -8218,7 +8804,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_laws'
+			exception.method = (
+					'fetch_laws( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_law( self, congress: int, law_type: str,
@@ -8273,7 +8861,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_law'
+			exception.method = (
+					'fetch_law( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_reports( self, congress: int, report_type: str='',
@@ -8337,7 +8927,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_reports'
+			exception.method = (
+					'fetch_reports( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_report( self, congress: int, report_type: str,
@@ -8392,7 +8984,9 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch_report'
+			exception.method = (
+					'fetch_report( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='congresses', congress: int=0,
@@ -8513,9 +9107,67 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'Congress.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Congress'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class InternetArchive( Fetcher ):
 	"""Internet Archive fetcher.
 
@@ -8633,14 +9285,23 @@ class InternetArchive( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'rows', rows )
-		value = int( rows )
-		if value < 1 or value > 100:
-			raise ValueError( 'rows must be between 1 and 100.' )
+		try:
+			value = int( rows )
+			if value < 1 or value > 100:
+				raise ValueError( 'rows must be between 1 and 100.' )
+			
+			return value
 		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'InternetArchive'
+			exception.method = 'validate_rows( self, rows: int ) -> int'
+			raise exception
+	
 	def validate_page( self, page: int ) -> int:
 		"""Validate page.
 
@@ -8657,14 +9318,23 @@ class InternetArchive( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'page', page )
-		value = int( page )
-		if value < 1:
-			raise ValueError( 'page must be greater than or equal to 1.' )
+		try:
+			value = int( page )
+			if value < 1:
+				raise ValueError( 'page must be greater than or equal to 1.' )
+			
+			return value
 		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'InternetArchive'
+			exception.method = 'validate_page( self, page: int ) -> int'
+			raise exception
+	
 	def build_query( self, keywords: str, media_type: str='',
 			collection: str='' ) -> str:
 		"""Build query.
@@ -8703,7 +9373,10 @@ class InternetArchive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
-			exception.method = 'InternetArchive.build_query'
+			exception.method = (
+					'build_query( self, keywords: str, media_type: str=, '
+					'collection: str= ) -> str'
+			)
 			raise exception
 	
 	def fetch( self, keywords: str, fields: List[ str ] | None = None,
@@ -8737,9 +9410,9 @@ class InternetArchive( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'keywords', keywords )
 		try:
 			self.keywords = str( keywords ).strip( )
+			throw_if( 'keywords', self.keywords )
 			
 			self.timeout = int( time )
 			self.rows = self.validate_rows( rows )
@@ -8788,9 +9461,71 @@ class InternetArchive( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
-			exception.method = 'InternetArchive.fetch'
+			exception.method = (
+					'fetch( self, keywords: str, fields: List[ str ] | None=None, '
+					'rows: int=10, page: int=1, sort: str=downloads desc, '
+					'media_type: str=, collection: str=, time: int=20 ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} '
+							f'This function uses the {tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'InternetArchive'
+			exception.method = (
+					'create_schema( self, function: str, tool: str, description: str, '
+					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
+			)
+			raise exception
+
 class OpenWeather( Fetcher ):
 	"""Open Weather fetcher.
 
@@ -9016,7 +9751,10 @@ class OpenWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenWeather'
-			exception.method = 'OpenWeather.geocode_location'
+			exception.method = (
+					'geocode_location( self, location: str, count: int=10 ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_current( self, lat: float, long: float, zone: str='auto',
@@ -9090,7 +9828,10 @@ class OpenWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenWeather'
-			exception.method = 'OpenWeather.fetch_current'
+			exception.method = (
+					'fetch_current( self, lat: float, long: float, zone: str=auto, '
+					'past_days: int=0 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_hourly( self, lat: float, long: float, zone: str='auto',
@@ -9166,7 +9907,10 @@ class OpenWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenWeather'
-			exception.method = 'OpenWeather.fetch_hourly'
+			exception.method = (
+					'fetch_hourly( self, lat: float, long: float, zone: str=auto, '
+					'forecast_days: int=7, past_days: int=0 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_daily( self, lat: float, long: float, zone: str='auto',
@@ -9242,7 +9986,10 @@ class OpenWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenWeather'
-			exception.method = 'OpenWeather.fetch_daily'
+			exception.method = (
+					'fetch_daily( self, lat: float, long: float, zone: str=auto, '
+					'forecast_days: int=7, past_days: int=0 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch( self, location: str, mode: str='current', zone: str='auto',
@@ -9339,9 +10086,67 @@ class OpenWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenWeather'
-			exception.method = 'OpenWeather.fetch'
+			exception.method = (
+					'fetch( self, location: str, mode: str=current, zone: str=auto, '
+					'forecast_days: int=7, past_days: int=0, count: int=10 ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenWeather'
+			exception.method = (
+					'create_schema( self, function: str, tool: str, description: str, '
+					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
+			)
+			raise exception
+
 class HistoricalWeather( Fetcher ):
 	"""Historical Weather fetcher.
 
@@ -9541,7 +10346,10 @@ class HistoricalWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HistoricalWeather'
-			exception.method = 'HistoricalWeather.geocode_location'
+			exception.method = (
+					'geocode_location( self, location: str, count: int=10 ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_historical( self, lat: float, long: float, date: dt.date,
@@ -9618,7 +10426,10 @@ class HistoricalWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HistoricalWeather'
-			exception.method = 'HistoricalWeather.fetch_historical'
+			exception.method = (
+					'fetch_historical( self, lat: float, long: float, date: dt.date, '
+					'zone: str=auto ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch( self, location: str, date: dt.date,
@@ -9686,9 +10497,66 @@ class HistoricalWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HistoricalWeather'
-			exception.method = 'HistoricalWeather.fetch'
+			exception.method = (
+					'fetch( self, location: str, date: dt.date, zone: str=auto, '
+					'count: int=10 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'HistoricalWeather'
+			exception.method = (
+					'create_schema( self, function: str, tool: str, description: str, '
+					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
+			)
+			raise exception
+
 class Grokipedia( Fetcher ):
 	"""Grokipedia fetcher.
 
@@ -9833,7 +10701,7 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = 'Grokipedia.fetch_search'
+			exception.method = 'fetch_search( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_page( self, page: str,
@@ -9889,7 +10757,7 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = 'Grokipedia.fetch_page'
+			exception.method = 'fetch_page( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch( self, mode: str='search', query: str='', page: str='',
@@ -9937,9 +10805,65 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = 'Grokipedia.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} '
+							f'This function uses the {tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Grokipedia'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class GoogleGeocoding( Fetcher ):
 	"""Google Geocoding fetcher.
 
@@ -10125,7 +11049,9 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = 'GoogleGeocoding.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_forward( self, query: str, language: str='en',
@@ -10181,7 +11107,9 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = 'GoogleGeocoding.fetch_forward'
+			exception.method = (
+					'fetch_forward( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_reverse( self, latitude: float, longitude: float,
@@ -10246,7 +11174,9 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = 'GoogleGeocoding.fetch_reverse'
+			exception.method = (
+					'fetch_reverse( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_place( self, place_id: str, language: str='en',
@@ -10302,7 +11232,9 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = 'GoogleGeocoding.fetch_place'
+			exception.method = (
+					'fetch_place( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='forward', query: str='',
@@ -10380,9 +11312,67 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = 'GoogleGeocoding.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GoogleGeocoding'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class CensusData( Fetcher ):
 	"""Census Data fetcher.
 
@@ -10528,7 +11518,7 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'CensusData.normalize_fields'
+			exception.method = 'normalize_fields( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def parse_predicates( self, predicates: str='' ) -> Dict[ str, Any ]:
@@ -10582,7 +11572,9 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'CensusData.parse_predicates'
+			exception.method = (
+					'parse_predicates( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]:
@@ -10634,7 +11626,9 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'CensusData.shape_table'
+			exception.method = (
+					'shape_table( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_variables( self, year: str, dataset: str,
@@ -10695,7 +11689,9 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'CensusData.fetch_variables'
+			exception.method = (
+					'fetch_variables( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_data( self, year: str, dataset: str, fields: str,
@@ -10777,7 +11773,9 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'CensusData.fetch_data'
+			exception.method = (
+					'fetch_data( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='variables', year: str='2022',
@@ -10841,9 +11839,65 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'CensusData.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'CensusData'
+			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			raise exception
+
 class Socrata( Fetcher ):
 	"""Socrata fetcher.
 
@@ -11002,7 +12056,7 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'Socrata.normalize_domain'
+			exception.method = 'normalize_domain( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def normalize_dataset_id( self, dataset_id: str ) -> str:
@@ -11039,7 +12093,7 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'Socrata.normalize_dataset_id'
+			exception.method = 'normalize_dataset_id( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def validate_limit( self, limit: int ) -> int:
@@ -11058,15 +12112,25 @@ class Socrata( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 50000:
+				raise ValueError( 'limit must be between 1 and 50000.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 50000:
-			raise ValueError( 'limit must be between 1 and 50000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Socrata'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_offset( self, offset: int ) -> int:
 		"""Validate offset.
 
@@ -11083,17 +12147,26 @@ class Socrata( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'offset', offset )
-		if offset is None:
-			raise ValueError( 'offset cannot be None.' )
+		try:
+			if offset is None:
+				raise ValueError( 'offset cannot be None.' )
+			
+			value = int( offset )
+			if value < 0:
+				raise ValueError( 'offset must be greater than or equal to 0.' )
+			
+			return value
 		
-		value = int( offset )
-		if value < 0:
-			raise ValueError( 'offset must be greater than or equal to 0.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Socrata'
+			exception.method = 'validate_offset( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def fetch_metadata( self, domain: str, dataset_id: str,
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Retrieve metadata data.
@@ -11118,8 +12191,6 @@ class Socrata( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'domain', domain )
-		throw_if( 'dataset_id', dataset_id )
 		try:
 			throw_if( 'time', time )
 			
@@ -11161,7 +12232,9 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'Socrata.fetch_metadata'
+			exception.method = (
+					'fetch_metadata( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_rows( self, domain: str, dataset_id: str, select: str='',
@@ -11196,8 +12269,6 @@ class Socrata( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'domain', domain )
-		throw_if( 'dataset_id', dataset_id )
 		try:
 			throw_if( 'time', time )
 			
@@ -11262,7 +12333,9 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'Socrata.fetch_rows'
+			exception.method = (
+					'fetch_rows( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='rows', domain: str='data.cdc.gov',
@@ -11330,9 +12403,67 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'Socrata.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Socrata'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class HealthData( Fetcher ):
 	"""Health Data fetcher.
 
@@ -11491,7 +12622,7 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'HealthData.normalize_domain'
+			exception.method = 'normalize_domain( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def normalize_dataset_id( self, dataset_id: str ) -> str:
@@ -11528,7 +12659,7 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'HealthData.normalize_dataset_id'
+			exception.method = 'normalize_dataset_id( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def validate_limit( self, limit: int ) -> int:
@@ -11547,15 +12678,25 @@ class HealthData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 50000:
+				raise ValueError( 'limit must be between 1 and 50000.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 50000:
-			raise ValueError( 'limit must be between 1 and 50000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'HealthData'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_offset( self, offset: int ) -> int:
 		"""Validate offset.
 
@@ -11572,17 +12713,26 @@ class HealthData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'offset', offset )
-		if offset is None:
-			raise ValueError( 'offset cannot be None.' )
+		try:
+			if offset is None:
+				raise ValueError( 'offset cannot be None.' )
+			
+			value = int( offset )
+			if value < 0:
+				raise ValueError( 'offset must be greater than or equal to 0.' )
+			
+			return value
 		
-		value = int( offset )
-		if value < 0:
-			raise ValueError( 'offset must be greater than or equal to 0.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'HealthData'
+			exception.method = 'validate_offset( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def fetch_metadata( self, domain: str, dataset_id: str,
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Retrieve metadata data.
@@ -11607,8 +12757,6 @@ class HealthData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'domain', domain )
-		throw_if( 'dataset_id', dataset_id )
 		try:
 			throw_if( 'time', time )
 			
@@ -11650,7 +12798,9 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'HealthData.fetch_metadata'
+			exception.method = (
+					'fetch_metadata( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_rows( self, domain: str, dataset_id: str, select: str='',
@@ -11685,8 +12835,6 @@ class HealthData( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'domain', domain )
-		throw_if( 'dataset_id', dataset_id )
 		try:
 			throw_if( 'time', time )
 			
@@ -11751,7 +12899,9 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'HealthData.fetch_rows'
+			exception.method = (
+					'fetch_rows( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='rows', domain: str='healthdata.gov',
@@ -11819,9 +12969,67 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'HealthData.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'HealthData'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class GlobalHealthData( Fetcher ):
 	"""Global Health Data fetcher.
 
@@ -11958,7 +13166,7 @@ class GlobalHealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
-			exception.method = 'GlobalHealthData.normalize_query_path'
+			exception.method = 'normalize_query_path( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def fetch_indicator_registry( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -12026,7 +13234,10 @@ class GlobalHealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
-			exception.method = 'GlobalHealthData.fetch_indicator_registry'
+			exception.method = (
+					'fetch_indicator_registry( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_athena( self, query_path: str, fmt: str='json',
@@ -12103,7 +13314,9 @@ class GlobalHealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
-			exception.method = 'GlobalHealthData.fetch_athena'
+			exception.method = (
+					'fetch_athena( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='indicator_registry', query_path: str='',
@@ -12158,9 +13371,67 @@ class GlobalHealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
-			exception.method = 'GlobalHealthData.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'GlobalHealthData'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class UnitedNations( Fetcher ):
 	"""United Nations fetcher.
 
@@ -12286,7 +13557,7 @@ class UnitedNations( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
-			exception.method = 'UnitedNations.normalize_query_path'
+			exception.method = 'normalize_query_path( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -12351,7 +13622,9 @@ class UnitedNations( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
-			exception.method = 'UnitedNations.fetch_datasets'
+			exception.method = (
+					'fetch_datasets( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_sdmx_query( self, query_path: str,
@@ -12421,7 +13694,9 @@ class UnitedNations( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
-			exception.method = 'UnitedNations.fetch_sdmx_query'
+			exception.method = (
+					'fetch_sdmx_query( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='datasets', query_path: str='',
@@ -12471,9 +13746,67 @@ class UnitedNations( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
-			exception.method = 'UnitedNations.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'UnitedNations'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class WorldPopulation( Fetcher ):
 	"""World Population fetcher.
 
@@ -12614,7 +13947,7 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = 'WorldPopulation.normalize_asset_path'
+			exception.method = 'normalize_asset_path( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def validate_page( self, page: int ) -> int:
@@ -12633,15 +13966,25 @@ class WorldPopulation( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'page', page )
+		try:
+			throw_if( 'page', page )
+			
+			value = int( page )
+			if value < 1:
+				raise ValueError( 'page must be greater than or equal to 1.' )
+			
+			return value
 		
-		value = int( page )
-		if value < 1:
-			raise ValueError( 'page must be greater than or equal to 1.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'WorldPopulation'
+			exception.method = 'validate_page( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_page_size( self, page_size: int ) -> int:
 		"""Validate page size.
 
@@ -12658,15 +14001,25 @@ class WorldPopulation( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'page_size', page_size )
+		try:
+			throw_if( 'page_size', page_size )
+			
+			value = int( page_size )
+			if value < 1 or value > 500:
+				raise ValueError( 'page_size must be between 1 and 500.' )
+			
+			return value
 		
-		value = int( page_size )
-		if value < 1 or value > 500:
-			raise ValueError( 'page_size must be between 1 and 500.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'WorldPopulation'
+			exception.method = 'validate_page_size( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def fetch_catalog( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Retrieve catalog data.
 
@@ -12729,7 +14082,9 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = 'WorldPopulation.fetch_catalog'
+			exception.method = (
+					'fetch_catalog( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def search_catalog( self, query: str='', page: int=1, page_size: int=25,
@@ -12803,7 +14158,9 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = 'WorldPopulation.search_catalog'
+			exception.method = (
+					'search_catalog( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_raster_metadata( self, asset_path: str,
@@ -12872,7 +14229,10 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = 'WorldPopulation.fetch_raster_metadata'
+			exception.method = (
+					'fetch_raster_metadata( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='catalog', query: str='',
@@ -12937,9 +14297,67 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = 'WorldPopulation.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'WorldPopulation'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class Wonder( Fetcher ):
 	"""Wonder fetcher.
 
@@ -13064,7 +14482,7 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'Wonder.normalize_dataset_id'
+			exception.method = 'normalize_dataset_id( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def build_template( self, dataset_id: str='D76' ) -> str:
@@ -13116,7 +14534,7 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'Wonder.build_template'
+			exception.method = 'build_template( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def fetch_template( self, dataset_id: str='D76' ) -> Dict[ str, Any ] | None:
@@ -13168,7 +14586,9 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'Wonder.fetch_template'
+			exception.method = (
+					'fetch_template( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def submit_query( self, dataset_id: str, request_xml: str,
@@ -13237,7 +14657,9 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'Wonder.submit_query'
+			exception.method = (
+					'submit_query( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='metadata_template', dataset_id: str='D76',
@@ -13291,9 +14713,73 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'Wonder.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Wonder'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class USGSEarthquakes( Fetcher ):
 	"""U S G S Earthquakes fetcher.
 
@@ -13447,38 +14933,48 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'feed', feed )
+		try:
+			throw_if( 'feed', feed )
+			
+			value = str( feed ).strip( )
+			allowed = {
+					'all_hour.geojson',
+					'all_day.geojson',
+					'all_week.geojson',
+					'all_month.geojson',
+					'significant_hour.geojson',
+					'significant_day.geojson',
+					'significant_week.geojson',
+					'significant_month.geojson',
+					'4.5_hour.geojson',
+					'4.5_day.geojson',
+					'4.5_week.geojson',
+					'4.5_month.geojson',
+					'2.5_hour.geojson',
+					'2.5_day.geojson',
+					'2.5_week.geojson',
+					'2.5_month.geojson',
+					'1.0_hour.geojson',
+					'1.0_day.geojson',
+					'1.0_week.geojson',
+					'1.0_month.geojson'
+			}
+			
+			if value not in allowed:
+				raise ValueError( f'Unsupported USGS earthquake feed: {value}' )
+			
+			return value
 		
-		value = str( feed ).strip( )
-		allowed = {
-				'all_hour.geojson',
-				'all_day.geojson',
-				'all_week.geojson',
-				'all_month.geojson',
-				'significant_hour.geojson',
-				'significant_day.geojson',
-				'significant_week.geojson',
-				'significant_month.geojson',
-				'4.5_hour.geojson',
-				'4.5_day.geojson',
-				'4.5_week.geojson',
-				'4.5_month.geojson',
-				'2.5_hour.geojson',
-				'2.5_day.geojson',
-				'2.5_week.geojson',
-				'2.5_month.geojson',
-				'1.0_hour.geojson',
-				'1.0_day.geojson',
-				'1.0_week.geojson',
-				'1.0_month.geojson'
-		}
-		
-		if value not in allowed:
-			raise ValueError( f'Unsupported USGS earthquake feed: {value}' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_feed( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_limit( self, limit: int ) -> int:
 		"""Validate limit.
 
@@ -13495,15 +14991,25 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 20000:
+				raise ValueError( 'limit must be between 1 and 20000.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 20000:
-			raise ValueError( 'limit must be between 1 and 20000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_magnitude( self, name: str, value: float ) -> float:
 		"""Validate magnitude.
 
@@ -13521,16 +15027,26 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'name', name )
-		throw_if( name, value )
+		try:
+			throw_if( 'name', name )
+			throw_if( name, value )
+			
+			number = float( value )
+			if number < 0.0 or number > 10.0:
+				raise ValueError( f'{name} must be between 0.0 and 10.0.' )
+			
+			return number
 		
-		number = float( value )
-		if number < 0.0 or number > 10.0:
-			raise ValueError( f'{name} must be between 0.0 and 10.0.' )
-		
-		return number
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_magnitude( self, *args, **kwargs ) -> float'
+			raise exception
+	
 	def validate_order_by( self, order_by: str ) -> str:
 		"""Validate order by.
 
@@ -13547,25 +15063,35 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'order_by', order_by )
+		try:
+			throw_if( 'order_by', order_by )
+			
+			value = str( order_by ).strip( ).lower( )
+			allowed = {
+					'time',
+					'time-asc',
+					'magnitude',
+					'magnitude-asc'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					"order_by must be 'time', 'time-asc', 'magnitude', or "
+					"'magnitude-asc'."
+				)
+			
+			return value
 		
-		value = str( order_by ).strip( ).lower( )
-		allowed = {
-				'time',
-				'time-asc',
-				'magnitude',
-				'magnitude-asc'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				"order_by must be 'time', 'time-asc', 'magnitude', or "
-				"'magnitude-asc'."
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_order_by( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_latitude( self, latitude: float ) -> float:
 		"""Validate latitude.
 
@@ -13582,15 +15108,25 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'latitude', latitude )
+		try:
+			throw_if( 'latitude', latitude )
+			
+			value = float( latitude )
+			if value < -90.0 or value > 90.0:
+				raise ValueError( 'latitude must be between -90 and 90.' )
+			
+			return value
 		
-		value = float( latitude )
-		if value < -90.0 or value > 90.0:
-			raise ValueError( 'latitude must be between -90 and 90.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_latitude( self, *args, **kwargs ) -> float'
+			raise exception
+	
 	def validate_longitude( self, longitude: float ) -> float:
 		"""Validate longitude.
 
@@ -13607,15 +15143,25 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'longitude', longitude )
+		try:
+			throw_if( 'longitude', longitude )
+			
+			value = float( longitude )
+			if value < -180.0 or value > 180.0:
+				raise ValueError( 'longitude must be between -180 and 180.' )
+			
+			return value
 		
-		value = float( longitude )
-		if value < -180.0 or value > 180.0:
-			raise ValueError( 'longitude must be between -180 and 180.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_longitude( self, *args, **kwargs ) -> float'
+			raise exception
+	
 	def validate_radius( self, radius: float ) -> float:
 		"""Validate radius.
 
@@ -13632,15 +15178,25 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'radius', radius )
+		try:
+			throw_if( 'max_radius_km', radius )
+			
+			value = float( radius )
+			if value < 0.0 or value > 20001.6:
+				raise ValueError( 'max_radius_km must be between 0.0 and 20001.6.' )
+			
+			return value
 		
-		value = float( radius )
-		if value < 0.0 or value > 20001.6:
-			raise ValueError( 'max_radius_km must be between 0.0 and 20001.6.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = 'validate_radius( self, *args, **kwargs ) -> float'
+			raise exception
+	
 	def to_iso_date( self, value: str ) -> str:
 		"""Convert to iso date.
 
@@ -13658,15 +15214,15 @@ class USGSEarthquakes( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'value', value )
 		try:
+			throw_if( 'date', value )
 			return str( value ).strip( )
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.to_iso_date'
+			exception.method = 'to_iso_date( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def epoch_millis_to_iso( self, value: Any ) -> str:
@@ -13752,7 +15308,9 @@ class USGSEarthquakes( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.shape_feature_rows'
+			exception.method = (
+					'shape_feature_rows( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_features( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -13803,7 +15361,9 @@ class USGSEarthquakes( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.summarize_features'
+			exception.method = (
+					'summarize_features( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self ) -> Dict[ str, Any ]:
@@ -13846,7 +15406,7 @@ class USGSEarthquakes( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.package_response'
+			exception.method = 'package_response( self ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_feed( self, feed: str='all_day.geojson',
@@ -13899,7 +15459,9 @@ class USGSEarthquakes( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.fetch_feed'
+			exception.method = (
+					'fetch_feed( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_search( self, start_date: str, end_date: str,
@@ -14010,7 +15572,9 @@ class USGSEarthquakes( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.fetch_search'
+			exception.method = (
+					'fetch_search( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='feed', feed: str='all_day.geojson',
@@ -14084,9 +15648,73 @@ class USGSEarthquakes( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
-			exception.method = 'USGSEarthquakes.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSEarthquakes'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class USGSWaterData( Fetcher ):
 	"""U S G S Water Data fetcher.
 
@@ -14227,26 +15855,36 @@ class USGSWaterData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'collection', collection )
+		try:
+			throw_if( 'collection', collection )
+			
+			value = str( collection ).strip( )
+			allowed = {
+					'monitoring-locations',
+					'time-series-metadata',
+					'latest-continuous',
+					'latest-daily'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					'Unsupported USGS Water Data collection. Use '
+					'monitoring-locations, time-series-metadata, latest-continuous, '
+					'or latest-daily.'
+				)
+			
+			return value
 		
-		value = str( collection ).strip( )
-		allowed = {
-				'monitoring-locations',
-				'time-series-metadata',
-				'latest-continuous',
-				'latest-daily'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				'Unsupported USGS Water Data collection. Use '
-				'monitoring-locations, time-series-metadata, latest-continuous, '
-				'or latest-daily.'
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSWaterData'
+			exception.method = 'validate_collection( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_limit( self, limit: int ) -> int:
 		"""Validate limit.
 
@@ -14263,15 +15901,25 @@ class USGSWaterData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 10000:
+				raise ValueError( 'limit must be between 1 and 10000.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 10000:
-			raise ValueError( 'limit must be between 1 and 10000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSWaterData'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_parameter_code( self, parameter_code: str ) -> str:
 		"""Validate parameter code.
 
@@ -14288,14 +15936,24 @@ class USGSWaterData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		value = str( parameter_code or '' ).strip( )
+		try:
+			value = str( parameter_code or '' ).strip( )
+			
+			if value and not re.fullmatch( r'\d{5}', value ):
+				raise ValueError( 'parameter_code must be a 5-digit USGS parameter code.' )
+			
+			return value
 		
-		if value and not re.fullmatch( r'\d{5}', value ):
-			raise ValueError( 'parameter_code must be a 5-digit USGS parameter code.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSWaterData'
+			exception.method = 'validate_parameter_code( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def coalesce_records( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""Coalesce records.
 
@@ -14351,7 +16009,9 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.coalesce_records'
+			exception.method = (
+					'coalesce_records( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_monitoring_locations( self,
@@ -14429,7 +16089,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.shape_monitoring_locations'
+			exception.method = (
+					'shape_monitoring_locations( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_time_series_metadata( self,
@@ -14503,7 +16166,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.shape_time_series_metadata'
+			exception.method = (
+					'shape_time_series_metadata( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_latest_values( self,
@@ -14583,7 +16249,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.shape_latest_values'
+			exception.method = (
+					'shape_latest_values( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -14636,7 +16305,9 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -14673,7 +16344,9 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, collection: str, params: Dict[ str, Any ],
@@ -14744,7 +16417,9 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_monitoring_locations( self, monitoring_location_id: str='',
@@ -14807,7 +16482,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.fetch_monitoring_locations'
+			exception.method = (
+					'fetch_monitoring_locations( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_time_series_metadata( self, monitoring_location_id: str='',
@@ -14865,7 +16543,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.fetch_time_series_metadata'
+			exception.method = (
+					'fetch_time_series_metadata( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_latest_continuous( self, monitoring_location_id: str='',
@@ -14923,7 +16604,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.fetch_latest_continuous'
+			exception.method = (
+					'fetch_latest_continuous( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_latest_daily( self, monitoring_location_id: str='',
@@ -14981,7 +16665,10 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.fetch_latest_daily'
+			exception.method = (
+					'fetch_latest_daily( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='monitoring-locations',
@@ -15065,9 +16752,73 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'USGSWaterData.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSWaterData'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class USGSTheNationalMap( Fetcher ):
 	"""U S G S The National Map fetcher.
 
@@ -15199,20 +16950,30 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
+		try:
+			throw_if( 'endpoint', endpoint )
+			
+			value = str( endpoint ).strip( ).lower( )
+			allowed = {
+					'datasets',
+					'products'
+			}
+			
+			if value not in allowed:
+				raise ValueError( "endpoint must be 'datasets' or 'products'." )
+			
+			return value
 		
-		value = str( endpoint ).strip( ).lower( )
-		allowed = {
-				'datasets',
-				'products'
-		}
-		
-		if value not in allowed:
-			raise ValueError( "endpoint must be 'datasets' or 'products'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSTheNationalMap'
+			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_max_items( self, max_items: int ) -> int:
 		"""Validate max items.
 
@@ -15229,15 +16990,25 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'max_items', max_items )
+		try:
+			throw_if( 'max_items', max_items )
+			
+			value = int( max_items )
+			if value < 1 or value > 500:
+				raise ValueError( 'max_items must be between 1 and 500.' )
+			
+			return value
 		
-		value = int( max_items )
-		if value < 1 or value > 500:
-			raise ValueError( 'max_items must be between 1 and 500.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSTheNationalMap'
+			exception.method = 'validate_max_items( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_offset( self, offset: int ) -> int:
 		"""Validate offset.
 
@@ -15254,17 +17025,26 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'offset', offset )
-		if offset is None:
-			raise ValueError( 'offset cannot be None.' )
+		try:
+			if offset is None:
+				raise ValueError( 'offset cannot be None.' )
+			
+			value = int( offset )
+			if value < 0 or value > 10000:
+				raise ValueError( 'offset must be between 0 and 10000.' )
+			
+			return value
 		
-		value = int( offset )
-		if value < 0 or value > 10000:
-			raise ValueError( 'offset must be between 0 and 10000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSTheNationalMap'
+			exception.method = 'validate_offset( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_bbox( self, bbox: str ) -> str:
 		"""Validate bbox.
 
@@ -15281,31 +17061,41 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		value = str( bbox or '' ).strip( )
+		try:
+			value = str( bbox or '' ).strip( )
+			
+			if not value:
+				return ''
+			
+			parts = [
+					part.strip( )
+					for part in value.split( ',' )
+			]
+			
+			if len( parts ) != 4:
+				raise ValueError( 'bbox must use minx,miny,maxx,maxy format.' )
+			
+			numbers = [ float( part ) for part in parts ]
+			minx, miny, maxx, maxy = numbers
+			
+			if minx >= maxx:
+				raise ValueError( 'bbox minx must be less than maxx.' )
+			
+			if miny >= maxy:
+				raise ValueError( 'bbox miny must be less than maxy.' )
+			
+			return ','.join( [ str( number ) for number in numbers ] )
 		
-		if not value:
-			return ''
-		
-		parts = [
-				part.strip( )
-				for part in value.split( ',' )
-		]
-		
-		if len( parts ) != 4:
-			raise ValueError( 'bbox must use minx,miny,maxx,maxy format.' )
-		
-		numbers = [ float( part ) for part in parts ]
-		minx, miny, maxx, maxy = numbers
-		
-		if minx >= maxx:
-			raise ValueError( 'bbox minx must be less than maxx.' )
-		
-		if miny >= maxy:
-			raise ValueError( 'bbox miny must be less than maxy.' )
-		
-		return ','.join( [ str( number ) for number in numbers ] )
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSTheNationalMap'
+			exception.method = 'validate_bbox( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def coalesce_records( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""Coalesce records.
 
@@ -15353,7 +17143,10 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.coalesce_records'
+			exception.method = (
+					'coalesce_records( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_dataset_rows( self,
@@ -15407,7 +17200,10 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.shape_dataset_rows'
+			exception.method = (
+					'shape_dataset_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_product_rows( self,
@@ -15489,7 +17285,10 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.shape_product_rows'
+			exception.method = (
+					'shape_product_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -15533,7 +17332,9 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -15570,7 +17371,9 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, endpoint: str, params: Dict[ str, Any ],
@@ -15639,7 +17442,9 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -15683,7 +17488,9 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.fetch_datasets'
+			exception.method = (
+					'fetch_datasets( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_products( self, dataset: str='', q: str='',
@@ -15750,7 +17557,9 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.fetch_products'
+			exception.method = (
+					'fetch_products( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='products', dataset: str='',
@@ -15812,9 +17621,66 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'USGSTheNationalMap.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSTheNationalMap'
+			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			raise exception
+
 class USGSScienceBase( Fetcher ):
 	"""U S G S Science Base fetcher.
 
@@ -15941,25 +17807,35 @@ class USGSScienceBase( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
+		try:
+			throw_if( 'endpoint', endpoint )
+			
+			value = str( endpoint ).strip( ).strip( '/' )
+			
+			if not value:
+				raise ValueError( 'endpoint cannot be empty.' )
+			
+			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
+				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
+			
+			if '..' in value:
+				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
+			
+			if value != 'items' and not value.startswith( 'item/' ):
+				raise ValueError( "endpoint must be 'items' or 'item/{id}'." )
+			
+			return value
 		
-		value = str( endpoint ).strip( ).strip( '/' )
-		
-		if not value:
-			raise ValueError( 'endpoint cannot be empty.' )
-		
-		if value.startswith( 'http://' ) or value.startswith( 'https://' ):
-			raise ValueError( 'endpoint must be a path segment, not a full URL.' )
-		
-		if '..' in value:
-			raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-		
-		if value != 'items' and not value.startswith( 'item/' ):
-			raise ValueError( "endpoint must be 'items' or 'item/{id}'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSScienceBase'
+			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_max_items( self, max_items: int ) -> int:
 		"""Validate max items.
 
@@ -15976,15 +17852,25 @@ class USGSScienceBase( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'max_items', max_items )
+		try:
+			throw_if( 'max_items', max_items )
+			
+			value = int( max_items )
+			if value < 1 or value > 1000:
+				raise ValueError( 'max_items must be between 1 and 1000.' )
+			
+			return value
 		
-		value = int( max_items )
-		if value < 1 or value > 1000:
-			raise ValueError( 'max_items must be between 1 and 1000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSScienceBase'
+			exception.method = 'validate_max_items( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_offset( self, offset: int ) -> int:
 		"""Validate offset.
 
@@ -16001,17 +17887,26 @@ class USGSScienceBase( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'offset', offset )
-		if offset is None:
-			raise ValueError( 'offset cannot be None.' )
+		try:
+			if offset is None:
+				raise ValueError( 'offset cannot be None.' )
+			
+			value = int( offset )
+			if value < 0 or value > 150000:
+				raise ValueError( 'offset must be between 0 and 150000.' )
+			
+			return value
 		
-		value = int( offset )
-		if value < 0 or value > 150000:
-			raise ValueError( 'offset must be between 0 and 150000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSScienceBase'
+			exception.method = 'validate_offset( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def coalesce_records( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""Coalesce records.
 
@@ -16058,7 +17953,10 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.coalesce_records'
+			exception.method = (
+					'coalesce_records( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_single_item( self, item: Dict[ str, Any ] ) -> Dict[ str, Any ]:
@@ -16115,7 +18013,9 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.shape_single_item'
+			exception.method = (
+					'shape_single_item( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def shape_item_rows( self,
@@ -16150,7 +18050,10 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.shape_item_rows'
+			exception.method = (
+					'shape_item_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -16194,7 +18097,9 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -16231,7 +18136,9 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, endpoint: str,
@@ -16300,7 +18207,7 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.request'
+			exception.method = 'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_items( self, q: str='', max_items: int=25,
@@ -16355,7 +18262,7 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.fetch_items'
+			exception.method = 'fetch_items( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_item( self, item_id: str,
@@ -16393,7 +18300,7 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.fetch_item'
+			exception.method = 'fetch_item( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch( self, mode: str='items', q: str='', item_id: str='', max_items: int=25,
@@ -16440,9 +18347,68 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'USGSScienceBase.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if not isinstance( parameters, dict ):
+				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'USGSScienceBase'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class AirNow( Fetcher ):
 	"""Air Now fetcher.
 
@@ -16618,7 +18584,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.request'
+			exception.method = (
+					'request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ]=None, '
+					'time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -16670,7 +18639,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.shape_rows'
+			exception.method = (
+					'shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -16725,7 +18697,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self ) -> Dict[ str, Any ]:
@@ -16763,7 +18738,7 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.package_response'
+			exception.method = 'package_response( self ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_current_zip( self, zip_code: str, distance: int=25,
@@ -16814,7 +18789,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.fetch_current_zip'
+			exception.method = (
+					'fetch_current_zip( self, zip_code: str, distance: int=25, '
+					'time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_current_latlon( self, latitude: float, longitude: float,
@@ -16869,7 +18847,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.fetch_current_latlon'
+			exception.method = (
+					'fetch_current_latlon( self, latitude: float, longitude: float, '
+					'distance: int=25, time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_forecast_zip( self, zip_code: str, date: str,
@@ -16924,7 +18905,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.fetch_forecast_zip'
+			exception.method = (
+					'fetch_forecast_zip( self, zip_code: str, date: str, distance: int=25, '
+					'time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch_forecast_latlon( self, latitude: float, longitude: float,
@@ -16983,7 +18967,10 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.fetch_forecast_latlon'
+			exception.method = (
+					'fetch_forecast_latlon( self, latitude: float, longitude: float, '
+					'date: str, distance: int=25, time: int=20 ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='current-zip', zip_code: str='',
@@ -17042,9 +19029,70 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'AirNow.fetch'
+			exception.method = (
+					'fetch( self, mode: str, zip_code: str, latitude: float | None, '
+					'longitude: float | None, date: str, distance: int, time: int ) '
+					'-> Dict[ str, Any ]'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f"{description.strip( )} This function uses the "
+							f"{tool.strip( )} service."
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'AirNow'
+			exception.method = (
+					'create_schema( self, function: str, tool: str, description: str, '
+					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
+			)
+			raise exception
+
 class ClimateData( Fetcher ):
 	"""Climate Data fetcher.
 
@@ -17180,15 +19228,25 @@ class ClimateData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 500:
+				raise ValueError( 'limit must be between 1 and 500.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 500:
-			raise ValueError( 'limit must be between 1 and 500.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'ClimateData'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_offset( self, offset: int ) -> int:
 		"""Validate offset.
 
@@ -17205,17 +19263,26 @@ class ClimateData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'offset', offset )
-		if offset is None:
-			raise ValueError( 'offset cannot be None.' )
+		try:
+			if offset is None:
+				raise ValueError( 'offset cannot be None.' )
+			
+			value = int( offset )
+			if value < 0 or value > 10000:
+				raise ValueError( 'offset must be between 0 and 10000.' )
+			
+			return value
 		
-		value = int( offset )
-		if value < 0 or value > 10000:
-			raise ValueError( 'offset must be between 0 and 10000.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'ClimateData'
+			exception.method = 'validate_offset( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_date_range( self, start_date: str, end_date: str ) -> Tuple[ str, str ]:
 		"""Validate date range.
 
@@ -17233,18 +19300,30 @@ class ClimateData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'start_date', start_date )
-		throw_if( 'end_date', end_date )
+		try:
+			throw_if( 'start_date', start_date )
+			throw_if( 'end_date', end_date )
+			
+			start_value = str( start_date ).strip( )
+			end_value = str( end_date ).strip( )
+			
+			if start_value > end_value:
+				raise ValueError( 'start_date must be on or before end_date.' )
+			
+			return start_value, end_value
 		
-		start_value = str( start_date ).strip( )
-		end_value = str( end_date ).strip( )
-		
-		if start_value > end_value:
-			raise ValueError( 'start_date must be on or before end_date.' )
-		
-		return start_value, end_value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'ClimateData'
+			exception.method = (
+					'validate_date_range( self, *args, **kwargs ) -> Tuple[ str, str ]'
+			)
+			raise exception
+	
 	def coalesce_records( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""Coalesce records.
 
@@ -17292,7 +19371,9 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.coalesce_records'
+			exception.method = (
+					'coalesce_records( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_dataset_rows( self,
@@ -17345,7 +19426,10 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.shape_dataset_rows'
+			exception.method = (
+					'shape_dataset_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -17385,7 +19469,7 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.shape_data_rows'
+			exception.method = 'shape_data_rows( self, *args, **kwargs ) -> List[ Dict[ str, Any ]]'
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -17434,7 +19518,7 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.summarize_rows'
+			exception.method = 'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -17471,7 +19555,9 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, url: str, params: Dict[ str, Any ], time: int=20 ) -> Dict[
@@ -17541,7 +19627,7 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.request'
+			exception.method = 'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_datasets( self, keyword: str='', start_date: str='', end_date: str='',
@@ -17603,7 +19689,7 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.fetch_datasets'
+			exception.method = 'fetch_datasets( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_data( self, dataset: str, start_date: str, end_date: str, stations: str='',
@@ -17664,7 +19750,7 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.fetch_data'
+			exception.method = 'fetch_data( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch( self, mode: str='datasets', keyword: str='', dataset: str='',
@@ -17725,9 +19811,70 @@ class ClimateData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
-			exception.method = 'ClimateData.fetch'
+			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'ClimateData'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class EoNet( Fetcher ):
 	"""Eo Net fetcher.
 
@@ -17868,20 +20015,30 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
+		try:
+			throw_if( 'endpoint', endpoint )
+			
+			value = str( endpoint ).strip( ).lower( )
+			allowed = {
+					'events',
+					'categories'
+			}
+			
+			if value not in allowed:
+				raise ValueError( "endpoint must be 'events' or 'categories'." )
+			
+			return value
 		
-		value = str( endpoint ).strip( ).lower( )
-		allowed = {
-				'events',
-				'categories'
-		}
-		
-		if value not in allowed:
-			raise ValueError( "endpoint must be 'events' or 'categories'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_status( self, status: str ) -> str:
 		"""Validate status.
 
@@ -17898,21 +20055,31 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'status', status )
+		try:
+			throw_if( 'status', status )
+			
+			value = str( status ).strip( ).lower( )
+			allowed = {
+					'open',
+					'closed',
+					'all'
+			}
+			
+			if value not in allowed:
+				raise ValueError( "status must be 'open', 'closed', or 'all'." )
+			
+			return value
 		
-		value = str( status ).strip( ).lower( )
-		allowed = {
-				'open',
-				'closed',
-				'all'
-		}
-		
-		if value not in allowed:
-			raise ValueError( "status must be 'open', 'closed', or 'all'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = 'validate_status( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_limit( self, limit: int ) -> int:
 		"""Validate limit.
 
@@ -17929,15 +20096,25 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 500:
+				raise ValueError( 'limit must be between 1 and 500.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 500:
-			raise ValueError( 'limit must be between 1 and 500.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_days( self, days: int ) -> int:
 		"""Validate days.
 
@@ -17954,15 +20131,25 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'days', days )
+		try:
+			throw_if( 'days', days )
+			
+			value = int( days )
+			if value < 1 or value > 3650:
+				raise ValueError( 'days must be between 1 and 3650.' )
+			
+			return value
 		
-		value = int( days )
-		if value < 1 or value > 3650:
-			raise ValueError( 'days must be between 1 and 3650.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = 'validate_days( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_bbox( self, bbox: str ) -> str:
 		"""Validate bbox.
 
@@ -17979,45 +20166,55 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		value = str( bbox or '' ).strip( )
+		try:
+			value = str( bbox or '' ).strip( )
+			
+			if not value:
+				return ''
+			
+			parts = [
+					part.strip( )
+					for part in value.split( ',' )
+			]
+			
+			if len( parts ) != 4:
+				raise ValueError(
+					'bbox must use min_lon,max_lat,max_lon,min_lat format.'
+				)
+			
+			numbers = [ float( part ) for part in parts ]
+			min_lon, max_lat, max_lon, min_lat = numbers
+			
+			if min_lon < -180.0 or min_lon > 180.0:
+				raise ValueError( 'bbox min_lon must be between -180 and 180.' )
+			
+			if max_lon < -180.0 or max_lon > 180.0:
+				raise ValueError( 'bbox max_lon must be between -180 and 180.' )
+			
+			if min_lat < -90.0 or min_lat > 90.0:
+				raise ValueError( 'bbox min_lat must be between -90 and 90.' )
+			
+			if max_lat < -90.0 or max_lat > 90.0:
+				raise ValueError( 'bbox max_lat must be between -90 and 90.' )
+			
+			if min_lon >= max_lon:
+				raise ValueError( 'bbox min_lon must be less than max_lon.' )
+			
+			if min_lat >= max_lat:
+				raise ValueError( 'bbox min_lat must be less than max_lat.' )
+			
+			return ','.join( [ str( number ) for number in numbers ] )
 		
-		if not value:
-			return ''
-		
-		parts = [
-				part.strip( )
-				for part in value.split( ',' )
-		]
-		
-		if len( parts ) != 4:
-			raise ValueError(
-				'bbox must use min_lon,max_lat,max_lon,min_lat format.'
-			)
-		
-		numbers = [ float( part ) for part in parts ]
-		min_lon, max_lat, max_lon, min_lat = numbers
-		
-		if min_lon < -180.0 or min_lon > 180.0:
-			raise ValueError( 'bbox min_lon must be between -180 and 180.' )
-		
-		if max_lon < -180.0 or max_lon > 180.0:
-			raise ValueError( 'bbox max_lon must be between -180 and 180.' )
-		
-		if min_lat < -90.0 or min_lat > 90.0:
-			raise ValueError( 'bbox min_lat must be between -90 and 90.' )
-		
-		if max_lat < -90.0 or max_lat > 90.0:
-			raise ValueError( 'bbox max_lat must be between -90 and 90.' )
-		
-		if min_lon >= max_lon:
-			raise ValueError( 'bbox min_lon must be less than max_lon.' )
-		
-		if min_lat >= max_lat:
-			raise ValueError( 'bbox min_lat must be less than max_lat.' )
-		
-		return ','.join( [ str( number ) for number in numbers ] )
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = 'validate_bbox( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_date_pair( self, start_date: str='', end_date: str='' ) -> Tuple[ str, str ]:
 		"""Validate date pair.
 
@@ -18035,20 +20232,32 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		start_value = str( start_date or '' ).strip( )
-		end_value = str( end_date or '' ).strip( )
+		try:
+			start_value = str( start_date or '' ).strip( )
+			end_value = str( end_date or '' ).strip( )
+			
+			if bool( start_value ) != bool( end_value ):
+				raise ValueError(
+					'start_date and end_date must either both be supplied or both be blank.'
+				)
+			
+			if start_value and end_value and start_value > end_value:
+				raise ValueError( 'start_date must be on or before end_date.' )
+			
+			return start_value, end_value
 		
-		if bool( start_value ) != bool( end_value ):
-			raise ValueError(
-				'start_date and end_date must either both be supplied or both be blank.'
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = (
+					'validate_date_pair( self, *args, **kwargs ) -> Tuple[ str, str ]'
 			)
-		
-		if start_value and end_value and start_value > end_value:
-			raise ValueError( 'start_date must be on or before end_date.' )
-		
-		return start_value, end_value
-		
+			raise exception
+	
 	def shape_event_rows( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""Shape event rows.
@@ -18127,7 +20336,10 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.shape_event_rows'
+			exception.method = (
+					'shape_event_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_category_rows( self,
@@ -18169,7 +20381,10 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.shape_category_rows'
+			exception.method = (
+					'shape_category_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -18214,7 +20429,9 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -18251,7 +20468,9 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ] = None,
@@ -18318,7 +20537,9 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_events( self, source: str='', category: str='',
@@ -18399,7 +20620,9 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.fetch_events'
+			exception.method = (
+					'fetch_events( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -18447,7 +20670,9 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.fetch_categories'
+			exception.method = (
+					'fetch_categories( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='events', source: str='', category: str='',
@@ -18513,9 +20738,71 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'EoNet.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EoNet'
+			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			raise exception
+
 class EnviroFacts( Fetcher ):
 	"""Enviro Facts fetcher.
 
@@ -18636,24 +20923,34 @@ class EnviroFacts( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'table_name', table_name )
+		try:
+			throw_if( 'table_name', table_name )
+			
+			value = str( table_name ).strip( ).upper( )
+			allowed = {
+					'TRI_FACILITY',
+					'TRI_RELEASE',
+					'EF_W_EMISSIONS_SOURCE_GHG'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					'Unsupported Envirofacts table. Use TRI_FACILITY, TRI_RELEASE, '
+					'or EF_W_EMISSIONS_SOURCE_GHG.'
+				)
+			
+			return value
 		
-		value = str( table_name ).strip( ).upper( )
-		allowed = {
-				'TRI_FACILITY',
-				'TRI_RELEASE',
-				'EF_W_EMISSIONS_SOURCE_GHG'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				'Unsupported Envirofacts table. Use TRI_FACILITY, TRI_RELEASE, '
-				'or EF_W_EMISSIONS_SOURCE_GHG.'
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EnviroFacts'
+			exception.method = 'validate_table_name( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_state_code( self, state_code: str='' ) -> str:
 		"""Validate state code.
 
@@ -18670,17 +20967,27 @@ class EnviroFacts( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		value = str( state_code or '' ).strip( ).upper( )
+		try:
+			value = str( state_code or '' ).strip( ).upper( )
+			
+			if not value:
+				return ''
+			
+			if not re.fullmatch( r'[A-Z]{2}', value ):
+				raise ValueError( 'state_code must be blank or a two-letter code.' )
+			
+			return value
 		
-		if not value:
-			return ''
-		
-		if not re.fullmatch( r'[A-Z]{2}', value ):
-			raise ValueError( 'state_code must be blank or a two-letter code.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EnviroFacts'
+			exception.method = 'validate_state_code( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_limit( self, limit: int ) -> int:
 		"""Validate limit.
 
@@ -18697,15 +21004,25 @@ class EnviroFacts( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'limit', limit )
+		try:
+			throw_if( 'limit', limit )
+			
+			value = int( limit )
+			if value < 1 or value > 500:
+				raise ValueError( 'limit must be between 1 and 500.' )
+			
+			return value
 		
-		value = int( limit )
-		if value < 1 or value > 500:
-			raise ValueError( 'limit must be between 1 and 500.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EnviroFacts'
+			exception.method = 'validate_limit( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def resolve_table_path( self, table_name: str, state_code: str='',
 			facility_name: str='', limit: int=25 ) -> str:
 		"""Resolve table path.
@@ -18726,7 +21043,6 @@ class EnviroFacts( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'table_name', table_name )
 		try:
 			self.table_name = self.validate_table_name( table_name )
 			self.state_code = self.validate_state_code( state_code )
@@ -18790,7 +21106,9 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.resolve_table_path'
+			exception.method = (
+					'resolve_table_path( self, *args, **kwargs ) -> str'
+			)
 			raise exception
 	
 	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -18833,7 +21151,9 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.shape_rows'
+			exception.method = (
+					'shape_rows( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -18882,7 +21202,9 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -18920,7 +21242,9 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -18974,7 +21298,9 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_table( self, table_name: str, state_code: str='',
@@ -19036,7 +21362,9 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.fetch_table'
+			exception.method = (
+					'fetch_table( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, table_name: str='TRI_FACILITY', state_code: str='',
@@ -19078,9 +21406,73 @@ class EnviroFacts( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = 'EnviroFacts.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'EnviroFacts'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class TidesAndCurrents( Fetcher ):
 	"""Tides And Currents fetcher.
 
@@ -19219,24 +21611,34 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'mode', mode )
+		try:
+			throw_if( 'mode', mode )
+			
+			value = str( mode ).strip( ).lower( )
+			allowed = {
+					'station',
+					'water-level',
+					'tide-predictions'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					"Unsupported NOAA Tides & Currents mode. Use 'station', "
+					"'water-level', or 'tide-predictions'."
+				)
+			
+			return value
 		
-		value = str( mode ).strip( ).lower( )
-		allowed = {
-				'station',
-				'water-level',
-				'tide-predictions'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				"Unsupported NOAA Tides & Currents mode. Use 'station', "
-				"'water-level', or 'tide-predictions'."
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_station_id( self, station_id: str ) -> str:
 		"""Validate station id.
 
@@ -19253,19 +21655,29 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'station_id', station_id )
+		try:
+			throw_if( 'station_id', station_id )
+			
+			value = str( station_id ).strip( )
+			
+			if not re.fullmatch( r'[A-Za-z0-9_-]{3,20}', value ):
+				raise ValueError(
+					'station_id must contain 3 to 20 letters, digits, underscores, '
+					'or hyphens.'
+				)
+			
+			return value
 		
-		value = str( station_id ).strip( )
-		
-		if not re.fullmatch( r'[A-Za-z0-9_-]{3,20}', value ):
-			raise ValueError(
-				'station_id must contain 3 to 20 letters, digits, underscores, '
-				'or hyphens.'
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = 'validate_station_id( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_date_range( self, begin_date: str, end_date: str ) -> Tuple[ str, str ]:
 		"""Validate date range.
 
@@ -19283,24 +21695,36 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'begin_date', begin_date )
-		throw_if( 'end_date', end_date )
+		try:
+			throw_if( 'begin_date', begin_date )
+			throw_if( 'end_date', end_date )
+			
+			begin_value = str( begin_date ).strip( )
+			end_value = str( end_date ).strip( )
+			
+			if not re.fullmatch( r'\d{8}', begin_value ):
+				raise ValueError( 'begin_date must use YYYYMMDD format.' )
+			
+			if not re.fullmatch( r'\d{8}', end_value ):
+				raise ValueError( 'end_date must use YYYYMMDD format.' )
+			
+			if begin_value > end_value:
+				raise ValueError( 'begin_date must be on or before end_date.' )
+			
+			return begin_value, end_value
 		
-		begin_value = str( begin_date ).strip( )
-		end_value = str( end_date ).strip( )
-		
-		if not re.fullmatch( r'\d{8}', begin_value ):
-			raise ValueError( 'begin_date must use YYYYMMDD format.' )
-		
-		if not re.fullmatch( r'\d{8}', end_value ):
-			raise ValueError( 'end_date must use YYYYMMDD format.' )
-		
-		if begin_value > end_value:
-			raise ValueError( 'begin_date must be on or before end_date.' )
-		
-		return begin_value, end_value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = (
+					'validate_date_range( self, *args, **kwargs ) -> Tuple[ str, str ]'
+			)
+			raise exception
+	
 	def validate_datum( self, datum: str ) -> str:
 		"""Validate datum.
 
@@ -19317,29 +21741,39 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'datum', datum )
+		try:
+			throw_if( 'datum', datum )
+			
+			value = str( datum ).strip( ).upper( )
+			allowed = {
+					'MLLW',
+					'MHHW',
+					'MHW',
+					'MTL',
+					'MSL',
+					'MLW',
+					'NAVD',
+					'STND'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					'datum must be one of MLLW, MHHW, MHW, MTL, MSL, MLW, NAVD, '
+					'or STND.'
+				)
+			
+			return value
 		
-		value = str( datum ).strip( ).upper( )
-		allowed = {
-				'MLLW',
-				'MHHW',
-				'MHW',
-				'MTL',
-				'MSL',
-				'MLW',
-				'NAVD',
-				'STND'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				'datum must be one of MLLW, MHHW, MHW, MTL, MSL, MLW, NAVD, '
-				'or STND.'
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = 'validate_datum( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_units( self, units: str ) -> str:
 		"""Validate units.
 
@@ -19356,20 +21790,30 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'units', units )
+		try:
+			throw_if( 'units', units )
+			
+			value = str( units ).strip( ).lower( )
+			allowed = {
+					'metric',
+					'english'
+			}
+			
+			if value not in allowed:
+				raise ValueError( "units must be 'metric' or 'english'." )
+			
+			return value
 		
-		value = str( units ).strip( ).lower( )
-		allowed = {
-				'metric',
-				'english'
-		}
-		
-		if value not in allowed:
-			raise ValueError( "units must be 'metric' or 'english'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = 'validate_units( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_time_zone( self, time_zone: str ) -> str:
 		"""Validate time zone.
 
@@ -19386,21 +21830,31 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'time_zone', time_zone )
+		try:
+			throw_if( 'time_zone', time_zone )
+			
+			value = str( time_zone ).strip( ).lower( )
+			allowed = {
+					'gmt',
+					'lst',
+					'lst_ldt'
+			}
+			
+			if value not in allowed:
+				raise ValueError( "time_zone must be 'gmt', 'lst', or 'lst_ldt'." )
+			
+			return value
 		
-		value = str( time_zone ).strip( ).lower( )
-		allowed = {
-				'gmt',
-				'lst',
-				'lst_ldt'
-		}
-		
-		if value not in allowed:
-			raise ValueError( "time_zone must be 'gmt', 'lst', or 'lst_ldt'." )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = 'validate_time_zone( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_interval( self, interval: str ) -> str:
 		"""Validate interval.
 
@@ -19417,30 +21871,40 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'interval', interval )
+		try:
+			throw_if( 'interval', interval )
+			
+			value = str( interval ).strip( ).lower( )
+			allowed = {
+					'hilo',
+					'h',
+					'1',
+					'5',
+					'6',
+					'10',
+					'15',
+					'30',
+					'60'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					"interval must be one of 'hilo', 'h', '1', '5', '6', '10', "
+					"'15', '30', or '60'."
+				)
+			
+			return value
 		
-		value = str( interval ).strip( ).lower( )
-		allowed = {
-				'hilo',
-				'h',
-				'1',
-				'5',
-				'6',
-				'10',
-				'15',
-				'30',
-				'60'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				"interval must be one of 'hilo', 'h', '1', '5', '6', '10', "
-				"'15', '30', or '60'."
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = 'validate_interval( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def shape_station_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""Shape station rows.
 
@@ -19487,7 +21951,10 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.shape_station_rows'
+			exception.method = (
+					'shape_station_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_data_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -19538,7 +22005,10 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.shape_data_rows'
+			exception.method = (
+					'shape_data_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -19596,7 +22066,9 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -19634,7 +22106,9 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, url: str, params: Optional[ Dict[ str, Any ] ] = None,
@@ -19701,7 +22175,9 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_station( self, station_id: str,
@@ -19748,7 +22224,9 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.fetch_station'
+			exception.method = (
+					'fetch_station( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_water_level( self, station_id: str, begin_date: str,
@@ -19820,7 +22298,9 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.fetch_water_level'
+			exception.method = (
+					'fetch_water_level( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_tide_predictions( self, station_id: str, begin_date: str,
@@ -19896,7 +22376,10 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.fetch_tide_predictions'
+			exception.method = (
+					'fetch_tide_predictions( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='water-level', station_id: str='',
@@ -19973,9 +22456,73 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = 'TidesAndCurrents.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'TidesAndCurrents'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class UvIndex( Fetcher ):
 	"""UV Index fetcher.
 
@@ -20095,25 +22642,35 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'mode', mode )
+		try:
+			throw_if( 'mode', mode )
+			
+			value = str( mode ).strip( ).lower( )
+			allowed = {
+					'daily-zip',
+					'daily-city-state',
+					'hourly-zip',
+					'hourly-city-state'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					"Unsupported EPA UV Index mode. Use 'daily-zip', "
+					"'daily-city-state', 'hourly-zip', or 'hourly-city-state'."
+				)
+			
+			return value
 		
-		value = str( mode ).strip( ).lower( )
-		allowed = {
-				'daily-zip',
-				'daily-city-state',
-				'hourly-zip',
-				'hourly-city-state'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				"Unsupported EPA UV Index mode. Use 'daily-zip', "
-				"'daily-city-state', 'hourly-zip', or 'hourly-city-state'."
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'UvIndex'
+			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_zip_code( self, zip_code: str ) -> str:
 		"""Validate zip code.
 
@@ -20130,16 +22687,26 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'zip_code', zip_code )
+		try:
+			throw_if( 'zip_code', zip_code )
+			
+			value = str( zip_code ).strip( )
+			
+			if not re.fullmatch( r'\d{5}(?:-\d{4})?', value ):
+				raise ValueError( 'zip_code must be a valid 5-digit ZIP or ZIP+4 value.' )
+			
+			return value
 		
-		value = str( zip_code ).strip( )
-		
-		if not re.fullmatch( r'\d{5}(?:-\d{4})?', value ):
-			raise ValueError( 'zip_code must be a valid 5-digit ZIP or ZIP+4 value.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'UvIndex'
+			exception.method = 'validate_zip_code( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_city( self, city: str ) -> str:
 		"""Validate city.
 
@@ -20156,19 +22723,29 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'city', city )
+		try:
+			throw_if( 'city', city )
+			
+			value = str( city ).strip( )
+			
+			if not value:
+				raise ValueError( 'city cannot be empty.' )
+			
+			if '/' in value or '\\' in value:
+				raise ValueError( 'city cannot contain path separators.' )
+			
+			return value
 		
-		value = str( city ).strip( )
-		
-		if not value:
-			raise ValueError( 'city cannot be empty.' )
-		
-		if '/' in value or '\\' in value:
-			raise ValueError( 'city cannot contain path separators.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'UvIndex'
+			exception.method = 'validate_city( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_state( self, state: str ) -> str:
 		"""Validate state.
 
@@ -20185,16 +22762,26 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'state', state )
+		try:
+			throw_if( 'state', state )
+			
+			value = str( state ).strip( ).upper( )
+			
+			if not re.fullmatch( r'[A-Z]{2}', value ):
+				raise ValueError( 'state must be a two-letter abbreviation.' )
+			
+			return value
 		
-		value = str( state ).strip( ).upper( )
-		
-		if not re.fullmatch( r'[A-Z]{2}', value ):
-			raise ValueError( 'state must be a two-letter abbreviation.' )
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'UvIndex'
+			exception.method = 'validate_state( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""Shape rows.
 
@@ -20235,7 +22822,9 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.shape_rows'
+			exception.method = (
+					'shape_rows( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -20300,7 +22889,9 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -20337,7 +22928,9 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, url: str, params: Dict[ str, Any ],
@@ -20395,7 +22988,9 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_daily_zip( self, zip_code: str,
@@ -20451,7 +23046,9 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.fetch_daily_zip'
+			exception.method = (
+					'fetch_daily_zip( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_daily_city_state( self, city: str, state: str,
@@ -20512,7 +23109,10 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.fetch_daily_city_state'
+			exception.method = (
+					'fetch_daily_city_state( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_hourly_zip( self, zip_code: str,
@@ -20568,7 +23168,9 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.fetch_hourly_zip'
+			exception.method = (
+					'fetch_hourly_zip( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_hourly_city_state( self, city: str, state: str,
@@ -20629,7 +23231,10 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.fetch_hourly_city_state'
+			exception.method = (
+					'fetch_hourly_city_state( self, *args, **kwargs ) '
+					'-> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='daily-zip', zip_code: str='',
@@ -20697,9 +23302,73 @@ class UvIndex( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
-			exception.method = 'UvIndex.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'UvIndex'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class PurpleAir( Fetcher ):
 	"""Purple Air fetcher.
 
@@ -20850,7 +23519,6 @@ class PurpleAir( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'fields', fields )
 		try:
 			throw_if( 'default_fields', default_fields )
 			
@@ -20876,7 +23544,7 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.normalize_fields'
+			exception.method = 'normalize_fields( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def shape_sensor_list_rows( self,
@@ -20937,7 +23605,10 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.shape_sensor_list_rows'
+			exception.method = (
+					'shape_sensor_list_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_sensor_detail_rows( self,
@@ -20989,7 +23660,10 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.shape_sensor_detail_rows'
+			exception.method = (
+					'shape_sensor_detail_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -21044,7 +23718,9 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.summarize_rows'
+			exception.method = (
+					'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ],
@@ -21083,7 +23759,9 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.package_response'
+			exception.method = (
+					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
+			)
 			raise exception
 	
 	def request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ] = None,
@@ -21135,7 +23813,9 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.request'
+			exception.method = (
+					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_sensors( self, nwlng: float, nwlat: float, selng: float, selat: float,
@@ -21209,7 +23889,9 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.fetch_sensors'
+			exception.method = (
+					'fetch_sensors( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch_sensor( self, sensor_index: int, fields: str='',
@@ -21256,7 +23938,9 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.fetch_sensor'
+			exception.method = (
+					'fetch_sensor( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='sensors', sensor_index: int=None,
@@ -21325,9 +24009,73 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'PurpleAir.fetch'
+			exception.method = (
+					'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError(
+					'parameters must be a dict of param_name -> schema definition.'
+				)
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return {
+					'name': function.strip( ),
+					'description': (
+							f'{description.strip( )} This function uses the '
+							f'{tool.strip( )} service.'
+					),
+					'parameters': {
+							'type': 'object',
+							'properties': parameters,
+							'required': required,
+					}
+			}
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'PurpleAir'
+			exception.method = (
+					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			)
+			raise exception
+
 class OpenAQ( Fetcher ):
 	"""Open A Q fetcher.
 
@@ -21485,27 +24233,37 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'mode', mode )
+		try:
+			throw_if( 'mode', mode )
+			
+			value = str( mode ).strip( ).lower( )
+			allowed = {
+					'countries',
+					'providers',
+					'parameters',
+					'parameter_latest',
+					'locations',
+					'latest'
+			}
+			
+			if value not in allowed:
+				raise ValueError(
+					'Unsupported OpenAQ mode. Use countries, providers, parameters, '
+					'parameter_latest, locations, or latest.'
+				)
+			
+			return value
 		
-		value = str( mode ).strip( ).lower( )
-		allowed = {
-				'countries',
-				'providers',
-				'parameters',
-				'parameter_latest',
-				'locations',
-				'latest'
-		}
-		
-		if value not in allowed:
-			raise ValueError(
-				'Unsupported OpenAQ mode. Use countries, providers, parameters, '
-				'parameter_latest, locations, or latest.'
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
 
@@ -21522,28 +24280,38 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
+		try:
+			throw_if( 'endpoint', endpoint )
+			
+			value = str( endpoint ).strip( ).strip( '/' )
+			
+			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
+				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
+			
+			if '..' in value:
+				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
+			
+			if not re.fullmatch(
+					r'(countries|providers|parameters|locations|'
+					r'parameters/\d+/latest|locations/\d+/latest)',
+					value
+			):
+				raise ValueError(
+					'Unsupported OpenAQ endpoint path.'
+				)
+			
+			return value
 		
-		value = str( endpoint ).strip( ).strip( '/' )
-		
-		if value.startswith( 'http://' ) or value.startswith( 'https://' ):
-			raise ValueError( 'endpoint must be a path segment, not a full URL.' )
-		
-		if '..' in value:
-			raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-		
-		if not re.fullmatch(
-				r'(countries|providers|parameters|locations|'
-				r'parameters/\d+/latest|locations/\d+/latest)',
-				value
-		):
-			raise ValueError(
-				'Unsupported OpenAQ endpoint path.'
-			)
-		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_positive_integer( self, name: str, value: Any,
 			maximum: int | None = None ) -> int:
 		"""Validate positive integer.
@@ -21564,20 +24332,32 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'name', name )
-		throw_if( name, value )
+		try:
+			throw_if( 'name', name )
+			throw_if( name, value )
+			
+			number = int( value )
+			
+			if number < 1:
+				raise ValueError( f'{name} must be greater than or equal to 1.' )
+			
+			if maximum is not None and number > int( maximum ):
+				raise ValueError( f'{name} must be less than or equal to {maximum}.' )
+			
+			return number
 		
-		number = int( value )
-		
-		if number < 1:
-			raise ValueError( f'{name} must be greater than or equal to 1.' )
-		
-		if maximum is not None and number > int( maximum ):
-			raise ValueError( f'{name} must be less than or equal to {maximum}.' )
-		
-		return number
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = (
+					'validate_positive_integer( self, *args, **kwargs ) -> int'
+			)
+			raise exception
+	
 	def validate_non_negative_integer( self, name: str, value: Any ) -> int:
 		"""Validate non negative integer.
 
@@ -21596,17 +24376,31 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'name', name )
-		throw_if( name, value )
+		try:
+			throw_if( 'name', name )
+			
+			if value is None:
+				raise ValueError( f'{name} cannot be None.' )
+			
+			number = int( value )
+			
+			if number < 0:
+				raise ValueError( f'{name} must be greater than or equal to 0.' )
+			
+			return number
 		
-		number = int( value )
-		
-		if number < 0:
-			raise ValueError( f'{name} must be greater than or equal to 0.' )
-		
-		return number
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = (
+					'validate_non_negative_integer( self, *args, **kwargs ) -> int'
+			)
+			raise exception
+	
 	def validate_coordinates( self, coordinates: str='' ) -> str:
 		"""Validate coordinates.
 
@@ -21624,31 +24418,41 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		value = str( coordinates or '' ).strip( )
+		try:
+			value = str( coordinates or '' ).strip( )
+			
+			if not value:
+				return ''
+			
+			parts = [
+					part.strip( )
+					for part in value.split( ',' )
+			]
+			
+			if len( parts ) != 2:
+				raise ValueError( 'coordinates must use latitude,longitude format.' )
+			
+			latitude = float( parts[ 0 ] )
+			longitude = float( parts[ 1 ] )
+			
+			if latitude < -90.0 or latitude > 90.0:
+				raise ValueError( 'coordinates latitude must be between -90 and 90.' )
+			
+			if longitude < -180.0 or longitude > 180.0:
+				raise ValueError( 'coordinates longitude must be between -180 and 180.' )
+			
+			return f'{latitude},{longitude}'
 		
-		if not value:
-			return ''
-		
-		parts = [
-				part.strip( )
-				for part in value.split( ',' )
-		]
-		
-		if len( parts ) != 2:
-			raise ValueError( 'coordinates must use latitude,longitude format.' )
-		
-		latitude = float( parts[ 0 ] )
-		longitude = float( parts[ 1 ] )
-		
-		if latitude < -90.0 or latitude > 90.0:
-			raise ValueError( 'coordinates latitude must be between -90 and 90.' )
-		
-		if longitude < -180.0 or longitude > 180.0:
-			raise ValueError( 'coordinates longitude must be between -180 and 180.' )
-		
-		return f'{latitude},{longitude}'
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = 'validate_coordinates( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_radius( self, radius: int ) -> int:
 		"""Validate radius.
 
@@ -21664,16 +24468,25 @@ class OpenAQ( Fetcher ):
 		    int: Validated radius value.
 
 		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'radius', radius )
-		value = self.validate_positive_integer(
-			name='radius',
-			value=radius,
-			maximum=100000
-		)
+		try:
+			value = self.validate_positive_integer(
+				name='radius',
+				value=radius,
+				maximum=100000
+			)
+			
+			return value
 		
-		return value
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = 'validate_radius( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def coalesce_results( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""Coalesce results.
 
@@ -21719,7 +24532,10 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.coalesce_results'
+			exception.method = (
+					'coalesce_results( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_resource_rows( self, payload: Any,
@@ -21780,7 +24596,10 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.shape_resource_rows'
+			exception.method = (
+					'shape_resource_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_location_rows( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
@@ -21868,7 +24687,10 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.shape_location_rows'
+			exception.method = (
+					'shape_location_rows( self, *args, **kwargs ) '
+					'-> List[ Dict[ str, Any ] ]'
+			)
 			raise exception
 	
 	def shape_latest_rows( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
@@ -21929,7 +24751,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.shape_latest_rows'
+			exception.method = ('shape_latest_rows( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]')
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -21971,7 +24793,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.summarize_rows'
+			exception.method = ('summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]')
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ],
@@ -22005,7 +24827,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.package_response'
+			exception.method = ('package_response( self, *args, **kwargs ) -> Dict[ str, Any ]')
 			raise exception
 	
 	def request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ]=None,
@@ -22032,7 +24854,6 @@ class OpenAQ( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
 		try:
 			self.endpoint = self.validate_endpoint( endpoint )
 			throw_if( 'time', time )
@@ -22064,7 +24885,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.request'
+			exception.method = ('request( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_countries( self, providers_id: str='', parameters_id: str='',
@@ -22112,7 +24933,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch_countries'
+			exception.method = 'fetch_countries( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_providers( self, limit: int=100, page: int=1,
@@ -22155,7 +24976,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch_providers'
+			exception.method = 'fetch_providers( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_parameters( self, limit: int=100, page: int=1,
@@ -22198,7 +25019,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch_parameters'
+			exception.method = 'fetch_parameters( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_parameter_latest( self, parameter_id: int, limit: int=100,
@@ -22225,7 +25046,6 @@ class OpenAQ( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'parameter_id', parameter_id )
 		try:
 			self.mode = 'parameter_latest'
 			self.parameter_id = self.validate_positive_integer( name='parameter_id',
@@ -22246,7 +25066,8 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch_parameter_latest'
+			exception.method = ('fetch_parameter_latest( self, *args, **kwargs ) '
+			                    '-> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_locations( self, country_id: int=None, coordinates: str='',
@@ -22304,7 +25125,8 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch_locations'
+			exception.method = (
+					'fetch_locations( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_latest( self, location_id: int,
@@ -22329,7 +25151,6 @@ class OpenAQ( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'location_id', location_id )
 		try:
 			self.mode = 'latest'
 			self.location_id = self.validate_positive_integer( name='location_id',
@@ -22344,7 +25165,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch_latest'
+			exception.method = 'fetch_latest( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch( self, mode: str='locations', location_id: int=None,
@@ -22415,9 +25236,60 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'OpenAQ.fetch'
+			exception.method = ('fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			
+			if not isinstance( parameters, dict ):
+				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+					'description': (f'{description.strip( )} This function uses the '
+					                f'{tool.strip( )} service.'),
+					'parameters': { 'type': 'object', 'properties': parameters,
+							'required': required, } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenAQ'
+			exception.method = ( 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None' )
+			raise exception
+
 class Firms( Fetcher ):
 	"""Firms fetcher.
 
@@ -22516,14 +25388,24 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'mode', mode )
-		value = str( mode ).strip( ).lower( )
-		allowed = { 'area', 'data-availability' }
-		if value not in allowed:
-			raise ValueError( "Unsupported FIRMS mode. Use 'area' or 'data-availability'." )
-		
-		return value
+		try:
+			throw_if( 'mode', mode )
+			value = str( mode ).strip( ).lower( )
+			allowed = { 'area', 'data-availability' }
+			if value not in allowed:
+				raise ValueError( "Unsupported FIRMS mode. Use 'area' or 'data-availability'." )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_source( self, source: str ) -> str:
 		"""Validate source.
 
@@ -22540,18 +25422,28 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'source', source )
-		
-		value = str( source ).strip( ).upper( )
-		allowed = { 'LANDSAT_NRT', 'MODIS_NRT', 'MODIS_SP', 'VIIRS_NOAA20_NRT',
-				'VIIRS_NOAA20_SP', 'VIIRS_NOAA21_NRT', 'VIIRS_SNPP_NRT', 'VIIRS_SNPP_SP' }
-		
-		if value not in allowed:
-			raise ValueError( 'Unsupported FIRMS source. Use one of the app-supported '
-			                  'LANDSAT, MODIS, or VIIRS source identifiers.' )
-		
-		return value
+		try:
+			throw_if( 'source', source )
+			
+			value = str( source ).strip( ).upper( )
+			allowed = { 'LANDSAT_NRT', 'MODIS_NRT', 'MODIS_SP', 'VIIRS_NOAA20_NRT',
+					'VIIRS_NOAA20_SP', 'VIIRS_NOAA21_NRT', 'VIIRS_SNPP_NRT', 'VIIRS_SNPP_SP' }
+			
+			if value not in allowed:
+				raise ValueError( 'Unsupported FIRMS source. Use one of the app-supported '
+				                  'LANDSAT, MODIS, or VIIRS source identifiers.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'validate_source( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_sensor( self, sensor: str ) -> str:
 		"""Validate sensor.
 
@@ -22568,15 +25460,25 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'sensor', sensor )
-		value = str( sensor ).strip( ).upper( )
-		allowed = { 'ALL', 'LANDSAT', 'MODIS', 'VIIRS_SNPP', 'VIIRS_NOAA20', 'VIIRS_NOAA21' }
-		if value not in allowed:
-			raise ValueError( 'Unsupported FIRMS sensor. Use ALL, LANDSAT, MODIS, '
-			                  'VIIRS_SNPP, VIIRS_NOAA20, or VIIRS_NOAA21.' )
-		
-		return value
+		try:
+			throw_if( 'sensor', sensor )
+			value = str( sensor ).strip( ).upper( )
+			allowed = { 'ALL', 'LANDSAT', 'MODIS', 'VIIRS_SNPP', 'VIIRS_NOAA20', 'VIIRS_NOAA21' }
+			if value not in allowed:
+				raise ValueError( 'Unsupported FIRMS sensor. Use ALL, LANDSAT, MODIS, '
+				                  'VIIRS_SNPP, VIIRS_NOAA20, or VIIRS_NOAA21.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'validate_sensor( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_day_range( self, day_range: int ) -> int:
 		"""Validate day range.
 
@@ -22593,13 +25495,23 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'day_range', day_range )
-		value = int( day_range )
-		if value < 1 or value > 5:
-			raise ValueError( 'day_range must be between 1 and 5.' )
-		
-		return value
+		try:
+			throw_if( 'day_range', day_range )
+			value = int( day_range )
+			if value < 1 or value > 5:
+				raise ValueError( 'day_range must be between 1 and 5.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'validate_day_range( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_date( self, date: str='' ) -> str:
 		"""Validate date.
 
@@ -22615,13 +25527,23 @@ class Firms( Fetcher ):
 		    str: Validated date value.
 
 		Raises:
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		value = str( date or '' ).strip( )
-		if not value:
-			return ''
-		
-		dt.datetime.strptime( value, '%Y-%m-%d' )
-		return value
+		try:
+			value = str( date or '' ).strip( )
+			if not value:
+				return ''
+			
+			dt.datetime.strptime( value, '%Y-%m-%d' )
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'validate_date( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_area_coordinates( self, area_coordinates: str='world' ) -> str:
 		"""Validate area coordinates.
 
@@ -22638,37 +25560,47 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'area_coordinates', area_coordinates )
-		value = str( area_coordinates ).strip( )
-		if value.lower( ) == 'world':
-			return 'world'
+		try:
+			throw_if( 'area_coordinates', area_coordinates )
+			value = str( area_coordinates ).strip( )
+			if value.lower( ) == 'world':
+				return 'world'
+			
+			parts = [ part.strip( ) for part in value.split( ',' ) ]
+			if len( parts ) != 4:
+				raise ValueError( 'area_coordinates must be world or west,south,east,north.' )
+			
+			west, south, east, north = [ float( part ) for part in parts ]
+			if west < -180.0 or west > 180.0:
+				raise ValueError( 'west longitude must be between -180 and 180.' )
+			
+			if east < -180.0 or east > 180.0:
+				raise ValueError( 'east longitude must be between -180 and 180.' )
+			
+			if south < -90.0 or south > 90.0:
+				raise ValueError( 'south latitude must be between -90 and 90.' )
+			
+			if north < -90.0 or north > 90.0:
+				raise ValueError( 'north latitude must be between -90 and 90.' )
+			
+			if west >= east:
+				raise ValueError( 'west longitude must be less than east longitude.' )
+			
+			if south >= north:
+				raise ValueError( 'south latitude must be less than north latitude.' )
+			
+			return f'{west:g},{south:g},{east:g},{north:g}'
 		
-		parts = [ part.strip( ) for part in value.split( ',' ) ]
-		if len( parts ) != 4:
-			raise ValueError( 'area_coordinates must be world or west,south,east,north.' )
-		
-		west, south, east, north = [ float( part ) for part in parts ]
-		if west < -180.0 or west > 180.0:
-			raise ValueError( 'west longitude must be between -180 and 180.' )
-		
-		if east < -180.0 or east > 180.0:
-			raise ValueError( 'east longitude must be between -180 and 180.' )
-		
-		if south < -90.0 or south > 90.0:
-			raise ValueError( 'south latitude must be between -90 and 90.' )
-		
-		if north < -90.0 or north > 90.0:
-			raise ValueError( 'north latitude must be between -90 and 90.' )
-		
-		if west >= east:
-			raise ValueError( 'west longitude must be less than east longitude.' )
-		
-		if south >= north:
-			raise ValueError( 'south latitude must be less than north latitude.' )
-		
-		return f'{west:g},{south:g},{east:g},{north:g}'
-		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'validate_area_coordinates( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]:
 		"""CSV to rows.
 
@@ -22707,7 +25639,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.csv_to_rows'
+			exception.method = 'csv_to_rows( self, *args, **kwargs ) -> List[ Dict[ str, Any ] ]'
 			raise exception
 	
 	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -22749,7 +25681,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.summarize_rows'
+			exception.method = 'summarize_rows( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def package_response( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -22779,7 +25711,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.package_response'
+			exception.method = ( 'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]' )
 			raise exception
 	
 	def request_csv( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -22820,7 +25752,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.request_csv'
+			exception.method = ('request_csv( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_area( self, source: str, area_coordinates: str='world',
@@ -22849,7 +25781,6 @@ class Firms( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'source', source )
 		try:
 			self.mode = 'area'
 			self.source = self.validate_source( source )
@@ -22872,7 +25803,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.fetch_area'
+			exception.method = ( 'fetch_area( self, *args, **kwargs ) -> Dict[ str, Any ] | None' )
 			raise exception
 	
 	def fetch_data_availability( self, sensor: str='ALL',
@@ -22912,7 +25843,8 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.fetch_data_availability'
+			exception.method = ('fetch_data_availability( self, *args, **kwargs ) '
+			                    '-> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch( self, mode: str='area', source: str='VIIRS_SNPP_NRT',
@@ -22960,9 +25892,58 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'Firms.fetch'
+			exception.method = ( 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None' )
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if not isinstance( parameters, dict ):
+				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			return { 'name': function.strip( ),
+					'description': (f'{description.strip( )} This function uses the '
+					                f'{tool.strip( )} service.'),
+					'parameters': { 'type': 'object', 'properties': parameters,
+							'required': required, } }
+		
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'Firms'
+			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
+			raise exception
+
 class OpenSky( Fetcher ):
 	"""Open Sky fetcher.
 
@@ -23094,19 +26075,29 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'mode', mode )
-		value = str( mode ).strip( ).lower( )
-		allowed = { 'states_bbox', 'flights_aircraft', 'arrivals_airport',
-		            'departures_airport',
-				'track_aircraft' }
-		
-		if value not in allowed:
-			raise ValueError( "Unsupported OpenSky mode. Use 'states_bbox', "
-			                  "'flights_aircraft', 'arrivals_airport', "
-			                  "'departures_airport', or 'track_aircraft'." )
-		
-		return value
+		try:
+			throw_if( 'mode', mode )
+			value = str( mode ).strip( ).lower( )
+			allowed = { 'states_bbox', 'flights_aircraft', 'arrivals_airport',
+			            'departures_airport',
+					'track_aircraft' }
+			
+			if value not in allowed:
+				raise ValueError( "Unsupported OpenSky mode. Use 'states_bbox', "
+				                  "'flights_aircraft', 'arrivals_airport', "
+				                  "'departures_airport', or 'track_aircraft'." )
+			
+			return value
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
 
@@ -23124,22 +26115,32 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
-		value = str( endpoint ).strip( )
-		if value.startswith( 'http://' ) or value.startswith( 'https://' ):
-			raise ValueError( 'endpoint must be a path segment, not a full URL.' )
-		
-		if '..' in value:
-			raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-		
-		allowed = { '/states/all', '/flights/aircraft', '/flights/arrival',
-				'/flights/departure', '/tracks/all' }
-		
-		if value not in allowed:
-			raise ValueError( 'Unsupported OpenSky endpoint path.' )
-		
-		return value
+		try:
+			throw_if( 'endpoint', endpoint )
+			value = str( endpoint ).strip( )
+			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
+				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
+			
+			if '..' in value:
+				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
+			
+			allowed = { '/states/all', '/flights/aircraft', '/flights/arrival',
+					'/flights/departure', '/tracks/all' }
+			
+			if value not in allowed:
+				raise ValueError( 'Unsupported OpenSky endpoint path.' )
+			
+			return value
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_icao24( self, icao24: str ) -> str:
 		"""Validate icao24.
 
@@ -23157,14 +26158,24 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'icao24', icao24 )
-		value = str( icao24 ).strip( ).lower( )
-		if not re.fullmatch( r'[0-9a-f]{6}', value ):
-			raise ValueError( 'icao24 must be a six-character hexadecimal address.' )
+		try:
+			throw_if( 'icao24', icao24 )
+			value = str( icao24 ).strip( ).lower( )
+			if not re.fullmatch( r'[0-9a-f]{6}', value ):
+				raise ValueError( 'icao24 must be a six-character hexadecimal address.' )
+			
+			return value
 		
-		return value
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_icao24( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_airport( self, airport: str ) -> str:
 		"""Validate airport.
 
@@ -23182,14 +26193,24 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'airport', airport )
-		value = str( airport ).strip( ).upper( )
-		if not re.fullmatch( r'[A-Z0-9]{4}', value ):
-			raise ValueError( 'airport must be a four-character ICAO airport code.' )
+		try:
+			throw_if( 'airport', airport )
+			value = str( airport ).strip( ).upper( )
+			if not re.fullmatch( r'[A-Z0-9]{4}', value ):
+				raise ValueError( 'airport must be a four-character ICAO airport code.' )
+			
+			return value
 		
-		return value
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_airport( self, *args, **kwargs ) -> str'
+			raise exception
+	
 	def validate_epoch( self, name: str, value: Any ) -> int:
 		"""Validate epoch.
 
@@ -23208,17 +26229,27 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'name', name )
-		throw_if( name, value )
+		try:
+			throw_if( 'name', name )
+			throw_if( name, value )
+			
+			number = int( value )
+			
+			if number < 0:
+				raise ValueError( f'{name} must be greater than or equal to 0.' )
+			
+			return number
 		
-		number = int( value )
-		
-		if number < 0:
-			raise ValueError( f'{name} must be greater than or equal to 0.' )
-		
-		return number
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_epoch( self, *args, **kwargs ) -> int'
+			raise exception
+	
 	def validate_time_range( self, begin: int, end: int ) -> Tuple[ int, int ]:
 		"""Validate time range.
 
@@ -23237,17 +26268,25 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'begin', begin )
-		throw_if( 'end', end )
-		start = self.validate_epoch( 'begin', begin )
-		stop = self.validate_epoch( 'end', end )
+		try:
+			start = self.validate_epoch( 'begin', begin )
+			stop = self.validate_epoch( 'end', end )
+			
+			if start > stop:
+				raise ValueError( 'begin must be less than or equal to end.' )
+			
+			return start, stop
 		
-		if start > stop:
-			raise ValueError( 'begin must be less than or equal to end.' )
-		
-		return start, stop
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = ( 'validate_time_range( self, *args, **kwargs ) -> Tuple[ int, int ]' )
+			raise exception
+	
 	def validate_latitude( self, name: str, value: Any ) -> float:
 		"""Validate latitude.
 
@@ -23266,17 +26305,27 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'name', name )
-		throw_if( name, value )
+		try:
+			throw_if( 'name', name )
+			throw_if( name, value )
+			
+			number = float( value )
+			
+			if number < -90.0 or number > 90.0:
+				raise ValueError( f'{name} must be between -90 and 90.' )
+			
+			return number
 		
-		number = float( value )
-		
-		if number < -90.0 or number > 90.0:
-			raise ValueError( f'{name} must be between -90 and 90.' )
-		
-		return number
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_latitude( self, *args, **kwargs ) -> float'
+			raise exception
+	
 	def validate_longitude( self, name: str, value: Any ) -> float:
 		"""Validate longitude.
 
@@ -23295,17 +26344,27 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		throw_if( 'name', name )
-		throw_if( name, value )
+		try:
+			throw_if( 'name', name )
+			throw_if( name, value )
+			
+			number = float( value )
+			
+			if number < -180.0 or number > 180.0:
+				raise ValueError( f'{name} must be between -180 and 180.' )
+			
+			return number
 		
-		number = float( value )
-		
-		if number < -180.0 or number > 180.0:
-			raise ValueError( f'{name} must be between -180 and 180.' )
-		
-		return number
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'validate_longitude( self, *args, **kwargs ) -> float'
+			raise exception
+	
 	def validate_bbox( self, lamin: float, lomin: float,
 			lamax: float, lomax: float ) -> Tuple[ float, float, float, float ]:
 		"""Validate bbox.
@@ -23327,20 +26386,33 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
 		"""
-		min_lat = self.validate_latitude( 'lamin', lamin )
-		min_lon = self.validate_longitude( 'lomin', lomin )
-		max_lat = self.validate_latitude( 'lamax', lamax )
-		max_lon = self.validate_longitude( 'lomax', lomax )
+		try:
+			min_lat = self.validate_latitude( 'lamin', lamin )
+			min_lon = self.validate_longitude( 'lomin', lomin )
+			max_lat = self.validate_latitude( 'lamax', lamax )
+			max_lon = self.validate_longitude( 'lomax', lomax )
+			
+			if min_lat >= max_lat:
+				raise ValueError( 'lamin must be less than lamax.' )
+			
+			if min_lon >= max_lon:
+				raise ValueError( 'lomin must be less than lomax.' )
+			
+			return min_lat, min_lon, max_lat, max_lon
 		
-		if min_lat >= max_lat:
-			raise ValueError( 'lamin must be less than lamax.' )
-		
-		if min_lon >= max_lon:
-			raise ValueError( 'lomin must be less than lomax.' )
-		
-		return min_lat, min_lon, max_lat, max_lon
-		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = (
+					'validate_bbox( self, *args, **kwargs ) '
+					'-> Tuple[ float, float, float, float ]'
+			)
+			raise exception
+	
 	def assign_credentials( self, client_id: str=None,
 			client_secret: str=None ) -> None:
 		"""Assign credentials.
@@ -23375,7 +26447,9 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.assign_credentials'
+			exception.method = (
+					'assign_credentials( self, *args, **kwargs ) -> None'
+			)
 			raise exception
 	
 	def authenticate( self ) -> str | None:
@@ -23413,7 +26487,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.authenticate'
+			exception.method = 'authenticate( self ) -> str | None'
 			raise exception
 	
 	def request( self, endpoint: str, params: Dict[ str, Any ] | None = None,
@@ -23440,7 +26514,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'endpoint', endpoint )
 		try:
 			self.endpoint = self.validate_endpoint( endpoint )
 			self.assign_credentials( client_id=client_id, client_secret=client_secret )
@@ -23469,7 +26542,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.request'
+			exception.method = 'request( self, *args, **kwargs ) -> Any'
 			raise exception
 	
 	def normalize_states( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
@@ -23531,7 +26604,9 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.normalize_states'
+			exception.method = (
+					'normalize_states( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def normalize_flights( self, payload: List[ Dict[ str, Any ] ] | None,
@@ -23555,7 +26630,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'mode', mode )
 		try:
 			items: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -23590,7 +26664,8 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.normalize_flights'
+			exception.method = (
+					'normalize_flights( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
 	def normalize_track( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
@@ -23643,7 +26718,8 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.normalize_track'
+			exception.method = (
+					'normalize_track( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_states( self, icao24: str='', time_value: int=None,
@@ -23722,7 +26798,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.fetch_states'
+			exception.method = ('fetch_states( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_flights_aircraft( self, icao24: str, begin: int, end: int,
@@ -23750,9 +26826,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'icao24', icao24 )
-		throw_if( 'begin', begin )
-		throw_if( 'end', end )
 		try:
 			self.mode = 'flights_aircraft'
 			self.icao24 = self.validate_icao24( icao24 )
@@ -23768,7 +26841,8 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.fetch_flights_aircraft'
+			exception.method = ('fetch_flights_aircraft( self, *args, **kwargs ) '
+			                    '-> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_arrivals_airport( self, airport: str, begin: int, end: int,
@@ -23796,9 +26870,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'airport', airport )
-		throw_if( 'begin', begin )
-		throw_if( 'end', end )
 		try:
 			self.mode = 'arrivals_airport'
 			self.airport = self.validate_airport( airport )
@@ -23814,7 +26885,8 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.fetch_arrivals_airport'
+			exception.method = ('fetch_arrivals_airport( self, *args, **kwargs ) '
+			                    '-> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch_departures_airport( self, airport: str, begin: int, end: int,
@@ -23842,9 +26914,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'airport', airport )
-		throw_if( 'begin', begin )
-		throw_if( 'end', end )
 		try:
 			self.mode = 'departures_airport'
 			self.airport = self.validate_airport( airport )
@@ -23860,7 +26929,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.fetch_departures_airport'
+			exception.method = 'fetch_departures_airport( self, *args, **kwargs ) -> Dict[str, Any]'
 			raise exception
 	
 	def fetch_track_aircraft( self, icao24: str, time_value: int=None,
@@ -23887,7 +26956,6 @@ class OpenSky( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'icao24', icao24 )
 		try:
 			self.mode = 'track_aircraft'
 			self.icao24 = self.validate_icao24( icao24 )
@@ -23904,7 +26972,8 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.fetch_track_aircraft'
+			exception.method = ('fetch_track_aircraft( self, *args, **kwargs ) '
+			                    '-> Dict[ str, Any ] | None')
 			raise exception
 	
 	def fetch( self, mode: str='states_bbox', icao24: str='', airport: str='',
@@ -23983,6 +27052,55 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'OpenSky.fetch'
+			exception.method = ('fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
+	def create_schema( self, function: str, tool: str,
+			description: str, parameters: dict,
+			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Create an AI tool schema.
+
+		Purpose:
+		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
+		    workflows. The method combines the public function name, service label, description, parameter
+		    schema, and required-field list into the structure consumed by downstream tool registries.
+
+		Args:
+		    function: Callable or function name represented by the schema.
+		    tool: Provider or service name used by the generated tool description.
+		    description: Human-readable description of the callable or tool.
+		    parameters: JSON Schema property definitions keyed by parameter name.
+		    required: Parameter names that should be marked as required in the generated schema.
+
+		Returns:
+		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
+		    integrations.
+
+		Raises:
+		    ValueError: If a required value is missing, blank, or outside the supported range.
+		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
+		        project error type.
+		"""
+		try:
+			throw_if( 'function', function )
+			throw_if( 'tool', tool )
+			throw_if( 'description', description )
+			throw_if( 'parameters', parameters )
+			if not isinstance( parameters, dict ):
+				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
+			
+			if required is None:
+				required = list( parameters.keys( ) )
+			
+			return { 'name': function.strip( ),
+					'description': (f'{description.strip( )} This function uses the '
+					                f'{tool.strip( )} service.'),
+					'parameters': { 'type': 'object', 'properties': parameters,
+							'required': required, } }
+		
+		except Exception as exc:
+			exception = Error( exc )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ]'
+			raise exception
