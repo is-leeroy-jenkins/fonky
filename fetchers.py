@@ -2214,7 +2214,6 @@ class GoogleSearch( Fetcher ):
 			if cse_id:
 				self.cse_id = str( cse_id ).strip( )
 			
-			throw_if( 'cse_id', self.cse_id )
 			self.timeout = int( time )
 			self.keywords = str( keywords ).strip( )
 			self.results = int( results )
@@ -2605,7 +2604,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'request_directions( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = 'request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -2931,7 +2930,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_current( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -2985,7 +2984,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_forecast( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -3039,7 +3038,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_daily_forecast( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3093,7 +3092,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_history( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -3136,7 +3135,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_alerts( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
 			raise exception
 
 class NavalObservatory( Fetcher ):
@@ -5792,7 +5791,6 @@ class SpaceWeather( Fetcher ):
 				if start > end:
 					raise ValueError( 'start_date must precede or equal end_date.' )
 			self.active_key = str( api_key or self.api_key or '' ).strip( )
-			throw_if( 'api_key', self.active_key )
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { 'api_key': self.active_key }
 			if self.start_date:
@@ -6024,7 +6022,9 @@ class AstroCatalog( Fetcher ):
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [ 'base_url', 'timeout', 'headers', 'fetch_object', 'cone_search', 'fetch', ]
+		return [ 'base_url', 'format', 'name', 'right_ascension', 'declination',
+			'radius', 'params', 'timeout', 'headers', 'request', 'normalize_attribute_path',
+			'parse_argument', 'fetch_object', 'cone_search', 'fetch' ]
 	
 	def normalize_attribute_path( self, quantity: str='', attributes: str='' ) -> str:
 		"""Normalize attribute path.
@@ -6043,11 +6043,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		parts: list[ str ] = [ ]
 		if quantity and quantity.strip( ):
-			parts.append( quantity.strip( ) )
+			parts.append( urllib.parse.quote( quantity.strip( ), safe='' ) )
 		
 		if attributes and attributes.strip( ):
 			attr_parts = [ a.strip( ) for a in attributes.split( ',' ) if a.strip( ) ]
-			parts.extend( attr_parts )
+			parts.extend( urllib.parse.quote( item, safe='' ) for item in attr_parts )
 		
 		return '/'.join( parts )
 	
@@ -6102,24 +6102,33 @@ class AstroCatalog( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'route', route )
+			throw_if( 'time', time )
 			self.timeout = int( time )
-			self.url = f'{self.base_url}/{route.lstrip( "/" )}'
-			self.params = params or { }
+			if self.timeout < 1:
+				raise ValueError( 'time must be a positive integer.' )
+			self.route = str( route ).strip( ).lstrip( '/' )
+			self.url = f'{self.base_url}/{self.route}'
+			self.params = params if params is not None else { }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=self.timeout )
 			
 			self.response.raise_for_status( )
 			content_type = (self.response.headers.get( 'Content-Type', '' ) or '').lower( )
 			if 'json' in content_type:
-				return self.response.json( )
-			
-			return self.response.text
+				self.payload = self.response.json( )
+			else:
+				self.payload = self.response.text
+			if isinstance( self.payload, dict ) and self.payload.get( 'error' ):
+				raise ValueError( f"AstroCatalog API error: {self.payload[ 'error' ]}" )
+			self.result = self.payload
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'request( self, *args ) -> Any'
+			exception.method = "request( self, route: str, params: Dict[ str, Any ] | None=None, time: int=20 ) -> Any"
 			raise exception
 	
 	def fetch_object( self, name: str, quantity: str='', attributes: str='',
@@ -6150,9 +6159,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
-			self.format = (data_format or 'json').strip( ).lower( )
-			route_parts = [ urllib.parse.quote( self.name ) ]
+			self.name = str( name ).strip( )
+			self.format = str( data_format or 'json' ).strip( ).lower( )
+			if self.format not in ('json', 'csv', 'tsv'):
+				raise ValueError( 'Unsupported AstroCatalog output format.' )
+			route_parts = [ urllib.parse.quote( self.name, safe='' ) ]
 			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
 				route_parts.append( attr_path )
@@ -6167,7 +6178,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'fetch_object( self, *args ) -> Any'
+			exception.method = "fetch_object( self, name: str, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 	
 	def cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='',
@@ -6199,10 +6210,15 @@ class AstroCatalog( Fetcher ):
 		try:
 			throw_if( 'ra', ra )
 			throw_if( 'dec', dec )
-			self.right_ascension = ra.strip( )
-			self.declination = dec.strip( )
-			self.radius = max( 1, int( radius ) )
-			self.format = (data_format or 'json').strip( ).lower( )
+			throw_if( 'radius', radius )
+			self.right_ascension = str( ra ).strip( )
+			self.declination = str( dec ).strip( )
+			self.radius = int( radius )
+			self.format = str( data_format or 'json' ).strip( ).lower( )
+			if self.radius < 1:
+				raise ValueError( 'radius must be positive.' )
+			if self.format not in ('json', 'csv', 'tsv'):
+				raise ValueError( 'Unsupported AstroCatalog output format.' )
 			route = 'catalog'
 			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
@@ -6220,7 +6236,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'cone_search( self, *args ) -> Any'
+			exception.method = "cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 	
 	def fetch( self, mode: str='object_query', query: str='', quantity: str='',
@@ -6284,7 +6300,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'fetch( self, *args ) -> Any'
+			exception.method = "fetch( self, mode: str='object_query', query: str='', quantity: str='', attributes: str='', arguments: str='', ra: str='', dec: str='', radius: int=2, data_format: str='json', time: int=20 ) -> Any"
 			raise exception
 
 class AstroQuery( Fetcher ):
@@ -6330,6 +6346,7 @@ class AstroQuery( Fetcher ):
 		self.right_ascension = None
 		self.declination = None
 		self.params = { }
+		self.headers = { }
 		self.row_limit = 100
 		self.agents = cfg.AGENTS
 		
@@ -6347,7 +6364,9 @@ class AstroQuery( Fetcher ):
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [ 'headers', 'row_limit', 'object_search', 'object_ids', 'region_search', 'fetch', ]
+		return [ 'url', 'radius', 'name', 'declination', 'right_ascension', 'params',
+			'headers', 'row_limit', 'table_to_records', 'object_search', 'object_ids',
+			'region_search', 'fetch' ]
 	
 	def table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]:
 		"""Table to records.
@@ -6392,7 +6411,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'table_to_records( self, *args ) -> List[ Dict[ str, Any ] ]'
+			exception.method = "table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]"
 			raise exception
 	
 	def object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None:
@@ -6416,14 +6435,18 @@ class AstroQuery( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			self.row_limit = max( 1, int( row_limit ) )
+			throw_if( 'row_limit', row_limit )
+			self.row_limit = int( row_limit )
+			if self.row_limit < 1:
+				raise ValueError( 'row_limit must be a positive integer.' )
 			simbad = Simbad( )
 			simbad.ROW_LIMIT = self.row_limit
 			result_table = simbad.query_object( self.name )
 			
-			return { 'mode': 'object_search', 'query': self.name, 'row_limit': self.row_limit,
+			self.result = { 'mode': 'object_search', 'query': self.name, 'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -6452,19 +6475,23 @@ class AstroQuery( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			self.row_limit = max( 1, int( row_limit ) )
+			throw_if( 'row_limit', row_limit )
+			self.row_limit = int( row_limit )
+			if self.row_limit < 1:
+				raise ValueError( 'row_limit must be a positive integer.' )
 			simbad = Simbad( )
 			simbad.ROW_LIMIT = self.row_limit
 			result_table = simbad.query_objectids( self.name )
-			return { 'mode': 'object_ids', 'query': self.name, 'row_limit': self.row_limit,
+			self.result = { 'mode': 'object_ids', 'query': self.name, 'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'object_ids( self, *args ) -> Dict[ str, Any ]'
+			exception.method = "object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def region_search( self, ra: str, dec: str, radius: float = 0.5,
@@ -6494,10 +6521,20 @@ class AstroQuery( Fetcher ):
 			
 			self.right_ascension = ra.strip( )
 			self.declination = dec.strip( )
+			throw_if( 'radius', radius )
 			self.radius = float( radius )
-			self.row_limit = max( 1, int( row_limit ) )
+			if not (0.0 < self.radius <= 180.0):
+				raise ValueError( 'radius must be greater than zero and at most 180 degrees.' )
+			throw_if( 'row_limit', row_limit )
+			self.row_limit = int( row_limit )
+			if self.row_limit < 1:
+				raise ValueError( 'row_limit must be a positive integer.' )
 			unit_map = { 'deg': u.deg, 'arcmin': u.arcmin, 'arcsec': u.arcsec, }
-			active_unit = unit_map.get( (radius_unit or 'deg').strip( ).lower( ), u.deg )
+			throw_if( 'radius_unit', radius_unit )
+			self.radius_unit = str( radius_unit ).strip( ).lower( )
+			if self.radius_unit not in unit_map:
+				raise ValueError( 'radius_unit must be deg, arcmin, or arcsec.' )
+			active_unit = unit_map[ self.radius_unit ]
 			coord = SkyCoord( ra=self.right_ascension, dec=self.declination,
 				unit=(u.hourangle, u.deg) )
 			
@@ -6506,17 +6543,18 @@ class AstroQuery( Fetcher ):
 			result_table = simbad.query_region( coordinates=coord,
 				radius=self.radius * active_unit )
 			
-			return { 'mode': 'region_search', 'ra': self.right_ascension, 'dec': self.declination,
-				'radius': self.radius, 'radius_unit': (radius_unit or 'deg').strip( ).lower( ),
+			self.result = { 'mode': 'region_search', 'ra': self.right_ascension, 'dec': self.declination,
+				'radius': self.radius, 'radius_unit': self.radius_unit,
 				'row_limit': self.row_limit,
 				'columns': list( result_table.colnames ) if result_table is not None else [ ],
 				'rows': self.table_to_records( result_table ), }
+			return self.result
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'region_search( self, *wargs) -> Dict[ str, Any ]'
+			exception.method = "region_search( self, ra: str, dec: str, radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='object_search', query: str='', ra: str='', dec: str='',
@@ -6564,7 +6602,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'fetch( self, *args ) -> Dict[ str, Any ]'
+			exception.method = "fetch( self, mode: str='object_search', query: str='', ra: str='', dec: str='', radius: float=0.5, radius_unit: str='deg', row_limit: int=100 ) -> Dict[ str, Any ]"
 			raise exception
 
 class StarMap( Fetcher ):
@@ -10940,7 +10978,8 @@ class GoogleGeocoding( Fetcher ):
 				'create_schema'
 		]
 	
-	def request( self, params: Dict[ str, Any ], time: int=10,) -> Dict[ str, Any ] | None:
+	def request( self, params: Dict[ str, Any ], time: int=10,
+			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
 		"""Request Google forward, reverse, and place geocoding.
 
 		Purpose:
@@ -10965,6 +11004,10 @@ class GoogleGeocoding( Fetcher ):
 		try:
 			throw_if( 'params', params )
 			throw_if( 'time', time )
+			
+			if api_key:
+				self.api_key = str( api_key ).strip( )
+			
 			self.timeout = int( time )
 			self.params = { }
 			
@@ -10978,8 +11021,13 @@ class GoogleGeocoding( Fetcher ):
 				self.params[ key ] = value
 			
 			self.params[ 'key' ] = self.api_key
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=self.timeout )
+			
+			self.response = requests.get(
+				url=self.url,
+				params=self.params,
+				headers=self.headers,
+				timeout=self.timeout
+			)
 			
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
@@ -23439,15 +23487,6 @@ class PurpleAir( Fetcher ):
 				'timeout',
 				'agents',
 				'headers',
-				'validate_api_key',
-				'validate_mode',
-				'validate_endpoint',
-				'validate_sensor_index',
-				'validate_longitude',
-				'validate_latitude',
-				'validate_bbox',
-				'validate_location_type',
-				'validate_non_negative_integer',
 				'normalize_fields',
 				'shape_sensor_list_rows',
 				'shape_sensor_detail_rows',
@@ -23459,341 +23498,6 @@ class PurpleAir( Fetcher ):
 				'fetch',
 				'create_schema'
 		]
-	
-	def validate_api_key( self ) -> str:
-		"""Validate api key.
-
-		Purpose:
-		    Validates and normalizes api key before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated api key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'api_key', self.api_key )
-			return str( self.api_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_api_key( self ) -> str'
-			raise exception
-	
-	def validate_mode( self, mode: str ) -> str:
-		"""Validate mode.
-
-		Purpose:
-		    Validates and normalizes mode before it is used in PurpleAir sensor and air quality records.
-		    The method converts incoming values to the expected representation, enforces visible range or
-		    format constraints, and returns the checked value for request construction.
-
-		Args:
-		    mode: Operation mode used to select the provider or processing workflow.
-
-		Returns:
-		    str: Validated mode value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'mode', mode )
-			value = str( mode ).strip( ).lower( )
-			allowed = { 'sensors', 'sensor' }
-			if value not in allowed:
-				raise ValueError( "Unsupported PurpleAir mode. Use 'sensors' or 'sensor'." )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
-			raise exception
-	
-	def validate_endpoint( self, endpoint: str ) -> str:
-		"""Validate endpoint.
-
-		Purpose:
-		    Validates and normalizes endpoint before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    endpoint: Provider endpoint or endpoint family to request.
-
-		Returns:
-		    str: Validated endpoint value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'endpoint', endpoint )
-			
-			value = str( endpoint ).strip( ).strip( '/' )
-			
-			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
-				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
-			
-			if '..' in value:
-				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-			
-			if value != 'sensors' and not re.fullmatch( r'sensors/\d+', value ):
-				raise ValueError( "endpoint must be 'sensors' or 'sensors/{sensor_index}'." )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
-			raise exception
-	
-	def validate_sensor_index( self, sensor_index: int ) -> int:
-		"""Validate sensor index.
-
-		Purpose:
-		    Validates and normalizes sensor index before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    sensor_index: PurpleAir sensor identifier.
-
-		Returns:
-		    int: Validated sensor index value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'sensor_index', sensor_index )
-			
-			value = int( sensor_index )
-			if value < 1:
-				raise ValueError( 'sensor_index must be greater than or equal to 1.' )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_sensor_index( self, *args, **kwargs ) -> int'
-			raise exception
-	
-	def validate_longitude( self, name: str, value: float ) -> float:
-		"""Validate longitude.
-
-		Purpose:
-		    Validates and normalizes longitude before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    name: Argument name included in validation error messages.
-		    value: Candidate argument value to validate.
-
-		Returns:
-		    float: Validated longitude value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = float( value )
-			if number < -180.0 or number > 180.0:
-				raise ValueError( f'{name} must be between -180 and 180.' )
-			
-			return number
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_longitude( self, *args, **kwargs ) -> float'
-			raise exception
-	
-	def validate_latitude( self, name: str, value: float ) -> float:
-		"""Validate latitude.
-
-		Purpose:
-		    Validates and normalizes latitude before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    name: Argument name included in validation error messages.
-		    value: Candidate argument value to validate.
-
-		Returns:
-		    float: Validated latitude value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = float( value )
-			if number < -90.0 or number > 90.0:
-				raise ValueError( f'{name} must be between -90 and 90.' )
-			
-			return number
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_latitude( self, *args, **kwargs ) -> float'
-			raise exception
-	
-	def validate_bbox( self, nwlng: float, nwlat: float,
-			selng: float, selat: float ) -> Tuple[ float, float, float, float ]:
-		"""Validate bbox.
-
-		Purpose:
-		    Validates and normalizes bbox before it is used in PurpleAir sensor and air quality records.
-		    The method converts incoming values to the expected representation, enforces visible range or
-		    format constraints, and returns the checked value for request construction.
-
-		Args:
-		    nwlng: Northwest bounding-box longitude in decimal degrees.
-		    nwlat: Northwest bounding-box latitude in decimal degrees.
-		    selng: Southeast bounding-box longitude in decimal degrees.
-		    selat: Southeast bounding-box latitude in decimal degrees.
-
-		Returns:
-		    Tuple[float, float, float, float]: Validated bbox value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			nw_lng = self.validate_longitude( 'nwlng', nwlng )
-			nw_lat = self.validate_latitude( 'nwlat', nwlat )
-			se_lng = self.validate_longitude( 'selng', selng )
-			se_lat = self.validate_latitude( 'selat', selat )
-			
-			if nw_lng >= se_lng:
-				raise ValueError( 'nwlng must be less than selng.' )
-			
-			if nw_lat <= se_lat:
-				raise ValueError( 'nwlat must be greater than selat.' )
-			
-			return nw_lng, nw_lat, se_lng, se_lat
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = (
-					'validate_bbox( self, *args, **kwargs ) '
-					'-> Tuple[ float, float, float, float ]'
-			)
-			raise exception
-	
-	def validate_location_type( self, location_type: int ) -> int:
-		"""Validate location type.
-
-		Purpose:
-		    Validates and normalizes location type before it is used in PurpleAir sensor and air quality
-		    records. The method converts incoming values to the expected representation, enforces visible
-		    range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    location_type: Provider type selector for location.
-
-		Returns:
-		    int: Validated location type value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'location_type', location_type if location_type == 0 else location_type )
-			
-			value = int( location_type )
-			if value not in (0, 1):
-				raise ValueError( 'location_type must be 0 or 1.' )
-			
-			return value
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = 'validate_location_type( self, *args, **kwargs ) -> int'
-			raise exception
-	
-	def validate_non_negative_integer( self, name: str, value: int ) -> int:
-		"""Validate non negative integer.
-
-		Purpose:
-		    Validates and normalizes non negative integer before it is used in PurpleAir sensor and air
-		    quality records. The method converts incoming values to the expected representation, enforces
-		    visible range or format constraints, and returns the checked value for request construction.
-
-		Args:
-		    name: Argument name included in validation error messages.
-		    value: Candidate argument value to validate.
-
-		Returns:
-		    int: Validated non negative integer value.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'name', name )
-			
-			if value is None:
-				raise ValueError( f'{name} cannot be None.' )
-			
-			number = int( value )
-			if number < 0:
-				raise ValueError( f'{name} must be greater than or equal to 0.' )
-			
-			return number
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = (
-					'validate_non_negative_integer( self, *args, **kwargs ) -> int'
-			)
-			raise exception
 	
 	def normalize_fields( self, fields: str, default_fields: str ) -> str:
 		"""Normalize fields.
@@ -24085,43 +23789,26 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_api_key( )
-			self.endpoint = self.validate_endpoint( endpoint )
+			throw_if( 'endpoint', endpoint )
 			throw_if( 'time', time )
-			
+			self.endpoint = str( endpoint ).strip( ).strip( '/' )
+			if self.endpoint != 'sensors' and not re.fullmatch(
+					r'sensors/[1-9][0-9]*', self.endpoint ):
+				raise ValueError( 'endpoint must identify sensors or a positive sensor index.' )
+
 			self.timeout = int( time )
-			self.url = f'{self.base_url}/{self.endpoint}'
-			self.params = { }
-			
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
-			
-			for key, value in (params or { }).items( ):
-				if value is None:
-					continue
-				
-				if isinstance( value, str ) and not value.strip( ):
-					continue
-				
-				self.params[ key ] = value
-			
-			self.headers[ 'X-API-Key' ] = self.validate_api_key( )
-			self.response = requests.get(
-				url=self.url,
-				params=self.params,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+
+			self.url = f'{self.base_url}/{self.endpoint}'
+			self.params = params if params is not None else { }
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			self.payload = self.response.json( ) or { }
-			self.result = {
-					'url': self.response.url,
-					'params': self.params,
-					'raw': self.payload
-			}
-			
+			self.payload = self.response.json( )
+			self.result = { 'url': self.response.url, 'params': self.params,
+				'raw': self.payload }
 			return self.result
-		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -24162,52 +23849,42 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			default_fields = (
-					'name,pm2.5,temperature,humidity,latitude,longitude,last_seen,'
-					'location_type'
-			)
-			
+			throw_if( 'nwlng', nwlng )
+			throw_if( 'nwlat', nwlat )
+			throw_if( 'selng', selng )
+			throw_if( 'selat', selat )
+			throw_if( 'location_type', location_type )
+			throw_if( 'max_age', max_age )
+			throw_if( 'modified_since', modified_since )
+			self.nwlng = float( nwlng )
+			self.nwlat = float( nwlat )
+			self.selng = float( selng )
+			self.selat = float( selat )
+			self.location_type = int( location_type )
+			self.max_age = int( max_age )
+			self.modified_since = int( modified_since )
+			if not (-180.0 <= self.nwlng < self.selng <= 180.0):
+				raise ValueError( 'Longitude bounds must satisfy -180 <= nwlng < selng <= 180.' )
+			if not (-90.0 <= self.selat < self.nwlat <= 90.0):
+				raise ValueError( 'Latitude bounds must satisfy -90 <= selat < nwlat <= 90.' )
+			if self.location_type not in (0, 1):
+				raise ValueError( 'location_type must be 0 or 1.' )
+			if self.max_age < 0 or self.modified_since < 0:
+				raise ValueError( 'max_age and modified_since cannot be negative.' )
+
 			self.mode = 'sensors'
-			self.nwlng, self.nwlat, self.selng, self.selat = self.validate_bbox(
-				nwlng=nwlng,
-				nwlat=nwlat,
-				selng=selng,
-				selat=selat
-			)
-			self.location_type = self.validate_location_type( location_type )
-			self.max_age = self.validate_non_negative_integer( 'max_age', max_age )
-			self.modified_since = self.validate_non_negative_integer(
-				'modified_since',
-				modified_since
-			)
-			self.fields = self.normalize_fields(
-				fields=fields,
-				default_fields=default_fields
-			)
-			self.timeout = int( time )
-			
-			self.request(
-				endpoint='sensors',
-				params={
-						'fields': self.fields,
-						'location_type': self.location_type,
-						'nwlng': self.nwlng,
-						'nwlat': self.nwlat,
-						'selng': self.selng,
-						'selat': self.selat,
-						'max_age': self.max_age,
-						'modified_since': self.modified_since
-				},
-				time=self.timeout
-			)
-			
+			default_fields = (
+				'name,pm2.5,temperature,humidity,latitude,longitude,last_seen,'
+				'location_type' )
+			self.fields = self.normalize_fields( fields=fields,
+				default_fields=default_fields )
+			self.request( endpoint='sensors', params={
+				'fields': self.fields, 'location_type': self.location_type,
+				'nwlng': self.nwlng, 'nwlat': self.nwlat,
+				'selng': self.selng, 'selat': self.selat,
+				'max_age': self.max_age, 'modified_since': self.modified_since }, time=time )
 			rows = self.shape_sensor_list_rows( self.payload )
-			
-			return self.package_response(
-				rows=rows,
-				params=self.params
-			)
-		
+			return self.package_response( rows=rows, params=self.params )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -24241,27 +23918,29 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			default_fields = (
-					'name,model,hardware,pm2.5_cf_1_a,pm2.5_cf_1_b,temperature,'
-					'humidity,pressure,latitude,longitude,last_seen,firmware_version,rssi'
-			)
-			
+			throw_if( 'sensor_index', sensor_index )
+			self.sensor_index = int( sensor_index )
+			if self.sensor_index < 1:
+				raise ValueError( 'sensor_index must be greater than or equal to 1.' )
+
 			self.mode = 'sensor'
-			self.sensor_index = self.validate_sensor_index( sensor_index )
-			self.fields = self.normalize_fields( fields=fields, default_fields=default_fields )
-			self.timeout = int( time )
-			self.request( endpoint=f'sensors/{self.sensor_index}', params={ 'fields': self.fields },
-				time=self.timeout )
-			
+			default_fields = (
+				'name,model,hardware,pm2.5_cf_1_a,pm2.5_cf_1_b,temperature,'
+				'humidity,pressure,latitude,longitude,last_seen,firmware_version,rssi' )
+			self.fields = self.normalize_fields( fields=fields,
+				default_fields=default_fields )
+			self.request( endpoint=f'sensors/{self.sensor_index}',
+				params={ 'fields': self.fields }, time=time )
 			rows = self.shape_sensor_detail_rows( self.payload )
-			return self.package_response( rows=rows, params={ 'sensor_index': self.sensor_index,
-			                                                  'fields': self.fields } )
-		
+			return self.package_response( rows=rows,
+				params={ 'sensor_index': self.sensor_index, 'fields': self.fields } )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'fetch_sensor( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			exception.method = (
+					'fetch_sensor( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
+			)
 			raise exception
 	
 	def fetch( self, mode: str='sensors', sensor_index: int=None,
@@ -24301,7 +23980,8 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = self.validate_mode( mode )
+			throw_if( 'mode', mode )
+			self.mode = str( mode ).strip( ).lower( )
 			
 			if self.mode == 'sensors':
 				return self.fetch_sensors(
@@ -24514,7 +24194,6 @@ class OpenAQ( Fetcher ):
 				'timeout',
 				'agents',
 				'headers',
-				'validate_api_key',
 				'validate_mode',
 				'validate_endpoint',
 				'validate_positive_integer',
@@ -24537,32 +24216,6 @@ class OpenAQ( Fetcher ):
 				'fetch',
 				'create_schema'
 		]
-	
-	def validate_api_key( self ) -> str:
-		"""Validate api key.
-
-		Purpose:
-		    Validates and normalizes api key before it is used in OpenAQ location, measurement, and air-
-		    quality records. The method converts incoming values to the expected representation, enforces
-		    visible range or format constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated api key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'api_key', self.api_key )
-			return str( self.api_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenAQ'
-			exception.method = 'validate_api_key( self ) -> str'
-			raise exception
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -25202,7 +24855,6 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_api_key( )
 			self.endpoint = self.validate_endpoint( endpoint )
 			throw_if( 'time', time )
 			self.timeout = int( time )
@@ -25221,7 +24873,7 @@ class OpenAQ( Fetcher ):
 				
 				self.params[ key ] = value
 			
-			self.headers[ 'X-API-Key' ] = self.validate_api_key( )
+
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( ) or { }
@@ -25715,36 +25367,10 @@ class Firms( Fetcher ):
 		"""
 		return [ 'base_url', 'map_key', 'mode', 'source', 'area_coordinates', 'day_range', 'date',
 				'sensor', 'params', 'payload', 'result', 'response', 'url', 'timeout', 'agents',
-				'headers', 'validate_map_key', 'validate_mode', 'validate_source',
+				'headers', 'validate_mode', 'validate_source',
 				'validate_sensor', 'validate_day_range', 'validate_date',
 				'validate_area_coordinates', 'csv_to_rows', 'summarize_rows', 'package_response',
 				'request_csv', 'fetch_area', 'fetch_data_availability', 'fetch', 'create_schema' ]
-	
-	def validate_map_key( self ) -> str:
-		"""Validate map key.
-
-		Purpose:
-		    Validates and normalizes map key before it is used in NASA FIRMS active fire data. The method
-		    converts incoming values to the expected representation, enforces visible range or format
-		    constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated map key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'map_key', self.map_key )
-			return str( self.map_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Firms'
-			exception.method = 'validate_map_key( self ) -> str'
-			raise exception
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -26108,7 +25734,7 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_map_key( )
+			self.map_key
 			throw_if( 'url', url )
 			throw_if( 'time', time )
 			self.url = str( url ).strip( )
@@ -26164,7 +25790,7 @@ class Firms( Fetcher ):
 			self.timeout = int( time )
 			self.params = { 'source': self.source, 'area_coordinates': self.area_coordinates,
 					'day_range': self.day_range, 'date': self.date }
-			self.url = (f'{self.base_url}/area/csv/{self.validate_map_key( )}/'
+			self.url = (f'{self.base_url}/area/csv/{self.map_key}/'
 			            f'{self.source}/{self.area_coordinates}/{self.day_range}')
 			
 			if self.date:
@@ -26208,7 +25834,7 @@ class Firms( Fetcher ):
 			self.timeout = int( time )
 			self.params = { 'sensor': self.sensor }
 			self.url = (f'{self.base_url}/data_availability/csv/'
-			            f'{self.validate_map_key( )}/{self.sensor}')
+			            f'{self.map_key}/{self.sensor}')
 			
 			self.request_csv( url=self.url, time=self.timeout )
 			rows = self.csv_to_rows( self.payload )
