@@ -22428,7 +22428,7 @@ class UvIndex( Fetcher ):
 		    None: Constructors initialize instance state and do not return a value.
 		"""
 		super( ).__init__( )
-		self.base_url = 'https://enviro.epa.gov/enviro/efservice'
+		self.base_url = 'https://data.epa.gov/dmapservice'
 		self.mode = 'daily-zip'
 		self.zip_code = ''
 		self.city = ''
