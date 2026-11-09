@@ -5357,7 +5357,10 @@ class OpenScience( Fetcher ):
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/metadata/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = { 'query': self.query_text, 'format': self.format_value }
+			self.params = dict( urllib.parse.parse_qsl( self.query_text,
+				keep_blank_values=True ) ) if '=' in self.query_text else {
+				'query': self.query_text }
+			self.params[ 'format' ] = self.format_value
 			self.result = { 'mode': 'metadata', 'url': self.url,
 				'params': self.params, 'data': self.request( time=time ) }
 			return self.result
@@ -5397,7 +5400,10 @@ class OpenScience( Fetcher ):
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/assays/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = { 'query': self.query_text, 'format': self.format_value }
+			self.params = dict( urllib.parse.parse_qsl( self.query_text,
+				keep_blank_values=True ) ) if '=' in self.query_text else {
+				'query': self.query_text }
+			self.params[ 'format' ] = self.format_value
 			self.result = { 'mode': 'assays', 'url': self.url,
 				'params': self.params, 'data': self.request( time=time ) }
 			return self.result
@@ -5437,7 +5443,10 @@ class OpenScience( Fetcher ):
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/data/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = { 'query': self.query_text, 'format': self.format_value }
+			self.params = dict( urllib.parse.parse_qsl( self.query_text,
+				keep_blank_values=True ) ) if '=' in self.query_text else {
+				'query': self.query_text }
+			self.params[ 'format' ] = self.format_value
 			self.result = { 'mode': 'data', 'url': self.url,
 				'params': self.params, 'data': self.request( time=time ) }
 			return self.result
