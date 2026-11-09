@@ -22,6 +22,7 @@ jobs:
         run: python -m py_compile fetchers.py
       - name: Execute mocked HTTP and behavior-differential tests
         run: |
+          python - <<'PY'
           from __future__ import annotations
           import ast
           import re
@@ -116,3 +117,5 @@ jobs:
               assert a==b, "REGRESSION: StarMap.extract_links changed"
           print("PASS equivalent sampled behavior and API-request call counts")
           
+
+          PY
