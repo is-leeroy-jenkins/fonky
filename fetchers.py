@@ -2214,7 +2214,6 @@ class GoogleSearch( Fetcher ):
 			if cse_id:
 				self.cse_id = str( cse_id ).strip( )
 			
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'cse_id', self.cse_id )
 			self.timeout = int( time )
 			self.keywords = str( keywords ).strip( )
@@ -2429,7 +2428,6 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'api_key', self.api_key )
 			self.address = address
 			self.mode = 'geocode_location'
 			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -2490,7 +2488,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'latitude', lat )
 			throw_if( 'longitude', long )
 			self.mode = 'geocode_coordinates'
@@ -2539,7 +2536,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'address', address )
 			if not isinstance( address, list ):
 				raise TypeError( 'address must be a list of address-line strings.' )
@@ -2586,7 +2582,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'origin', origin )
 			throw_if( 'destination', destination )
 			throw_if( 'mode', mode )
@@ -2817,7 +2812,6 @@ class GoogleWeather( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'path', path )
 			throw_if( 'params', params )
 			throw_if( 'time', time )
@@ -7235,7 +7229,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'query', query )
 			throw_if( 'offset_mark', offset_mark )
 			throw_if( 'time', time )
@@ -7290,7 +7283,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'package_id', package_id )
 			throw_if( 'time', time )
 			
@@ -7352,7 +7344,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'collection', collection )
 			throw_if( 'start_date', start_date )
 			throw_if( 'offset_mark', offset_mark )
@@ -8502,8 +8493,6 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
-			
 			self.limit = self.validate_limit( limit )
 			self.offset = self.validate_offset( offset )
 			self.sort = str( sort or 'updateDate+desc' ).strip( )
@@ -11020,8 +11009,6 @@ class GoogleGeocoding( Fetcher ):
 			
 			if api_key:
 				self.api_key = str( api_key ).strip( )
-			
-			throw_if( 'api_key', self.api_key )
 			
 			self.timeout = int( time )
 			self.params = { }
@@ -18558,7 +18545,6 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'time', time )
 			
@@ -24210,7 +24196,6 @@ class OpenAQ( Fetcher ):
 				'timeout',
 				'agents',
 				'headers',
-				'validate_api_key',
 				'validate_mode',
 				'validate_endpoint',
 				'validate_positive_integer',
@@ -24233,32 +24218,6 @@ class OpenAQ( Fetcher ):
 				'fetch',
 				'create_schema'
 		]
-	
-	def validate_api_key( self ) -> str:
-		"""Validate api key.
-
-		Purpose:
-		    Validates and normalizes api key before it is used in OpenAQ location, measurement, and air-
-		    quality records. The method converts incoming values to the expected representation, enforces
-		    visible range or format constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated api key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'api_key', self.api_key )
-			return str( self.api_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenAQ'
-			exception.method = 'validate_api_key( self ) -> str'
-			raise exception
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -24898,7 +24857,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_api_key( )
+			self.api_key
 			self.endpoint = self.validate_endpoint( endpoint )
 			throw_if( 'time', time )
 			self.timeout = int( time )
@@ -24917,7 +24876,7 @@ class OpenAQ( Fetcher ):
 				
 				self.params[ key ] = value
 			
-			self.headers[ 'X-API-Key' ] = self.validate_api_key( )
+
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( ) or { }
@@ -25416,32 +25375,6 @@ class Firms( Fetcher ):
 				'validate_area_coordinates', 'csv_to_rows', 'summarize_rows', 'package_response',
 				'request_csv', 'fetch_area', 'fetch_data_availability', 'fetch', 'create_schema' ]
 	
-	def validate_map_key( self ) -> str:
-		"""Validate map key.
-
-		Purpose:
-		    Validates and normalizes map key before it is used in NASA FIRMS active fire data. The method
-		    converts incoming values to the expected representation, enforces visible range or format
-		    constraints, and returns the checked value for request construction.
-
-		Returns:
-		    str: Validated map key value.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'map_key', self.map_key )
-			return str( self.map_key ).strip( )
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Firms'
-			exception.method = 'validate_map_key( self ) -> str'
-			raise exception
-	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
 
@@ -25804,7 +25737,7 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.validate_map_key( )
+			self.map_key
 			throw_if( 'url', url )
 			throw_if( 'time', time )
 			self.url = str( url ).strip( )
@@ -25860,7 +25793,7 @@ class Firms( Fetcher ):
 			self.timeout = int( time )
 			self.params = { 'source': self.source, 'area_coordinates': self.area_coordinates,
 					'day_range': self.day_range, 'date': self.date }
-			self.url = (f'{self.base_url}/area/csv/{self.validate_map_key( )}/'
+			self.url = (f'{self.base_url}/area/csv/{self.map_key}/'
 			            f'{self.source}/{self.area_coordinates}/{self.day_range}')
 			
 			if self.date:
@@ -25904,7 +25837,7 @@ class Firms( Fetcher ):
 			self.timeout = int( time )
 			self.params = { 'sensor': self.sensor }
 			self.url = (f'{self.base_url}/data_availability/csv/'
-			            f'{self.validate_map_key( )}/{self.sensor}')
+			            f'{self.map_key}/{self.sensor}')
 			
 			self.request_csv( url=self.url, time=self.timeout )
 			rows = self.csv_to_rows( self.payload )
