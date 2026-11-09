@@ -18078,7 +18078,7 @@ class USGSScienceBase( Fetcher ):
 				if value is None:
 					continue
 				
-				if isinstance( value, str ) and not value.strip( ):
+				if isinstance( value, str ) and not value.strip( ) and key != 'q':
 					continue
 				
 				self.params[ key ] = value
