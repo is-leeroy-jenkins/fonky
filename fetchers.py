@@ -4001,8 +4001,7 @@ class EarthObservatory( Fetcher ):
 				raise ValueError( 'NASA EONET layer categories must be a list.' )
 			layers = [ ]
 			for item in categories:
-				if not isinstance( item, dict ) or not isinstance(
-						item.get( 'layers', [ ] ), list ):
+				if not isinstance( item, dict ) or not isinstance( item.get( 'layers', [ ] ), list ):
 					raise ValueError( 'NASA EONET layer category is malformed.' )
 				layers.extend( item.get( 'layers', [ ] ) )
 			if not categories:
@@ -4072,7 +4071,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
+			exception.method = "fetch( self, **args ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -4116,7 +4115,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self,**args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class GlobalImagery( Fetcher ):
