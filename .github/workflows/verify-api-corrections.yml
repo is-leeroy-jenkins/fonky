@@ -34,6 +34,7 @@ jobs:
           python - <<'PY'
           import ast
           import re
+          import textwrap
           import urllib.parse
           from pathlib import Path
           from unittest.mock import Mock
@@ -54,7 +55,7 @@ jobs:
               body=[]
               for node in cls.body:
                   if isinstance(node,ast.FunctionDef) and node.name in method_names:
-                      body.append(ast.get_source_segment(source,node))
+                      body.append(textwrap.indent(ast.get_source_segment(source,node),'\t'))
               assert len(body)==len(method_names)
               # ast.get_source_segment includes the original tab indentation for each method.
               env={'Error':AppError,'throw_if':throw_if,'requests':SimpleNamespace(get=calls),
