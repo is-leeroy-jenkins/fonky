@@ -6338,7 +6338,6 @@ class StarMap( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'html', html )
 		throw_if( 'base_url', base_url )
 		try:
 			links: Dict[ str, str ] = { }
@@ -13704,7 +13703,6 @@ class USGSEarthquakes( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'value', value )
 		throw_if( 'name', name )
 		throw_if( name, value )
 		
@@ -22025,7 +22023,6 @@ class OpenAQ( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'value', value )
 		throw_if( 'name', name )
 		throw_if( name, value )
 		
@@ -22060,11 +22057,8 @@ class OpenAQ( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'value', value )
 		throw_if( 'name', name )
-		
-		if value is None:
-			raise ValueError( f'{name} cannot be None.' )
+		throw_if( name, value )
 		
 		number = int( value )
 		
@@ -23178,7 +23172,6 @@ class Firms( Fetcher ):
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
 		        project error type.
 		"""
-		throw_if( 'csv_text', csv_text )
 		try:
 			text = str( csv_text or '' )
 			if not text.strip( ):
