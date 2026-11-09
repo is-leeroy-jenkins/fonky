@@ -2479,8 +2479,6 @@ class GoogleMaps( Fetcher ):
 		throw_if( 'lat', lat )
 		throw_if( 'long', long )
 		try:
-			throw_if( 'latitude', lat )
-			throw_if( 'longitude', long )
 			self.mode = 'geocode_coordinates'
 			self.latitude = float( lat )
 			self.longitude = float( long )
@@ -2523,8 +2521,6 @@ class GoogleMaps( Fetcher ):
 		Raises:
 		    TypeError: If a supplied value has an unsupported type.
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'address', address )
 		if not isinstance( address, list ):
@@ -3162,8 +3158,6 @@ class NavalObservatory( Fetcher ):
 		    str: Validated date value.
 
 		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'date_value', date_value )
 		value = str( date_value ).strip( )
@@ -3187,8 +3181,6 @@ class NavalObservatory( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'time_value', time_value )
 		value = str( time_value ).strip( )
@@ -3218,8 +3210,6 @@ class NavalObservatory( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'latitude', latitude )
 		throw_if( 'longitude', longitude )
@@ -5014,8 +5004,6 @@ class OpenScience( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'format_value', format_value )
 		value = str( format_value ).strip( ).lower( )
@@ -6716,8 +6704,6 @@ class GovData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'page_size', page_size )
 		
@@ -6743,8 +6729,6 @@ class GovData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'sort_field', sort_field )
 		value = str( sort_field or 'score' ).strip( )
@@ -6773,8 +6757,6 @@ class GovData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'sort_order', sort_order )
 		value = str( sort_order or 'DESC' ).strip( ).upper( )
@@ -7771,8 +7753,6 @@ class Congress( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -7798,8 +7778,6 @@ class Congress( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'offset', offset )
 		if offset is None:
@@ -8699,8 +8677,6 @@ class InternetArchive( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'rows', rows )
 		value = int( rows )
@@ -8725,8 +8701,6 @@ class InternetArchive( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'page', page )
 		value = int( page )
@@ -11181,8 +11155,6 @@ class Socrata( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -11208,8 +11180,6 @@ class Socrata( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'offset', offset )
 		if offset is None:
@@ -11680,8 +11650,6 @@ class HealthData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -11707,8 +11675,6 @@ class HealthData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'offset', offset )
 		if offset is None:
@@ -12789,8 +12755,6 @@ class WorldPopulation( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'page', page )
 		
@@ -12816,8 +12780,6 @@ class WorldPopulation( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'page_size', page_size )
 		
@@ -13622,8 +13584,6 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'feed', feed )
 		
@@ -13672,8 +13632,6 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -13700,8 +13658,6 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'name', name )
 		throw_if( name, value )
@@ -13728,8 +13684,6 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'order_by', order_by )
 		
@@ -13765,8 +13719,6 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'latitude', latitude )
 		
@@ -13792,8 +13744,6 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'longitude', longitude )
 		
@@ -13819,11 +13769,8 @@ class USGSEarthquakes( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'radius', radius )
-		throw_if( 'max_radius_km', radius )
 		
 		value = float( radius )
 		if value < 0.0 or value > 20001.6:
@@ -13850,7 +13797,6 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		throw_if( 'value', value )
 		try:
-			throw_if( 'date', value )
 			return str( value ).strip( )
 		
 		except Exception as e:
@@ -14428,8 +14374,6 @@ class USGSWaterData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'collection', collection )
 		
@@ -14466,8 +14410,6 @@ class USGSWaterData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -14493,8 +14435,6 @@ class USGSWaterData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		value = str( parameter_code or '' ).strip( )
 		
@@ -15437,8 +15377,6 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'endpoint', endpoint )
 		
@@ -15469,8 +15407,6 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'max_items', max_items )
 		
@@ -15496,8 +15432,6 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'offset', offset )
 		if offset is None:
@@ -15525,8 +15459,6 @@ class USGSTheNationalMap( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		value = str( bbox or '' ).strip( )
 		
@@ -16206,8 +16138,6 @@ class USGSScienceBase( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'endpoint', endpoint )
 		
@@ -16243,8 +16173,6 @@ class USGSScienceBase( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'max_items', max_items )
 		
@@ -16270,8 +16198,6 @@ class USGSScienceBase( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'offset', offset )
 		if offset is None:
@@ -17488,8 +17414,6 @@ class ClimateData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -17515,8 +17439,6 @@ class ClimateData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'offset', offset )
 		if offset is None:
@@ -17545,8 +17467,6 @@ class ClimateData( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'start_date', start_date )
 		throw_if( 'end_date', end_date )
@@ -18189,8 +18109,6 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'endpoint', endpoint )
 		
@@ -18221,8 +18139,6 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'status', status )
 		
@@ -18254,8 +18170,6 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -18281,8 +18195,6 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'days', days )
 		
@@ -18308,8 +18220,6 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		value = str( bbox or '' ).strip( )
 		
@@ -18366,8 +18276,6 @@ class EoNet( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		start_value = str( start_date or '' ).strip( )
 		end_value = str( end_date or '' ).strip( )
@@ -18987,8 +18895,6 @@ class EnviroFacts( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'table_name', table_name )
 		
@@ -19023,8 +18929,6 @@ class EnviroFacts( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		value = str( state_code or '' ).strip( ).upper( )
 		
@@ -19052,8 +18956,6 @@ class EnviroFacts( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'limit', limit )
 		
@@ -19590,8 +19492,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'mode', mode )
 		
@@ -19626,8 +19526,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'station_id', station_id )
 		
@@ -19658,8 +19556,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'begin_date', begin_date )
 		throw_if( 'end_date', end_date )
@@ -19694,8 +19590,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'datum', datum )
 		
@@ -19735,8 +19629,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'units', units )
 		
@@ -19767,8 +19659,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'time_zone', time_zone )
 		
@@ -19800,8 +19690,6 @@ class TidesAndCurrents( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'interval', interval )
 		
@@ -20501,8 +20389,6 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'mode', mode )
 		
@@ -20538,8 +20424,6 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'zip_code', zip_code )
 		
@@ -20566,8 +20450,6 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'city', city )
 		
@@ -20597,8 +20479,6 @@ class UvIndex( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'state', state )
 		
@@ -21937,8 +21817,6 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'mode', mode )
 		
@@ -21976,8 +21854,6 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'endpoint', endpoint )
 		
@@ -22020,8 +21896,6 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'name', name )
 		throw_if( name, value )
@@ -22054,8 +21928,6 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'name', name )
 		throw_if( name, value )
@@ -22084,8 +21956,6 @@ class OpenAQ( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		value = str( coordinates or '' ).strip( )
 		
@@ -22126,8 +21996,6 @@ class OpenAQ( Fetcher ):
 		    int: Validated radius value.
 
 		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'radius', radius )
 		value = self.validate_positive_integer(
@@ -22991,8 +22859,6 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'mode', mode )
 		value = str( mode ).strip( ).lower( )
@@ -23017,8 +22883,6 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'source', source )
 		
@@ -23047,8 +22911,6 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'sensor', sensor )
 		value = str( sensor ).strip( ).upper( )
@@ -23074,8 +22936,6 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'day_range', day_range )
 		value = int( day_range )
@@ -23098,8 +22958,6 @@ class Firms( Fetcher ):
 		    str: Validated date value.
 
 		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		value = str( date or '' ).strip( )
 		if not value:
@@ -23123,8 +22981,6 @@ class Firms( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'area_coordinates', area_coordinates )
 		value = str( area_coordinates ).strip( )
@@ -23582,29 +23438,19 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		try:
-			throw_if( 'mode', mode )
-			value = str( mode ).strip( ).lower( )
-			allowed = { 'states_bbox', 'flights_aircraft', 'arrivals_airport',
-			            'departures_airport',
-					'track_aircraft' }
-			
-			if value not in allowed:
-				raise ValueError( "Unsupported OpenSky mode. Use 'states_bbox', "
-				                  "'flights_aircraft', 'arrivals_airport', "
-				                  "'departures_airport', or 'track_aircraft'." )
-			
-			return value
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_mode( self, *args, **kwargs ) -> str'
-			raise exception
-	
+		throw_if( 'mode', mode )
+		value = str( mode ).strip( ).lower( )
+		allowed = { 'states_bbox', 'flights_aircraft', 'arrivals_airport',
+		            'departures_airport',
+				'track_aircraft' }
+		
+		if value not in allowed:
+			raise ValueError( "Unsupported OpenSky mode. Use 'states_bbox', "
+			                  "'flights_aircraft', 'arrivals_airport', "
+			                  "'departures_airport', or 'track_aircraft'." )
+		
+		return value
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
 
@@ -23622,32 +23468,22 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		try:
-			throw_if( 'endpoint', endpoint )
-			value = str( endpoint ).strip( )
-			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
-				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
-			
-			if '..' in value:
-				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-			
-			allowed = { '/states/all', '/flights/aircraft', '/flights/arrival',
-					'/flights/departure', '/tracks/all' }
-			
-			if value not in allowed:
-				raise ValueError( 'Unsupported OpenSky endpoint path.' )
-			
-			return value
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_endpoint( self, *args, **kwargs ) -> str'
-			raise exception
-	
+		throw_if( 'endpoint', endpoint )
+		value = str( endpoint ).strip( )
+		if value.startswith( 'http://' ) or value.startswith( 'https://' ):
+			raise ValueError( 'endpoint must be a path segment, not a full URL.' )
+		
+		if '..' in value:
+			raise ValueError( 'endpoint cannot contain parent-directory markers.' )
+		
+		allowed = { '/states/all', '/flights/aircraft', '/flights/arrival',
+				'/flights/departure', '/tracks/all' }
+		
+		if value not in allowed:
+			raise ValueError( 'Unsupported OpenSky endpoint path.' )
+		
+		return value
 	def validate_icao24( self, icao24: str ) -> str:
 		"""Validate icao24.
 
@@ -23665,24 +23501,14 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		try:
-			throw_if( 'icao24', icao24 )
-			value = str( icao24 ).strip( ).lower( )
-			if not re.fullmatch( r'[0-9a-f]{6}', value ):
-				raise ValueError( 'icao24 must be a six-character hexadecimal address.' )
-			
-			return value
+		throw_if( 'icao24', icao24 )
+		value = str( icao24 ).strip( ).lower( )
+		if not re.fullmatch( r'[0-9a-f]{6}', value ):
+			raise ValueError( 'icao24 must be a six-character hexadecimal address.' )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_icao24( self, *args, **kwargs ) -> str'
-			raise exception
-	
+		return value
+		
 	def validate_airport( self, airport: str ) -> str:
 		"""Validate airport.
 
@@ -23700,24 +23526,14 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		try:
-			throw_if( 'airport', airport )
-			value = str( airport ).strip( ).upper( )
-			if not re.fullmatch( r'[A-Z0-9]{4}', value ):
-				raise ValueError( 'airport must be a four-character ICAO airport code.' )
-			
-			return value
+		throw_if( 'airport', airport )
+		value = str( airport ).strip( ).upper( )
+		if not re.fullmatch( r'[A-Z0-9]{4}', value ):
+			raise ValueError( 'airport must be a four-character ICAO airport code.' )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_airport( self, *args, **kwargs ) -> str'
-			raise exception
-	
+		return value
+		
 	def validate_epoch( self, name: str, value: Any ) -> int:
 		"""Validate epoch.
 
@@ -23736,28 +23552,17 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		throw_if( 'value', value )
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = int( value )
-			
-			if number < 0:
-				raise ValueError( f'{name} must be greater than or equal to 0.' )
-			
-			return number
+		throw_if( 'name', name )
+		throw_if( name, value )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_epoch( self, *args, **kwargs ) -> int'
-			raise exception
-	
+		number = int( value )
+		
+		if number < 0:
+			raise ValueError( f'{name} must be greater than or equal to 0.' )
+		
+		return number
+		
 	def validate_time_range( self, begin: int, end: int ) -> Tuple[ int, int ]:
 		"""Validate time range.
 
@@ -23776,27 +23581,17 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
 		throw_if( 'begin', begin )
 		throw_if( 'end', end )
-		try:
-			start = self.validate_epoch( 'begin', begin )
-			stop = self.validate_epoch( 'end', end )
-			
-			if start > stop:
-				raise ValueError( 'begin must be less than or equal to end.' )
-			
-			return start, stop
+		start = self.validate_epoch( 'begin', begin )
+		stop = self.validate_epoch( 'end', end )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = ( 'validate_time_range( self, *args, **kwargs ) -> Tuple[ int, int ]' )
-			raise exception
-	
+		if start > stop:
+			raise ValueError( 'begin must be less than or equal to end.' )
+		
+		return start, stop
+		
 	def validate_latitude( self, name: str, value: Any ) -> float:
 		"""Validate latitude.
 
@@ -23815,28 +23610,17 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		throw_if( 'value', value )
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = float( value )
-			
-			if number < -90.0 or number > 90.0:
-				raise ValueError( f'{name} must be between -90 and 90.' )
-			
-			return number
+		throw_if( 'name', name )
+		throw_if( name, value )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_latitude( self, *args, **kwargs ) -> float'
-			raise exception
-	
+		number = float( value )
+		
+		if number < -90.0 or number > 90.0:
+			raise ValueError( f'{name} must be between -90 and 90.' )
+		
+		return number
+		
 	def validate_longitude( self, name: str, value: Any ) -> float:
 		"""Validate longitude.
 
@@ -23855,28 +23639,17 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		throw_if( 'value', value )
-		try:
-			throw_if( 'name', name )
-			throw_if( name, value )
-			
-			number = float( value )
-			
-			if number < -180.0 or number > 180.0:
-				raise ValueError( f'{name} must be between -180 and 180.' )
-			
-			return number
+		throw_if( 'name', name )
+		throw_if( name, value )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'validate_longitude( self, *args, **kwargs ) -> float'
-			raise exception
-	
+		number = float( value )
+		
+		if number < -180.0 or number > 180.0:
+			raise ValueError( f'{name} must be between -180 and 180.' )
+		
+		return number
+		
 	def validate_bbox( self, lamin: float, lomin: float,
 			lamax: float, lomax: float ) -> Tuple[ float, float, float, float ]:
 		"""Validate bbox.
@@ -23898,33 +23671,20 @@ class OpenSky( Fetcher ):
 
 		Raises:
 		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
 		"""
-		try:
-			min_lat = self.validate_latitude( 'lamin', lamin )
-			min_lon = self.validate_longitude( 'lomin', lomin )
-			max_lat = self.validate_latitude( 'lamax', lamax )
-			max_lon = self.validate_longitude( 'lomax', lomax )
-			
-			if min_lat >= max_lat:
-				raise ValueError( 'lamin must be less than lamax.' )
-			
-			if min_lon >= max_lon:
-				raise ValueError( 'lomin must be less than lomax.' )
-			
-			return min_lat, min_lon, max_lat, max_lon
+		min_lat = self.validate_latitude( 'lamin', lamin )
+		min_lon = self.validate_longitude( 'lomin', lomin )
+		max_lat = self.validate_latitude( 'lamax', lamax )
+		max_lon = self.validate_longitude( 'lomax', lomax )
 		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = (
-					'validate_bbox( self, *args, **kwargs ) '
-					'-> Tuple[ float, float, float, float ]'
-			)
-			raise exception
-	
+		if min_lat >= max_lat:
+			raise ValueError( 'lamin must be less than lamax.' )
+		
+		if min_lon >= max_lon:
+			raise ValueError( 'lomin must be less than lomax.' )
+		
+		return min_lat, min_lon, max_lat, max_lon
+		
 	def assign_credentials( self, client_id: str=None,
 			client_secret: str=None ) -> None:
 		"""Assign credentials.
