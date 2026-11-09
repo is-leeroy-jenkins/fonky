@@ -73,7 +73,7 @@ jobs:
           requests = SimpleNamespace(get=Mock())
           scope = {"requests": requests,"Error": WrappedError,"throw_if": throw_if,
                    "Result":ResponseResult,"BeautifulSoup":FakeSoup,
-                   "re":re,"urllib":__import__("urllib"),"Dict":dict,"List":list,
+                   "re":re,"urllib":__import__("urllib.parse"),"Dict":dict,"List":list,
                    "Any":object,"Optional":object,"Tuple":tuple}
           def build(source, cls, name):
               method_src = method(source, cls, name)
