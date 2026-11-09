@@ -18069,7 +18069,7 @@ class USGSScienceBase( Fetcher ):
 			self.endpoint = self.validate_endpoint( endpoint )
 			self.timeout = int( time )
 			self.url = f'{self.base_url}/{self.endpoint}'
-			self.params = { }
+			self.params = { 'format': 'json' }
 			
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
