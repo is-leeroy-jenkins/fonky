@@ -119,6 +119,102 @@ jobs:
           
 
 
+
+          # Execute real method bodies with deterministic HTTP mocks across providers.
+          # Original source has malformed metadata literals in some methods. The test
+          # normalizes only the diagnostic string at compile time; it does not edit the repo.
+          def build_safe(source, cls, name):
+              src = method(source, cls, name)
+              src = re.sub(r"^(\t+exception\.method\s*=).*$",
+                           r"\1 'diagnostic'",src,flags=re.M)
+              env = dict(scope)
+              exec(compile("from __future__ import annotations\nclass Target:\n"+src,
+                           cls+"."+name,"exec"),env)
+              return env["Target"]
+
+          def check_maps(source):
+              obj=build_safe(source,"GoogleMaps","geocode_location")()
+              obj.api_key="test-key"
+              obj.headers={}
+              obj.timeout=11
+              response=Mock()
+              response.json.return_value={
+                  "status":"OK","results":[{"geometry":{"location":{
+                      "lat":38.8799,"lng":-77.1068}}}]}
+              requests.get.reset_mock()
+              requests.get.return_value=response
+              coordinates=obj.geocode_location("Arlington, VA")
+              assert coordinates==(38.8799,-77.1068)
+              assert obj.coordinates==coordinates
+              opts=requests.get.call_args.kwargs
+              assert opts["params"]=={"address":"Arlington, VA","key":"test-key"}
+              assert opts["timeout"]==11
+              return coordinates,opts["url"],opts["params"],opts["timeout"]
+
+          def check_usno(source):
+              obj=build_safe(source,"NavalObservatory","fetch_celnav")()
+              obj.base_url="https://aa.usno.navy.mil/api"
+              obj.headers={"User-Agent":"test"}
+              obj.validate_date=lambda x:x
+              obj.validate_time=lambda x:x
+              obj.validate_coordinates=lambda latitude,longitude:(latitude,longitude)
+              response=Mock()
+              response.json.return_value={"type":"Feature","properties":{"data":[]}}
+              requests.get.reset_mock()
+              requests.get.return_value=response
+              result=obj.fetch_celnav("2026-11-08","15:03",38.9,-77.0,time=12)
+              assert result["mode"]=="celnav"
+              assert result["data"]==response.json.return_value
+              options=requests.get.call_args.kwargs
+              assert options["params"]=={"date":"2026-11-08","time":"15:03","coords":"38.9,-77.0"}
+              assert options["timeout"]==12
+              return result,options
+
+          def check_openaq(source):
+              obj=build_safe(source,"OpenAQ","request")()
+              obj.base_url="https://api.openaq.org/v3"
+              obj.headers={"X-API-Key":"mock-key"}
+              obj.validate_endpoint=lambda s:s
+              response=Mock()
+              response.url="https://api.openaq.org/v3/locations"
+              response.json.return_value={"meta":{},"results":[]}
+              requests.get.reset_mock()
+              requests.get.return_value=response
+              result=obj.request(endpoint="locations",params={"limit":1,"country":None,"blank":""})
+              assert result["raw"]==response.json.return_value
+              opts=requests.get.call_args.kwargs
+              assert opts["url"]=="https://api.openaq.org/v3/locations"
+              assert opts["params"]=={"limit":1}
+              assert opts["headers"]["X-API-Key"]=="mock-key"
+              return result,opts
+
+          def check_firms(source):
+              obj=build_safe(source,"Firms","request_csv")()
+              obj.map_key="mock-map-key"
+              obj.headers={}
+              obj.params={"source":"VIIRS"}
+              response=Mock()
+              response.text="latitude,longitude\n38.9,-77.0"
+              requests.get.reset_mock()
+              requests.get.return_value=response
+              result=obj.request_csv(url="https://firms.modaps.eosdis.nasa.gov/test",time=8)
+              assert result["raw"]==response.text
+              opts=requests.get.call_args.kwargs
+              assert opts["timeout"]==8
+              assert opts["url"]==result["url"]
+              return result,opts
+
+          for label,checker in [
+              ("Google Maps geocoding",check_maps),
+              ("US Naval Observatory celnav",check_usno),
+              ("OpenAQ air-quality retrieval",check_openaq),
+              ("NASA FIRMS CSV retrieval",check_firms),
+          ]:
+              old=checker(before)
+              new=checker(after)
+              assert old==new, "API regression in "+label
+              print("PASS mocked original-versus-current API contract:",label)
+
           # Verify all 513 method bodies differ only by intended guard statements,
           # schema's optional required default, and literal quoting of error metadata.
           def method_map(source):
