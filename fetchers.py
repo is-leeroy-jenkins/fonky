@@ -52,6 +52,7 @@ import os
 import urllib.parse
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from typing import Any, Dict, Optional, Pattern, List, Tuple
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -61,6 +62,7 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from astropy import units as u
 from astroquery.simbad import Simbad
+from astroquery.vizier import Vizier
 from bs4 import BeautifulSoup
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import crawl4ai
@@ -5914,7 +5916,7 @@ class AstroCatalog( Fetcher ):
 	"""Astro Catalog fetcher.
 
 	Purpose:
-	    Coordinates Open Astronomy Catalog queries within Fonky. The class stores provider
+	    Coordinates Astroquery SIMBAD and VizieR catalog queries within Fonky. The class stores provider
 	    configuration, request parameters, response payloads, and normalized result state so callers
 	    can access the service through a consistent fetcher interface.
 
@@ -5947,7 +5949,9 @@ class AstroCatalog( Fetcher ):
 		    None: Constructors initialize instance state and do not return a value.
 		"""
 		super( ).__init__( )
-		self.base_url = 'https://api.astrocats.space'
+		self.base_url = 'https://simbad.cds.unistra.fr'
+		self.provider = 'simbad'
+		self.catalog = ''
 		self.format = 'json'
 		self.name = None
 		self.right_ascension = None
@@ -5976,7 +5980,8 @@ class AstroCatalog( Fetcher ):
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
 		return [ 'base_url', 'format', 'name', 'right_ascension', 'declination',
-			'radius', 'params', 'timeout', 'headers', 'request', 'normalize_attribute_path',
+			'radius', 'params', 'timeout', 'headers', 'provider', 'catalog',
+			'serialize_table', 'request', 'normalize_attribute_path',
 			'parse_argument', 'fetch_object', 'cone_search', 'fetch' ]
 	
 	def normalize_attribute_path( self, quantity: str='', attributes: str='' ) -> str:
@@ -6032,27 +6037,60 @@ class AstroCatalog( Fetcher ):
 		
 		return params
 	
-	def request( self, route: str, params: Dict[ str, Any ] | None=None,
-			time: int=20 ) -> Any:
-		"""Request Open Astronomy Catalog queries.
+	def serialize_table( self, table: Table, catalog: str ) -> Dict[ str, Any ]:
+		"""Convert an Astropy table into JSON-compatible catalog rows.
 
 		Purpose:
-		    Sends a provider request for Open Astronomy Catalog queries after request parameters have been
-		    validated or prepared by the caller. The method stores request, response, and payload state on
-		    the instance so subsequent methods can package or inspect the result consistently.
+		    Preserves column names, provider catalog provenance, and masked values while
+		    returning plain Python values for downstream model tools.
 
 		Args:
-		    route: Provider route or endpoint path appended to the service base URL.
-		    params: HTTP query-parameter mapping sent to the provider.
-		    time: Request timeout in seconds.
+		    table: Astroquery result table.
+		    catalog: Source catalog identifier.
 
 		Returns:
-		    object: Normalized provider response, result payload, or document collection returned by the
-		    operation.
+		    Dict[str, Any]: Catalog name, columns, rows, and number of records.
+		"""
+		rows: List[ Dict[ str, Any ] ] = [ ]
+		for record in table:
+			item: Dict[ str, Any ] = { }
+			for column in table.colnames:
+				value = record[ column ]
+				if np.ma.is_masked( value ):
+					item[ column ] = None
+					continue
+				if isinstance( value, np.generic ):
+					value = value.item( )
+				if isinstance( value, bytes ):
+					value = value.decode( 'utf-8', errors='replace' )
+				if isinstance( value, (str, int, float, bool) ) or value is None:
+					item[ column ] = value
+				else:
+					item[ column ] = str( value )
+			rows.append( item )
+		return { 'catalog': catalog, 'columns': list( table.colnames ),
+			'rows': rows, 'count': len( rows ) }
+
+	def request( self, route: str, params: Dict[ str, Any ] | None=None,
+			time: int=20 ) -> Any:
+		"""Retrieve catalog data from SIMBAD or a named VizieR catalog.
+
+		Purpose:
+		    Replaces the retired Open Astronomy Catalog endpoint with Astroquery.
+		    'catalog' selects a region query; an object name selects an object lookup.
+		    The optional parameters 'provider', 'catalog', and 'row_limit' allow
+		    retrieval from published VizieR catalogs, including transient catalogs.
+
+		Args:
+		    route: Encoded object name or 'catalog' for a cone search.
+		    params: Provider selection and query arguments.
+		    time: Positive provider timeout in seconds.
+
+		Returns:
+		    Any: JSON-compatible catalog records or formatted CSV/TSV tables.
 
 		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
+		    Error: Wraps provider or response-processing errors.
 		"""
 		try:
 			throw_if( 'route', route )
@@ -6060,29 +6098,77 @@ class AstroCatalog( Fetcher ):
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
 			self.route = str( route ).strip( ).lstrip( '/' )
-			self.url = f'{self.base_url}/{self.route}'
 			self.params = params if params is not None else { }
-			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=self.timeout )
-			
-			self.response.raise_for_status( )
-			content_type = (self.response.headers.get( 'Content-Type', '' ) or '').lower( )
-			if 'json' in content_type:
-				self.payload = self.response.json( )
+			self.format = str( self.params.get( 'format', 'json' ) ).strip( ).lower( )
+			if self.format not in ('json', 'csv', 'tsv'):
+				raise ValueError( 'Unsupported AstroCatalog output format.' )
+			self.catalog = str( self.params.get( 'catalog', '' ) ).strip( )
+			self.provider = str( self.params.get( 'provider',
+				'vizier' if self.catalog else 'simbad' ) ).strip( ).lower( )
+			if self.provider == 'transient':
+				self.provider = 'vizier'
+			if self.provider not in ('simbad', 'vizier'):
+				raise ValueError( 'provider must be simbad, vizier, or transient.' )
+			if self.provider == 'vizier' and not self.catalog:
+				raise ValueError( 'A VizieR catalog identifier is required.' )
+			self.base_url = ('https://simbad.cds.unistra.fr'
+				if self.provider == 'simbad' else 'https://vizier.cds.unistra.fr')
+			self.url = self.base_url
+			self.response = None
+			is_region = self.route == 'catalog'
+			if is_region:
+				throw_if( 'ra', self.params.get( 'ra' ) )
+				throw_if( 'dec', self.params.get( 'dec' ) )
+				self.right_ascension = str( self.params[ 'ra' ] )
+				self.declination = str( self.params[ 'dec' ] )
+				self.radius = int( self.params.get( 'radius', 2 ) )
+				if self.radius < 1:
+					raise ValueError( 'radius must be positive.' )
+				self.coordinates = SkyCoord(
+					self.right_ascension, self.declination,
+					unit=(u.deg, u.deg), frame='icrs' )
+				self.search_radius = self.radius * u.arcmin
 			else:
-				self.payload = self.response.text
-			if isinstance( self.payload, dict ) and self.payload.get( 'error' ):
-				raise ValueError( f"AstroCatalog API error: {self.payload[ 'error' ]}" )
-			self.result = self.payload
+				self.name = urllib.parse.unquote( self.route )
+				throw_if( 'name', self.name )
+			if self.provider == 'simbad':
+				self.client = Simbad( )
+				self.client.timeout = self.timeout
+				self.payload = (self.client.query_region(
+					self.coordinates, radius=self.search_radius )
+					if is_region else self.client.query_object( self.name ))
+				raw_tables = ([ ('SIMBAD', self.payload) ]
+					if self.payload is not None else [ ])
+			else:
+				self.client = Vizier( row_limit=int( self.params.get( 'row_limit', 50 ) ) )
+				self.client.TIMEOUT = self.timeout
+				self.payload = (self.client.query_region(
+					self.coordinates, radius=self.search_radius, catalog=self.catalog )
+					if is_region else self.client.query_object(
+					self.name, catalog=self.catalog ))
+				raw_tables = [(str( key ), table)
+					for key, table in self.payload.items( )]
+			tables = [self.serialize_table( table, name )
+				for name, table in raw_tables]
+			self.result = { 'provider': self.provider, 'catalog': self.catalog,
+				'mode': 'cone_search' if is_region else 'object_query',
+				'tables': tables, 'count': sum( item[ 'count' ] for item in tables ) }
+			if self.format in ('csv', 'tsv'):
+				formatted: List[ Dict[ str, str ] ] = [ ]
+				for name, table in raw_tables:
+					output = io.StringIO( )
+					table.write( output, format='ascii.csv' if self.format == 'csv'
+						else 'ascii.tab', overwrite=True )
+					formatted.append( { 'catalog': name, 'data': output.getvalue( ) } )
+				self.result[ 'formatted_tables' ] = formatted
 			return self.result
-		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
 			exception.method = "request( self, route: str, params: Dict[ str, Any ] | None=None, time: int=20 ) -> Any"
 			raise exception
-	
+
 	def fetch_object( self, name: str, quantity: str='', attributes: str='',
 			arguments: str='', data_format: str='json', time: int=20 ) -> Any:
 		"""Retrieve object data.
@@ -6118,7 +6204,8 @@ class AstroCatalog( Fetcher ):
 			route_parts = [ urllib.parse.quote( self.name, safe='' ) ]
 			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
-				route_parts.append( attr_path )
+				raise ValueError( 'Legacy quantity/attributes paths are not supported by SIMBAD; '
+					'use arguments="provider=vizier,catalog=<ID>" instead.' )
 			
 			route = '/'.join( route_parts )
 			params = self.parse_argument( arguments )
@@ -6173,7 +6260,8 @@ class AstroCatalog( Fetcher ):
 			route = 'catalog'
 			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
-				route = f'{route}/{attr_path}'
+				raise ValueError( 'Legacy quantity/attributes paths are not supported by SIMBAD; '
+					'use arguments="provider=vizier,catalog=<ID>" instead.' )
 			
 			params = self.parse_argument( arguments )
 			params[ 'ra' ] = self.right_ascension
@@ -6193,7 +6281,7 @@ class AstroCatalog( Fetcher ):
 	def fetch( self, mode: str='object_query', query: str='', quantity: str='',
 			attributes: str='', arguments: str='', ra: str='', dec: str='',
 			radius: int=2, data_format: str='json', time: int=20 ) -> Any:
-		"""Fetch Open Astronomy Catalog queries.
+		"""Fetch astronomical catalog queries.
 
 		Purpose:
 		    Retrieves Open Astronomy Catalog queries using validated arguments and the stored AstroCatalog
