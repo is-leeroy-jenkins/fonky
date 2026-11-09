@@ -1,0 +1,62 @@
+name: Temporary Fonky external API live health probes
+on:
+  push:
+    paths:
+      - '.github/workflows/live-api-probes.yml'
+permissions:
+  contents: read
+jobs:
+  live-api-probes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install requests
+      - name: Check read-only provider endpoints
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import json
+          import requests
+          from concurrent.futures import ThreadPoolExecutor
+          from datetime import datetime, timezone
+          CASES = [["arxiv","https://export.arxiv.org/api/query?search_query=all:galaxy&start=0&max_results=1","xml"],["wikipedia","https://en.wikipedia.org/w/api.php?action=query&meta=siteinfo&format=json","json"],["nasa_eonet","https://eonet.gsfc.nasa.gov/api/v3/events?limit=1","json"],["nasa_gibs","https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?service=WMS&request=GetCapabilities&version=1.3.0","xml"],["jpl_cad","https://ssd-api.jpl.nasa.gov/cad.api?date-min=2026-11-01&date-max=2026-11-09&dist-max=10LD","json"],["jpl_sbdb","https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=433","json"],["jpl_nhats","https://ssd-api.jpl.nasa.gov/nhats.api","json"],["jpl_fireball","https://ssd-api.jpl.nasa.gov/fireball.api?limit=1","json"],["nasa_osdr","https://visualization.osdr.nasa.gov/biodata/api/v2/dataset/OSD-48/","json"],["nasa_donki","https://api.nasa.gov/DONKI/CME?startDate=2026-11-01&endDate=2026-11-09&api_key=DEMO_KEY","json"],["astrocats","https://api.astrocats.space/catalog","any"],["usno","https://aa.usno.navy.mil/api/rstt/oneday?date=2026-11-08&coords=38.9,-77.0","json"],["sscweb","https://sscweb.gsfc.nasa.gov/WS/sscr/2/observatories","xml"],["govinfo","https://api.govinfo.gov/collections","json"],["archive","https://archive.org/advancedsearch.php?q=collection%3Aopensource&rows=1&page=1&output=json","json"],["openmeteo_forecast","https://api.open-meteo.com/v1/forecast?latitude=38.8799&longitude=-77.1068&current=temperature_2m","json"],["openmeteo_history","https://archive-api.open-meteo.com/v1/archive?latitude=38.8799&longitude=-77.1068&start_date=2026-10-01&end_date=2026-10-01&daily=temperature_2m_max&timezone=UTC","json"],["openmeteo_geocode","https://geocoding-api.open-meteo.com/v1/search?name=Arlington&count=1","json"],["census","https://api.census.gov/data/2023/acs/acs5?get=NAME,B01003_001E&for=state:51","json"],["who_gho","https://ghoapi.azureedge.net/api/Indicator?$top=1","json"],["worldpop","https://www.worldpop.org/rest/data","json"],["usgs_earthquake_feed","https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson","json"],["usgs_earthquake_search","https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=1","json"],["usgs_water","https://api.waterdata.usgs.gov/ogcapi/v0/collections","json"],["nationalmap","https://tnmaccess.nationalmap.gov/api/v1/products?max=1","json"],["sciencebase","https://www.sciencebase.gov/catalog/items?max=1&format=json","json"],["noaa_search","https://www.ncei.noaa.gov/access/services/search/v1?dataset=daily-summaries&limit=1","json"],["noaa_data","https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&stations=USW00013743&startDate=2026-10-01&endDate=2026-10-01&dataTypes=TMAX&format=json","json"],["epa_envirofacts","https://data.epa.gov/efservice/tri_facility/rows/0:1/JSON","json"],["noaa_tide_metadata","https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8594900.json","json"],["noaa_tide_data","https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=8594900&product=water_level&datum=MLLW&time_zone=gmt&units=metric&format=json","json"],["epa_uv","https://enviro.epa.gov/enviro/efservice/uv_index/rows/0:1/JSON","json"],["opensky","https://opensky-network.org/api/states/all","json"],["grokipedia","https://grokipedia.com","html"],["skymap","https://www.sky-map.org/","html"]]
+          def probe(case):
+              name, url, expected = case
+              try:
+                  response = requests.get(url,timeout=18,headers={"User-Agent":"Fonky-API-Integration-Verification/1.0 (read-only; GitHub Actions)"})
+                  status = response.status_code
+                  media = response.headers.get("content-type","")
+                  shape="unknown"
+                  if status < 400:
+                      if expected=="json":
+                          try:
+                              data=response.json()
+                              shape=type(data).__name__
+                          except Exception: shape="invalid-json"
+                      elif expected=="xml":
+                          shape="xml" if response.text.lstrip().startswith(("<","<?xml")) else "unexpected-body"
+                      elif expected=="html":
+                          shape="html" if "<html" in response.text[:3000].lower() else "unexpected-body"
+                      else: shape="body"
+                  outcome = ("PASS" if status < 300 and shape not in ("invalid-json","unexpected-body") else
+                             "AUTH" if status in (401,403) else "FAIL")
+                  return {"provider":name,"result":outcome,"status":status,"shape":shape,"content_type":media[:50],"url":url}
+              except Exception as exc:
+                  return {"provider":name,"result":"ERROR","exception":type(exc).__name__,"detail":str(exc)[:170],"url":url}
+          with ThreadPoolExecutor(max_workers=6) as pool:
+              results=list(pool.map(probe,CASES))
+          for item in results:
+              print(json.dumps(item,ensure_ascii=False))
+          from collections import Counter
+          print("SUMMARY",json.dumps(dict(Counter(i["result"] for i in results))))
+          with open("api-live-verification.json","w",encoding="utf-8") as fp:
+              json.dump({"verified_at":datetime.now(timezone.utc).isoformat(),"results":results},fp,indent=2)
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fonky-live-api-verification
+          path: api-live-verification.json
