@@ -118,4 +118,51 @@ jobs:
           print("PASS equivalent sampled behavior and API-request call counts")
           
 
+
+          # Verify all 513 method bodies differ only by intended guard statements,
+          # schema's optional required default, and literal quoting of error metadata.
+          def method_map(source):
+              result = {}
+              current_class = ""
+              lines = source.splitlines()
+              for i, line in enumerate(lines):
+                  class_match = re.match(r"^class (\w+)", line)
+                  if class_match:
+                      current_class = class_match.group(1)
+                  method_match = re.match(r"^\tdef (\w+)\(", line)
+                  if not method_match:
+                      continue
+                  end = next((j for j in range(i+1,len(lines))
+                              if re.match(r"^(?:\tdef |class )",lines[j])),len(lines))
+                  result[(current_class,method_match.group(1))] = lines[i:end]
+              return result
+
+          def normalize_method(lines):
+              clean=[]
+              for line in lines:
+                  if re.match(r"^\t{2,3}throw_if\(",line):
+                      continue
+                  if re.match(r"^\t+exception\.method\s*=",line):
+                      line = re.sub(r"^(.*exception\.method\s*=).*$",r"\1 <metadata>",line)
+                  line=line.replace("required: list[ str ] | None=None","required: list[ str ]")
+                  clean.append(line)
+              return "\n".join(clean).strip()
+
+          before_map = method_map(before)
+          after_map = method_map(after)
+          assert before_map.keys()==after_map.keys(), "Public method additions or removals"
+          unexpected = []
+          for key in before_map:
+              a=normalize_method(before_map[key])
+              b=normalize_method(after_map[key])
+              if a!=b:
+                  import difflib
+                  delta = list(difflib.unified_diff(a.splitlines(),b.splitlines(),n=2))
+                  unexpected.append((key,delta[:16]))
+          print("Methods checked:",len(before_map),"Unexpected non-validation changes:",len(unexpected))
+          for name,diff in unexpected[:12]:
+              print("MISMATCH",name,"\n"+"\n".join(diff))
+          assert not unexpected, "API or response implementation changed outside identified validation and metadata edits"
+          print("PASS all provider request and response bodies structurally preserved")
+
           PY
