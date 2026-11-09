@@ -156,6 +156,14 @@ jobs:
               a=normalize_method(before_map[key])
               b=normalize_method(after_map[key])
               if a!=b:
+                  # Harmless formatting differences must have identical AST.
+                  try:
+                      x = ast.dump(ast.parse("class Shadow:\n"+a.replace("<metadata>","'metadata'")),include_attributes=False)
+                      y = ast.dump(ast.parse("class Shadow:\n"+b.replace("<metadata>","'metadata'")),include_attributes=False)
+                      if x == y:
+                          continue
+                  except SyntaxError:
+                      pass
                   import difflib
                   delta = list(difflib.unified_diff(a.splitlines(),b.splitlines(),n=2))
                   unexpected.append((key,delta[:16]))
