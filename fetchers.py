@@ -24238,22 +24238,13 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
-			
 			value = str( mode ).strip( ).lower( )
-			allowed = {
-					'countries',
-					'providers',
-					'parameters',
-					'parameter_latest',
-					'locations',
-					'latest'
-			}
+			allowed = { 'countries', 'providers', 'parameters', 'parameter_latest', 'locations',
+					'latest' }
 			
 			if value not in allowed:
-				raise ValueError(
-					'Unsupported OpenAQ mode. Use countries, providers, parameters, '
-					'parameter_latest, locations, or latest.'
-				)
+				raise ValueError( 'Unsupported OpenAQ mode. Use countries, providers, parameters, '
+					'parameter_latest, locations, or latest.' )
 			
 			return value
 		
@@ -24285,23 +24276,15 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			
 			value = str( endpoint ).strip( ).strip( '/' )
-			
 			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
 				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
 			
 			if '..' in value:
 				raise ValueError( 'endpoint cannot contain parent-directory markers.' )
-			
-			if not re.fullmatch(
-					r'(countries|providers|parameters|locations|'
-					r'parameters/\d+/latest|locations/\d+/latest)',
-					value
-			):
-				raise ValueError(
-					'Unsupported OpenAQ endpoint path.'
-				)
+			if not re.fullmatch( r'(countries|providers|parameters|locations|'
+			                     r'parameters/\d+/latest|locations/\d+/latest)', value ):
+				raise ValueError( 'Unsupported OpenAQ endpoint path.' )
 			
 			return value
 		
@@ -24337,10 +24320,8 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			throw_if( name, value )
-			
+			throw_if( 'value', value )
 			number = int( value )
-			
 			if number < 1:
 				raise ValueError( f'{name} must be greater than or equal to 1.' )
 			
@@ -24353,9 +24334,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = (
-					'validate_positive_integer( self, *args, **kwargs ) -> int'
-			)
+			exception.method =  'validate_positive_integer( self, *args, **kwargs ) -> int'
 			raise exception
 	
 	def validate_non_negative_integer( self, name: str, value: Any ) -> int:
@@ -24381,12 +24360,10 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			
 			if value is None:
 				raise ValueError( f'{name} cannot be None.' )
 			
 			number = int( value )
-			
 			if number < 0:
 				raise ValueError( f'{name} must be greater than or equal to 0.' )
 			
@@ -24396,9 +24373,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = (
-					'validate_non_negative_integer( self, *args, **kwargs ) -> int'
-			)
+			exception.method = 'validate_non_negative_integer( self, *args, **kwargs ) -> int'
 			raise exception
 	
 	def validate_coordinates( self, coordinates: str='' ) -> str:
@@ -24426,18 +24401,12 @@ class OpenAQ( Fetcher ):
 			
 			if not value:
 				return ''
-			
-			parts = [
-					part.strip( )
-					for part in value.split( ',' )
-			]
-			
+			parts = [ part.strip( ) for part in value.split( ',' ) ]
 			if len( parts ) != 2:
 				raise ValueError( 'coordinates must use latitude,longitude format.' )
 			
 			latitude = float( parts[ 0 ] )
 			longitude = float( parts[ 1 ] )
-			
 			if latitude < -90.0 or latitude > 90.0:
 				raise ValueError( 'coordinates latitude must be between -90 and 90.' )
 			
@@ -24472,11 +24441,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = self.validate_positive_integer(
-				name='radius',
-				value=radius,
-				maximum=100000
-			)
+			value = self.validate_positive_integer( name='radius', value=radius, maximum=100000 )
 			
 			return value
 		
