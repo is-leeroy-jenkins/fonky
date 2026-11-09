@@ -2214,7 +2214,6 @@ class GoogleSearch( Fetcher ):
 			if cse_id:
 				self.cse_id = str( cse_id ).strip( )
 			
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'cse_id', self.cse_id )
 			self.timeout = int( time )
 			self.keywords = str( keywords ).strip( )
@@ -2429,7 +2428,6 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			throw_if( 'api_key', self.api_key )
 			self.address = address
 			self.mode = 'geocode_location'
 			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -2490,7 +2488,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'latitude', lat )
 			throw_if( 'longitude', long )
 			self.mode = 'geocode_coordinates'
@@ -2539,7 +2536,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'address', address )
 			if not isinstance( address, list ):
 				raise TypeError( 'address must be a list of address-line strings.' )
@@ -2586,7 +2582,6 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'origin', origin )
 			throw_if( 'destination', destination )
 			throw_if( 'mode', mode )
@@ -2610,7 +2605,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None'
+			exception.method = 'request_directions( self, **args ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -2817,7 +2812,6 @@ class GoogleWeather( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'path', path )
 			throw_if( 'params', params )
 			throw_if( 'time', time )
@@ -2937,7 +2931,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_current( self, **args ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -2991,7 +2985,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_hourly_forecast( self, **args ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -3045,7 +3039,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_daily_forecast( self, **args ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3099,7 +3093,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_hourly_history( self, **args ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -3142,7 +3136,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None'
+			exception.method = 'fetch_alerts( self, **args ) -> Dict[ str, Any ] | None'
 			raise exception
 
 class NavalObservatory( Fetcher ):
@@ -7195,7 +7189,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'query', query )
 			throw_if( 'offset_mark', offset_mark )
 			throw_if( 'time', time )
@@ -7250,7 +7243,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'package_id', package_id )
 			throw_if( 'time', time )
 			
@@ -7312,7 +7304,6 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'collection', collection )
 			throw_if( 'start_date', start_date )
 			throw_if( 'offset_mark', offset_mark )
@@ -8462,8 +8453,6 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
-			
 			self.limit = self.validate_limit( limit )
 			self.offset = self.validate_offset( offset )
 			self.sort = str( sort or 'updateDate+desc' ).strip( )
@@ -10951,8 +10940,7 @@ class GoogleGeocoding( Fetcher ):
 				'create_schema'
 		]
 	
-	def request( self, params: Dict[ str, Any ], time: int=10,
-			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
+	def request( self, params: Dict[ str, Any ], time: int=10,) -> Dict[ str, Any ] | None:
 		"""Request Google forward, reverse, and place geocoding.
 
 		Purpose:
@@ -10977,12 +10965,6 @@ class GoogleGeocoding( Fetcher ):
 		try:
 			throw_if( 'params', params )
 			throw_if( 'time', time )
-			
-			if api_key:
-				self.api_key = str( api_key ).strip( )
-			
-			throw_if( 'api_key', self.api_key )
-			
 			self.timeout = int( time )
 			self.params = { }
 			
@@ -10996,13 +10978,8 @@ class GoogleGeocoding( Fetcher ):
 				self.params[ key ] = value
 			
 			self.params[ 'key' ] = self.api_key
-			
-			self.response = requests.get(
-				url=self.url,
-				params=self.params,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
+				timeout=self.timeout )
 			
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
@@ -18518,7 +18495,6 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'api_key', self.api_key )
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'time', time )
 			
@@ -23531,13 +23507,8 @@ class PurpleAir( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
-			
 			value = str( mode ).strip( ).lower( )
-			allowed = {
-					'sensors',
-					'sensor'
-			}
-			
+			allowed = { 'sensors', 'sensor' }
 			if value not in allowed:
 				raise ValueError( "Unsupported PurpleAir mode. Use 'sensors' or 'sensor'." )
 			
@@ -24277,37 +24248,20 @@ class PurpleAir( Fetcher ):
 			
 			self.mode = 'sensor'
 			self.sensor_index = self.validate_sensor_index( sensor_index )
-			self.fields = self.normalize_fields(
-				fields=fields,
-				default_fields=default_fields
-			)
+			self.fields = self.normalize_fields( fields=fields, default_fields=default_fields )
 			self.timeout = int( time )
-			
-			self.request(
-				endpoint=f'sensors/{self.sensor_index}',
-				params={
-						'fields': self.fields
-				},
-				time=self.timeout
-			)
+			self.request( endpoint=f'sensors/{self.sensor_index}', params={ 'fields': self.fields },
+				time=self.timeout )
 			
 			rows = self.shape_sensor_detail_rows( self.payload )
-			
-			return self.package_response(
-				rows=rows,
-				params={
-						'sensor_index': self.sensor_index,
-						'fields': self.fields
-				}
-			)
+			return self.package_response( rows=rows, params={ 'sensor_index': self.sensor_index,
+			                                                  'fields': self.fields } )
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = (
-					'fetch_sensor( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
-			)
+			exception.method = 'fetch_sensor( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch( self, mode: str='sensors', sensor_index: int=None,
