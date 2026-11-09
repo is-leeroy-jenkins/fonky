@@ -205,6 +205,46 @@ class Fetcher:
 		"""
 		raise NotImplementedError( 'Must be implemented by a subclass.' )
 
+	def create_schema( self, function: str, tool: str, description: str,
+			parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, Any ]:
+		"""Create a function-calling schema for a fetcher operation.
+
+		Purpose:
+		    Builds the shared tool schema used by fetcher subclasses without duplicating
+		    identical schema-construction logic in every provider.
+
+		Args:
+		    function: Public callable name represented by the schema.
+		    tool: Provider or service identifier.
+		    description: Description of the callable.
+		    parameters: JSON Schema property definitions.
+		    required: Required property names, or None to use all defined properties.
+
+		Returns:
+		    Dict[str, Any]: Tool schema containing the function name, description,
+		    and JSON Schema object definition.
+		"""
+		throw_if( 'function', function )
+		throw_if( 'tool', tool )
+		throw_if( 'description', description )
+		throw_if( 'parameters', parameters )
+		if not isinstance( parameters, dict ):
+			raise ValueError( 'parameters must be a dictionary of property schemas.' )
+		if required is None:
+			required = list( parameters.keys( ) )
+		return {
+				'name': function.strip( ),
+				'description': (
+						f'{description.strip( )} This function uses the '
+						f'{tool.strip( )} service.'
+				),
+				'parameters': {
+						'type': 'object',
+						'properties': parameters,
+						'required': required,
+				}
+		}
+
 class WebFetcher( Fetcher ):
 	"""Web Fetcher fetcher.
 
@@ -1033,58 +1073,6 @@ class WebFetcher( Fetcher ):
 			exception.method = 'scrape_images( self, *args, **kwargs ) -> List[ str ] | None'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'WebFetcher'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			raise exception
-
 class WebCrawler( WebFetcher ):
 	"""Web Crawler fetcher.
 
@@ -2603,51 +2591,6 @@ class GoogleMaps( Fetcher ):
 			exception.method = 'request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-					'description': ( f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service." ),
-					'parameters': { 'type': 'object', 'properties': parameters,
-							'required': required } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'GoogleMaps'
-			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
-			raise exception
-
 class GoogleWeather( Fetcher ):
 	"""Google Weather fetcher.
 
@@ -3396,51 +3339,6 @@ class NavalObservatory( Fetcher ):
 			exception.method = "fetch( self, mode: str='celnav', date_value: str='', time_value: str='', latitude: float=0.0, longitude: float=0.0, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-					'description': ( f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.' ),
-					'parameters': { 'type': 'object', 'properties': parameters,
-							'required': required } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'NavalObservatory'
-			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
-			raise exception
-
 class SatelliteCenter( Fetcher ):
 	"""Satellite Center fetcher.
 
@@ -4090,50 +3988,6 @@ class EarthObservatory( Fetcher ):
 			exception.method = "fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
-				               f'service.', 'parameters': { 'type': 'object',
-					'properties': parameters, 'required': required } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'EarthObservatory'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
-			raise exception
-
 class GlobalImagery( Fetcher ):
 	"""Global Imagery fetcher.
 
@@ -4569,54 +4423,6 @@ class GlobalImagery( Fetcher ):
 			exception.cause = 'GlobalImagery'
 			exception.method = (
 				'fetch_mercator_map( self, ccrs: Any=None ) -> Dict[ str, Any ] | None' )
-			raise exception
-
-	def create_schema( self, function: str, tool: str, description: str,
-			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
-				raise ValueError( 'parameters must be a dict of parameter schema definitions.' )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
-				               f'service.',
-				'parameters': { 'type': 'object', 'properties': parameters, 'required': required } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'GlobalImagery'
-			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None'
 			raise exception
 
 class NearbyObjects( Fetcher ):
@@ -5124,51 +4930,6 @@ class NearbyObjects( Fetcher ):
 			exception.method = "fetch( self, mode: str='close_approaches', start_date: str='', end_date: str='', query: str='', query_type: str='sstr', dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
-				               f'service.',
-				'parameters': { 'type': 'object', 'properties': parameters, 'required': required } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'NearbyObjects'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
-			raise exception
-
 class OpenScience( Fetcher ):
 	"""Open Science fetcher.
 
@@ -5552,58 +5313,6 @@ class OpenScience( Fetcher ):
 			exception.method = "fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-		required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenScience'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
-			raise exception
-
 class SpaceWeather( Fetcher ):
 	"""Space Weather fetcher.
 
@@ -5859,57 +5568,6 @@ class SpaceWeather( Fetcher ):
 			exception.method = "fetch( self, mode: str='cme', start_date: str='', end_date: str='', time: int=20, location: str='ALL', catalog: str='ALL', notification_type: str='all', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'SpaceWeather'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
-			raise exception
-
 class AstroCatalog( Fetcher ):
 	"""Astro Catalog fetcher.
 
@@ -7393,62 +7051,6 @@ class GovData( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'GovData'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class StarChart( Fetcher ):
 	"""Star Chart fetcher.
 
@@ -8009,59 +7611,6 @@ class StarChart( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'StarChart'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
-			raise exception
-
 class Congress( Fetcher ):
 	"""Congress fetcher.
 
@@ -9034,62 +8583,6 @@ class Congress( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Congress'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class InternetArchive( Fetcher ):
 	"""Internet Archive fetcher.
 
@@ -9377,63 +8870,6 @@ class InternetArchive( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'InternetArchive'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
-			raise exception
-
 class OpenWeather( Fetcher ):
 	"""Open Weather fetcher.
 
@@ -10001,60 +9437,6 @@ class OpenWeather( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenWeather'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
-			raise exception
-
 class HistoricalWeather( Fetcher ):
 	"""Historical Weather fetcher.
 
@@ -10411,60 +9793,6 @@ class HistoricalWeather( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'HistoricalWeather'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
-			raise exception
-
 class Grokipedia( Fetcher ):
 	"""Grokipedia fetcher.
 
@@ -10716,62 +10044,6 @@ class Grokipedia( Fetcher ):
 			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Grokipedia'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class GoogleGeocoding( Fetcher ):
 	"""Google Geocoding fetcher.
 
@@ -11225,62 +10497,6 @@ class GoogleGeocoding( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'GoogleGeocoding'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class CensusData( Fetcher ):
 	"""Census Data fetcher.
 
@@ -11752,60 +10968,6 @@ class CensusData( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'CensusData'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			raise exception
-
 class Socrata( Fetcher ):
 	"""Socrata fetcher.
 
@@ -12305,62 +11467,6 @@ class Socrata( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Socrata'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class HealthData( Fetcher ):
 	"""Health Data fetcher.
 
@@ -12860,62 +11966,6 @@ class HealthData( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'HealthData'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class GlobalHealthData( Fetcher ):
 	"""Global Health Data fetcher.
 
@@ -13262,62 +12312,6 @@ class GlobalHealthData( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'GlobalHealthData'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class UnitedNations( Fetcher ):
 	"""United Nations fetcher.
 
@@ -13637,62 +12631,6 @@ class UnitedNations( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'UnitedNations'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class WorldPopulation( Fetcher ):
 	"""World Population fetcher.
 
@@ -14172,62 +13110,6 @@ class WorldPopulation( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'WorldPopulation'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class Wonder( Fetcher ):
 	"""Wonder fetcher.
 
@@ -14588,68 +13470,6 @@ class Wonder( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Wonder'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class USGSEarthquakes( Fetcher ):
 	"""U S G S Earthquakes fetcher.
 
@@ -15470,68 +14290,6 @@ class USGSEarthquakes( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'USGSEarthquakes'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class USGSWaterData( Fetcher ):
 	"""U S G S Water Data fetcher.
 
@@ -16550,68 +15308,6 @@ class USGSWaterData( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'USGSWaterData'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class USGSTheNationalMap( Fetcher ):
 	"""U S G S The National Map fetcher.
 
@@ -17386,63 +16082,6 @@ class USGSTheNationalMap( Fetcher ):
 			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			raise exception
-
 class USGSScienceBase( Fetcher ):
 	"""U S G S Science Base fetcher.
 
@@ -18089,65 +16728,6 @@ class USGSScienceBase( Fetcher ):
 			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
-				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'USGSScienceBase'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class AirNow( Fetcher ):
 	"""Air Now fetcher.
 
@@ -18775,63 +17355,6 @@ class AirNow( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'AirNow'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
-			raise exception
-
 class ClimateData( Fetcher ):
 	"""Climate Data fetcher.
 
@@ -19528,67 +18051,6 @@ class ClimateData( Fetcher ):
 			exception.method = 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'ClimateData'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class EoNet( Fetcher ):
 	"""Eo Net fetcher.
 
@@ -20407,66 +18869,6 @@ class EoNet( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'EoNet'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			raise exception
-
 class EnviroFacts( Fetcher ):
 	"""Enviro Facts fetcher.
 
@@ -21052,68 +19454,6 @@ class EnviroFacts( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'EnviroFacts'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class TidesAndCurrents( Fetcher ):
 	"""Tides And Currents fetcher.
 
@@ -22044,68 +20384,6 @@ class TidesAndCurrents( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'TidesAndCurrents'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class UvIndex( Fetcher ):
 	"""UV Index fetcher.
 
@@ -22858,68 +21136,6 @@ class UvIndex( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'UvIndex'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class PurpleAir( Fetcher ):
 	"""Purple Air fetcher.
 
@@ -23566,68 +21782,6 @@ class PurpleAir( Fetcher ):
 			)
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError(
-					'parameters must be a dict of param_name -> schema definition.'
-				)
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return {
-					'name': function.strip( ),
-					'description': (
-							f'{description.strip( )} This function uses the '
-							f'{tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': parameters,
-							'required': required,
-					}
-			}
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'PurpleAir'
-			exception.method = (
-					'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			)
-			raise exception
-
 class OpenAQ( Fetcher ):
 	"""Open A Q fetcher.
 
@@ -24745,57 +22899,6 @@ class OpenAQ( Fetcher ):
 			exception.method = ('fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			
-			if not isinstance( parameters, dict ):
-				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-					'description': (f'{description.strip( )} This function uses the '
-					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
-							'required': required, } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenAQ'
-			exception.method = ( 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None' )
-			raise exception
-
 class Firms( Fetcher ):
 	"""Firms fetcher.
 
@@ -25355,55 +23458,6 @@ class Firms( Fetcher ):
 			exception.method = ( 'fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None' )
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
-				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			return { 'name': function.strip( ),
-					'description': (f'{description.strip( )} This function uses the '
-					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
-							'required': required, } }
-		
-		except Exception as e:
-			exception = Error( e )
-			exception.module = 'fetchers'
-			exception.cause = 'Firms'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ] | None'
-			raise exception
-
 class OpenSky( Fetcher ):
 	"""Open Sky fetcher.
 
@@ -26532,52 +24586,3 @@ class OpenSky( Fetcher ):
 			exception.method = ('fetch( self, *args, **kwargs ) -> Dict[ str, Any ] | None')
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
-		"""Create an AI tool schema.
-
-		Purpose:
-		    Builds a compact function schema for exposing a fetcher operation to AI tool-calling
-		    workflows. The method combines the public function name, service label, description, parameter
-		    schema, and required-field list into the structure consumed by downstream tool registries.
-
-		Args:
-		    function: Callable or function name represented by the schema.
-		    tool: Provider or service name used by the generated tool description.
-		    description: Human-readable description of the callable or tool.
-		    parameters: JSON Schema property definitions keyed by parameter name.
-		    required: Parameter names that should be marked as required in the generated schema.
-
-		Returns:
-		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
-
-		Raises:
-		    ValueError: If a required value is missing, blank, or outside the supported range.
-		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
-		        project error type.
-		"""
-		try:
-			throw_if( 'function', function )
-			throw_if( 'tool', tool )
-			throw_if( 'description', description )
-			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
-				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
-			
-			if required is None:
-				required = list( parameters.keys( ) )
-			
-			return { 'name': function.strip( ),
-					'description': (f'{description.strip( )} This function uses the '
-					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
-							'required': required, } }
-		
-		except Exception as exc:
-			exception = Error( exc )
-			exception.module = 'fetchers'
-			exception.cause = 'OpenSky'
-			exception.method = 'create_schema( self, *args, **kwargs ) -> Dict[ str, str ]'
-			raise exception
