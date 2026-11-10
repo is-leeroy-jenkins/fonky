@@ -30,7 +30,8 @@ jobs:
           python -m py_compile fetchers.py
           python -m pytest -q tests/test_arxiv_integration.py
       - name: Optional live smoke query
-        if: github.event_name == 'workflow_dispatch' && inputs.live == true
+        if: github.event_name == 'pull_request' || inputs.live == true
+        continue-on-error: true
         env:
           FONKY_ARXIV_LIVE: "1"
         run: python -m pytest -q tests/test_arxiv_integration.py -k live
