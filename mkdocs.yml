@@ -100,6 +100,7 @@ nav:
       - Error Handling: api/boogr.md
       - Local Automation: api/loco.md
       - Local AI Tools: api/loco-tools.md
+      - Local AI Tools — Generated Reference: api/loco-tools-generated.md
       - Provider Tools:
           - OpenAI Agents SDK: api/gpt-tools.md
           - Anthropic Claude: api/claude-tools.md
