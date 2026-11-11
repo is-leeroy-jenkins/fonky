@@ -318,7 +318,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
-			self.url = url.strip( )
+			self.url = url
+			self.url = self.url.strip( )
 			self.timeout = time
 			self.response = requests.get( url=self.url, headers=self.headers,
 				timeout=self.timeout )
@@ -385,13 +386,15 @@ class WebFetcher( Fetcher ):
 		Returns:
 		    List[str]: Text or identifier values produced by the operation.
 		"""
-		if value is None:
+		throw_if( 'value', value )
+		self.value = value
+		if self.value is None:
 			return [ ]
 		
-		if isinstance( value, list ):
-			return [ str( item ) for item in value if item is not None ]
+		if isinstance( self.value, list ):
+			return [ str( item ) for item in self.value if item is not None ]
 		
-		return [ str( value ) ]
+		return [ str( self.value ) ]
 	
 	def extract_title( self, html: str ) -> str:
 		"""Extract title from the supplied content.
@@ -484,9 +487,11 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'base_url', base_url )
+			self.base_url = base_url
 			throw_if( 'href', href )
-			self.source_url = base_url.strip( )
-			self.href = href.strip( )
+			self.href = href
+			self.source_url = self.base_url.strip( )
+			self.href = self.href.strip( )
 			if self.href.startswith( ('mailto:', 'tel:', 'javascript:', '#') ):
 				return ''
 			
@@ -523,9 +528,11 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'left_url', left_url )
+			self.left_url = left_url
 			throw_if( 'right_url', right_url )
-			self.left_url = left_url.strip( )
-			self.right_url = right_url.strip( )
+			self.right_url = right_url
+			self.left_url = self.left_url.strip( )
+			self.right_url = self.right_url.strip( )
 			self.left_host = urllib.parse.urlparse( self.left_url ).netloc.lower( )
 			self.right_host = urllib.parse.urlparse( self.right_url ).netloc.lower( )
 			return bool( self.left_host ) and self.left_host == self.right_host
@@ -553,8 +560,9 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'base_url', base_url )
+			self.base_url = base_url
 			throw_if( 'html', html )
-			self.source_url = base_url.strip( )
+			self.source_url = self.base_url.strip( )
 			self.source_html = html
 			self.soup = BeautifulSoup( self.source_html, 'html.parser' )
 			self.results = [ ]
@@ -595,8 +603,9 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			throw_if( 'html', html )
-			self.source_url = url.strip( )
+			self.source_url = self.url.strip( )
 			self.source_html = html
 			self.selected_methods = selected_methods or [ ]
 			self.results = { }
@@ -742,7 +751,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data(
 				self.url, self.html or '', [ 'scrape_paragraphs' ] ).get( 'Paragraphs', [ ] )
@@ -773,7 +783,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data(
 				self.url, self.html or '', [ 'scrape_lists' ] ).get( 'Lists', [ ] )
@@ -804,7 +815,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_tables' ] ).get( 'Tables', [ ] )
@@ -835,7 +847,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data(
 				self.url, self.html or '', [ 'scrape_articles' ] ).get( 'Articles', [ ] )
@@ -866,7 +879,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_headings' ] ).get( 'Headings', [ ] )
@@ -897,7 +911,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_divisions' ] ).get( 'Divisions', [ ] )
@@ -928,7 +943,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_sections' ] ).get( 'Sections', [ ] )
@@ -959,7 +975,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_blockquotes' ] ).get( 'Blockquotes', [ ] )
@@ -990,7 +1007,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_hyperlinks' ] ).get( 'Hyperlinks', [ ] )
@@ -1021,7 +1039,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.url = uri.strip( )
+			self.uri = uri
+			self.url = self.uri.strip( )
 			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_images' ] ).get( 'Images', [ ] )
@@ -1058,15 +1077,19 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
-			return { 'name': function.strip( ),
+				required = list( self.parameters.keys( ) )
+			return { 'name': self.function.strip( ),
 					'description': (f'{description.strip( )} This function uses the '
 					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
+					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': required, } }
 		
 		except Exception as exc:
@@ -1169,15 +1192,16 @@ class WebCrawler( WebFetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			if self.use_playwright:
-				self.url = url.strip( )
+				self.url = self.url.strip( )
 				self.timeout = time
 				self.raw_url = self.url
 				self.raw_html = self.render_with_playwright( self.url, timeout=self.timeout )
 				self.html = self.raw_html or ''
 				self.soup = BeautifulSoup( self.html, 'html.parser' )
 				return None
-			return super( ).fetch( url=url, time=time )
+			return super( ).fetch( url=self.url, time=time )
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
@@ -1205,10 +1229,11 @@ class WebCrawler( WebFetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			with sync_playwright( ) as p:
 				browser = p.chromium.launch( )
 				page = browser.new_page( )
-				page.goto( url, timeout=timeout * 1000 )
+				page.goto( self.url, timeout=timeout * 1000 )
 				page.wait_for_load_state( 'networkidle', timeout=timeout * 1000 )
 				html = page.content( )
 				browser.close( )
@@ -1242,13 +1267,14 @@ class WebCrawler( WebFetcher ):
 		Returns:
 		    Dict[str, Any]: Extracted and normalized content values.
 		"""
-		page_result: Dict[ str, Any ] = { 'url': url, 'status_code': None, 'encoding': None,
+		throw_if( 'url', url )
+		self.url = url
+		page_result: Dict[ str, Any ] = { 'url': self.url, 'status_code': None, 'encoding': None,
 			'title': '', 'plain_text': '', 'raw_html': '', 'links_discovered': [ ], 'data': { },
 			'errors': [ ], 'content_bytes': 0, 'truncated_by_max_bytes': False, }
 		try:
-			throw_if( 'url', url )
 			methods = selected_methods or [ ]
-			self.fetch( url=url, time=request_timeout )
+			self.fetch( url=self.url, time=request_timeout )
 			raw_html = self.html or ''
 			if self.response is not None:
 				page_result[ 'status_code' ] = getattr( self.response, 'status_code', None )
@@ -1264,7 +1290,7 @@ class WebCrawler( WebFetcher ):
 				page_result[ 'errors' ].append(
 					f'Response exceeded max bytes and was truncated to {max_bytes} bytes.' )
 			
-			page_result[ 'links_discovered' ] = self.extract_links( url, raw_html )
+			page_result[ 'links_discovered' ] = self.extract_links( self.url, raw_html )
 			if include_title:
 				page_result[ 'title' ] = self.extract_title( raw_html )
 			
@@ -1277,7 +1303,7 @@ class WebCrawler( WebFetcher ):
 			if include_raw_html:
 				page_result[ 'raw_html' ] = raw_html
 			
-			page_result[ 'data' ] = self.extract_structured_data( url=url, html=raw_html,
+			page_result[ 'data' ] = self.extract_structured_data( url=self.url, html=raw_html,
 				selected_methods=methods )
 			return page_result
 		except Exception as exc:
@@ -1319,8 +1345,9 @@ class WebCrawler( WebFetcher ):
 		"""
 		try:
 			throw_if( 'seed_url', seed_url )
+			self.seed_url = seed_url
 			started_at = dt.datetime.now( )
-			normalized_seed = self.normalize_url( seed_url, seed_url )
+			normalized_seed = self.normalize_url( self.seed_url, self.seed_url )
 			if not normalized_seed:
 				raise ValueError( 'A valid absolute URL is required.' )
 			
@@ -1468,7 +1495,8 @@ class ArXiv( Fetcher ):
 		"""
 		try:
 			throw_if( 'question', question )
-			self.query = question.strip( )
+			self.question = question
+			self.query = self.question.strip( )
 			max_docs = self.max_documents if max_documents is None else \
 				max( 1, min( max_documents, 300 ) )
 			
@@ -1637,7 +1665,9 @@ class GoogleDrive( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.query = (question or '').strip( )
+			throw_if( 'question', question )
+			self.question = question
+			self.query = (self.question or '').strip( )
 			self.folder_id = (folder_id or 'root').strip( ) or 'root'
 			self.num_results = results
 			self.template = template.strip( )
@@ -1762,7 +1792,8 @@ class Wikipedia( Fetcher ):
 		"""
 		try:
 			throw_if( 'question', question )
-			self.query = question.strip( )
+			self.question = question
+			self.query = self.question.strip( )
 			lang = self.language if language is None else \
 				(language.strip( ) if language else 'en')
 			
@@ -2192,6 +2223,7 @@ class GoogleSearch( Fetcher ):
 		"""
 		try:
 			throw_if( 'keywords', keywords )
+			self.keywords = keywords
 			if api_key:
 				self.api_key = api_key.strip( )
 			
@@ -2199,7 +2231,7 @@ class GoogleSearch( Fetcher ):
 				self.cse_id = cse_id.strip( )
 			
 			self.timeout = time
-			self.keywords = keywords.strip( )
+			self.keywords = self.keywords.strip( )
 			self.results = results
 			self.start = start
 			if self.results < 1:
@@ -2471,11 +2503,15 @@ class GoogleMaps( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'latitude', lat )
-			throw_if( 'longitude', long )
+			throw_if( 'lat', lat )
+			self.lat = lat
+			throw_if( 'long', long )
+			self.long = long
+			throw_if( 'latitude', self.lat )
+			throw_if( 'longitude', self.long )
 			self.mode = 'geocode_coordinates'
-			self.latitude = lat
-			self.longitude = long
+			self.latitude = self.lat
+			self.longitude = self.long
 			self.coordinates = (self.latitude, self.longitude)
 			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
 			self.params = { 'latlng': f'{self.latitude},{self.longitude}', 'key': self.api_key }
@@ -2520,12 +2556,13 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			if not isinstance( address, list ):
+			self.address = address
+			if not isinstance( self.address, list ):
 				raise TypeError( 'address must be a list of address-line strings.' )
 			
 			self.mode = 'validate_address'
 			self.url = 'https://addressvalidation.googleapis.com/v1:validateAddress'
-			self.address_lines = [ str( line ).strip( ) for line in address if
+			self.address_lines = [ str( line ).strip( ) for line in self.address if
 				line is not None and str( line ).strip( ) ]
 			
 			if not self.address_lines:
@@ -2566,10 +2603,12 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'origin', origin )
+			self.origin = origin
 			throw_if( 'destination', destination )
+			self.destination = destination
 			self.mode = mode.strip( ).lower( )
-			self.origin = origin.strip( )
-			self.destination = destination.strip( )
+			self.origin = self.origin.strip( )
+			self.destination = self.destination.strip( )
 			self.url = 'https://maps.googleapis.com/maps/api/directions/json'
 			self.params = { 'origin': self.origin, 'destination': self.destination,
 				'mode': self.mode, 'key': self.api_key }
@@ -2616,16 +2655,20 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 					'description': ( f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service." ),
-					'parameters': { 'type': 'object', 'properties': parameters,
+					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': required } }
 		
 		except Exception as e:
@@ -2756,7 +2799,8 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
-			self.address = address.strip( )
+			self.address = address
+			self.address = self.address.strip( )
 			lat, lng = self.gmaps.geocode_location( address=self.address )
 			self.latitude = float( lat )
 			self.longitude = float( lng )
@@ -2795,16 +2839,18 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'path', path )
+			self.path = path
 			throw_if( 'params', params )
-			if not isinstance( params, dict ):
+			self.params = params
+			if not isinstance( self.params, dict ):
 				raise TypeError( 'params must be a dictionary.' )
-			self.path = path.strip( ).lstrip( '/' )
+			self.path = self.path.strip( ).lstrip( '/' )
 			self.timeout = time
 			self.params = { }
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 			
-			for key, value in params.items( ):
+			for key, value in self.params.items( ):
 				if value is None:
 					continue
 				
@@ -2894,11 +2940,12 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
+			self.address = address
 			self.mode = 'current'
 			self.units_system = units_system.strip( )
 			self.language_code = language_code.strip( )
 			self.timeout = time
-			self.latitude, self.longitude = self.resolve_coordinates( address )
+			self.latitude, self.longitude = self.resolve_coordinates( self.address )
 			self.params = { 'location.latitude': self.latitude,
 				'location.longitude': self.longitude, 'unitsSystem': self.units_system,
 				'languageCode': self.language_code }
@@ -2940,6 +2987,7 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
+			self.address = address
 			self.mode = 'hourly_forecast'
 			self.hours = hours
 			self.units_system = units_system.strip( )
@@ -2948,7 +2996,7 @@ class GoogleWeather( Fetcher ):
 			if self.hours < 1 or self.hours > 240:
 				raise ValueError( 'hours must be between 1 and 240.' )
 			
-			self.latitude, self.longitude = self.resolve_coordinates( address )
+			self.latitude, self.longitude = self.resolve_coordinates( self.address )
 			self.params = { 'location.latitude': self.latitude,
 				'location.longitude': self.longitude, 'hours': self.hours,
 				'unitsSystem': self.units_system, 'languageCode': self.language_code }
@@ -2990,6 +3038,7 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
+			self.address = address
 			self.mode = 'daily_forecast'
 			self.days = days
 			self.units_system = units_system.strip( )
@@ -2998,7 +3047,7 @@ class GoogleWeather( Fetcher ):
 			if self.days < 1 or self.days > 10:
 				raise ValueError( 'days must be between 1 and 10.' )
 			
-			self.latitude, self.longitude = self.resolve_coordinates( address )
+			self.latitude, self.longitude = self.resolve_coordinates( self.address )
 			self.params = { 'location.latitude': self.latitude,
 				'location.longitude': self.longitude, 'days': self.days,
 				'unitsSystem': self.units_system, 'languageCode': self.language_code }
@@ -3040,6 +3089,7 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
+			self.address = address
 			self.mode = 'hourly_history'
 			self.hours = hours
 			self.units_system = units_system.strip( )
@@ -3048,7 +3098,7 @@ class GoogleWeather( Fetcher ):
 			if self.hours < 1 or self.hours > 24:
 				raise ValueError( 'hours must be between 1 and 24 for hourly history.' )
 			
-			self.latitude, self.longitude = self.resolve_coordinates( address )
+			self.latitude, self.longitude = self.resolve_coordinates( self.address )
 			self.params = { 'location.latitude': self.latitude,
 				'location.longitude': self.longitude, 'hours': self.hours,
 				'unitsSystem': self.units_system, 'languageCode': self.language_code }
@@ -3087,10 +3137,11 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
+			self.address = address
 			self.mode = 'alerts'
 			self.language_code = language_code.strip( )
 			self.timeout = time
-			self.latitude, self.longitude = self.resolve_coordinates( address )
+			self.latitude, self.longitude = self.resolve_coordinates( self.address )
 			self.params = { 'location.latitude': self.latitude,
 				'location.longitude': self.longitude, 'languageCode': self.language_code }
 			
@@ -3193,7 +3244,8 @@ class NavalObservatory( Fetcher ):
 		"""
 		try:
 			throw_if( 'date_value', date_value )
-			value = date_value.strip( )
+			self.date_value = date_value
+			value = self.date_value.strip( )
 			calendar_date = dt.datetime.strptime( value, '%Y-%m-%d' )
 			if calendar_date.year < 1800 or calendar_date.year > 2050:
 				raise ValueError( 'Celestial navigation dates must be between 1800 and 2050.' )
@@ -3226,7 +3278,8 @@ class NavalObservatory( Fetcher ):
 		"""
 		try:
 			throw_if( 'time_value', time_value )
-			value = time_value.strip( )
+			self.time_value = time_value
+			value = self.time_value.strip( )
 			pattern = (r'^(?:[01]\d|2[0-3]):[0-5]\d'
 			           r'(?:'
 			           r':[0-5]\d(?:\.\d{1,6})?'
@@ -3265,9 +3318,11 @@ class NavalObservatory( Fetcher ):
 		"""
 		try:
 			throw_if( 'latitude', latitude )
+			self.latitude = latitude
 			throw_if( 'longitude', longitude )
-			lat = latitude
-			lon = longitude
+			self.longitude = longitude
+			lat = self.latitude
+			lon = self.longitude
 			if not (-90.0 <= lat <= 90.0):
 				raise ValueError( 'Latitude must be between -90 and 90 and finite.' )
 			if not (-180.0 <= lon <= 180.0):
@@ -3308,17 +3363,21 @@ class NavalObservatory( Fetcher ):
 		"""
 		try:
 			throw_if( 'date_value', date_value )
+			self.date_value = date_value
 			throw_if( 'time_value', time_value )
+			self.time_value = time_value
 			throw_if( 'latitude', latitude )
+			self.latitude = latitude
 			throw_if( 'longitude', longitude )
+			self.longitude = longitude
 			self.timeout = time
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 
-			self.date_value = self.validate_date( date_value )
-			self.time_value = self.validate_time( time_value )
-			self.latitude, self.longitude = self.validate_coordinates( latitude=latitude,
-				longitude=longitude )
+			self.date_value = self.validate_date( self.date_value )
+			self.time_value = self.validate_time( self.time_value )
+			self.latitude, self.longitude = self.validate_coordinates( latitude=self.latitude,
+				longitude=self.longitude )
 			self.location_label = (location_label or '').strip( )
 			self.url = f'{self.base_url}/celnav'
 			self.params = { 'date': self.date_value, 'time': self.time_value,
@@ -3414,16 +3473,20 @@ class NavalObservatory( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 					'description': ( f'{description.strip( )} '
 							f'This function uses the {tool.strip( )} service.' ),
-					'parameters': { 'type': 'object', 'properties': parameters,
+					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': required } }
 		
 		except Exception as e:
@@ -3595,11 +3658,14 @@ class SatelliteCenter( Fetcher ):
 		"""
 		try:
 			throw_if( 'observatories', observatories )
+			self.observatories = observatories
 			throw_if( 'start_time', start_time )
+			self.start_time = start_time
 			throw_if( 'end_time', end_time )
-			self.observatory_ids = observatories.strip( )
-			self.start_time = start_time.strip( )
-			self.end_time = end_time.strip( )
+			self.end_time = end_time
+			self.observatory_ids = self.observatories.strip( )
+			self.start_time = self.start_time.strip( )
+			self.end_time = self.end_time.strip( )
 			self.coordinate_systems = coordinate_systems.strip( ).lower( )
 			self.resolution_factor = resolution_factor
 			self.timeout = time
@@ -4098,16 +4164,20 @@ class EarthObservatory( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
 				               f'service.', 'parameters': { 'type': 'object',
-					'properties': parameters, 'required': required } }
+					'properties': self.parameters, 'required': required } }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -4235,11 +4305,14 @@ class GlobalImagery( Fetcher ):
 		"""
 		try:
 			throw_if( 'projection', projection )
+			self.projection = projection
 			throw_if( 'quality', quality )
+			self.quality = quality
 			throw_if( 'version', version )
-			self.projection = projection.strip( ).lower( ).replace( ':', '' )
-			self.quality = quality.strip( ).lower( )
-			self.version = version.strip( )
+			self.version = version
+			self.projection = self.projection.strip( ).lower( ).replace( ':', '' )
+			self.quality = self.quality.strip( ).lower( )
+			self.version = self.version.strip( )
 			if self.projection not in ('epsg4326', 'epsg3857', 'epsg3413', 'epsg3031'):
 				raise ValueError( 'Unsupported NASA GIBS WMS projection.' )
 			if not re.fullmatch( r'[a-z0-9_-]+', self.quality ):
@@ -4326,18 +4399,21 @@ class GlobalImagery( Fetcher ):
 		"""
 		try:
 			throw_if( 'layer', layer )
+			self.layer = layer
 			throw_if( 'image_date', image_date )
+			self.image_date = image_date
 			throw_if( 'bbox', bbox )
+			self.bbox = bbox
 			self.projection, self.quality, self.version = self.validate_wms_options(
 				projection=projection, quality=quality, version=version )
-			self.layer = layer.strip( )
-			self.image_date = image_date.strip( )
+			self.layer = self.layer.strip( )
+			self.image_date = self.image_date.strip( )
 			self.image_format = image_format.strip( ).lower( )
 			self.width = width
 			self.height = height
-			if len( bbox ) != 4:
+			if len( self.bbox ) != 4:
 				raise ValueError( 'bbox must contain west, south, east, north.' )
-			self.bbox = tuple( float( value ) for value in bbox )
+			self.bbox = tuple( float( value ) for value in self.bbox )
 			west, south, east, north = self.bbox
 			if not all( float('-inf') < value < float('inf') for value in self.bbox ):
 				raise ValueError( 'bbox coordinates must be finite.' )
@@ -4420,14 +4496,17 @@ class GlobalImagery( Fetcher ):
 		"""
 		try:
 			throw_if( 'layer', layer )
+			self.layer = layer
 			throw_if( 'image_date', image_date )
+			self.image_date = image_date
 			throw_if( 'bbox', bbox )
+			self.bbox = bbox
 			self.timeout = time
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 			self.mode = 'wms_map'
-			self.url = self.build_wms_url( layer=layer, image_date=image_date,
-				bbox=bbox, width=width, height=height, projection=projection,
+			self.url = self.build_wms_url( layer=self.layer, image_date=self.image_date,
+				bbox=self.bbox, width=width, height=height, projection=projection,
 				quality=quality, image_format=image_format, transparent=transparent )
 
 			self.output_dir = output_dir or 'python-examples'
@@ -4586,19 +4665,23 @@ class GlobalImagery( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
+			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
 				raise ValueError( 'parameters must be a dict of parameter schema definitions.' )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
 				               f'service.',
-				'parameters': { 'type': 'object', 'properties': parameters, 'required': required } }
+				'parameters': { 'type': 'object', 'properties': self.parameters, 'required': required } }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -4743,14 +4826,15 @@ class NearbyObjects( Fetcher ):
 		    Error: If any NHATS mission constraint is unsupported.
 		"""
 		try:
+			throw_if( 'launch', launch )
+			self.launch = launch
 			throw_if( 'dv', dv )
 			throw_if( 'dur', dur )
 			throw_if( 'stay', stay )
-			throw_if( 'launch', launch )
 			self.dv = dv
 			self.dur = dur
 			self.stay = stay
-			self.launch = launch.strip( )
+			self.launch = self.launch.strip( )
 			if self.dv not in range( 4, 13 ):
 				raise ValueError( 'NHATS dv must be an integer from 4 through 12.' )
 			if self.dur not in range( 60, 451, 30 ):
@@ -4799,10 +4883,12 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			self.mode = 'close_approaches'
-			self.start_date = start_date.strip( )
-			self.end_date = end_date.strip( )
+			self.start_date = self.start_date.strip( )
+			self.end_date = self.end_date.strip( )
 			self.dist_max = (dist_max or '10LD').strip( )
 			self.body = (body or 'Earth').strip( )
 			self.sort = (sort or 'date').strip( )
@@ -4867,8 +4953,9 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			self.mode = 'object_lookup'
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.query_type = query_type.strip( ).lower( )
 			if self.query_type not in ('sstr', 'spk', 'des'):
 				raise ValueError( 'query_type must be sstr, spk, or des.' )
@@ -4972,9 +5059,10 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'designation', designation )
+			self.designation = designation
 			self.validate_nhats_options( dv=dv, dur=dur, stay=stay, launch=launch )
 			self.mode = 'nhats_object'
-			self.query = designation.strip( )
+			self.query = self.designation.strip( )
 			self.url = f'{self.base_url}/nhats.api'
 			self.params = { 'des': self.query, 'dv': self.dv, 'dur': self.dur,
 				'stay': self.stay, 'launch': self.launch }
@@ -5142,17 +5230,21 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 				'description': f'{description.strip( )} This function uses the {tool.strip( )} '
 				               f'service.',
-				'parameters': { 'type': 'object', 'properties': parameters, 'required': required } }
+				'parameters': { 'type': 'object', 'properties': self.parameters, 'required': required } }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -5250,7 +5342,8 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'format_value', format_value )
-			value = format_value.strip( ).lower( )
+			self.format_value = format_value
+			value = self.format_value.strip( ).lower( )
 			
 			allowed = { 'json', 'csv', 'tsv', 'browser' }
 			if value not in allowed:
@@ -5284,14 +5377,15 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'response', response )
-			content_type = str( response.headers.get( 'Content-Type', '' ) ).lower( )
+			self.response = response
+			content_type = str( self.response.headers.get( 'Content-Type', '' ) ).lower( )
 			if 'application/json' in content_type:
-				return response.json( )
+				return self.response.json( )
 			
 			try:
-				return response.json( )
+				return self.response.json( )
 			except Exception:
-				return response.text
+				return self.response.text
 		
 		except Exception as e:
 			exception = Error( e )
@@ -5357,7 +5451,8 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'accession', accession )
-			self.accession = accession.strip( )
+			self.accession = accession
+			self.accession = self.accession.strip( )
 			if not re.fullmatch( r'[A-Za-z0-9_-]+', self.accession ):
 				raise ValueError( 'Invalid OSDR dataset accession.' )
 			self.endpoint = f'/v2/dataset/{self.accession}/'
@@ -5398,7 +5493,8 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			self.query_text = query.strip( )
+			self.query = query
+			self.query_text = self.query.strip( )
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/metadata/'
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -5441,7 +5537,8 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			self.query_text = query.strip( )
+			self.query = query
+			self.query_text = self.query.strip( )
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/assays/'
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -5484,7 +5581,8 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
-			self.query_text = query.strip( )
+			self.query = query
+			self.query_text = self.query.strip( )
 			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/data/'
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -5577,21 +5675,25 @@ class OpenScience( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} '
 							f'This function uses the {tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -5722,16 +5824,19 @@ class SpaceWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
+			self.start_date = start_date
+			self.end_date = end_date
 			self.timeout = time
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
-			self.endpoint = endpoint.strip( )
+			self.endpoint = self.endpoint.strip( )
 			supported = { 'CME', 'CMEAnalysis', 'GST', 'IPS', 'FLR', 'SEP',
 				'MPC', 'RBE', 'HSS', 'WSAEnlilSimulations', 'notifications' }
 			if self.endpoint not in supported:
 				raise ValueError( 'Unsupported NASA DONKI endpoint.' )
-			self.start_date = (start_date or '').strip( )
-			self.end_date = (end_date or '').strip( )
+			self.start_date = (self.start_date or '').strip( )
+			self.end_date = (self.end_date or '').strip( )
 			if bool( self.start_date ) != bool( self.end_date ):
 				raise ValueError( 'start_date and end_date must be supplied together.' )
 			if self.start_date:
@@ -5883,19 +5988,23 @@ class SpaceWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -6017,11 +6126,12 @@ class AstroCatalog( Fetcher ):
 		Returns:
 		    Dict[str, Any]: Structured mapping produced by the operation.
 		"""
+		self.argument_string = argument_string
 		params: Dict[ str, Any ] = { }
-		if not argument_string or not argument_string.strip( ):
+		if not self.argument_string or not self.argument_string.strip( ):
 			return params
 		
-		raw_items = re.split( r'[\n,]+', argument_string )
+		raw_items = re.split( r'[\n,]+', self.argument_string )
 		items = [ item.strip( ) for item in raw_items if item and item.strip( ) ]
 		for item in items:
 			if '=' in item:
@@ -6046,10 +6156,14 @@ class AstroCatalog( Fetcher ):
 		Returns:
 		    Dict[str, Any]: Catalog name, columns, rows, and number of records.
 		"""
+		throw_if( 'table', table )
+		self.table = table
+		throw_if( 'catalog', catalog )
+		self.catalog = catalog
 		rows: List[ Dict[ str, Any ] ] = [ ]
-		for record in table:
+		for record in self.table:
 			item: Dict[ str, Any ] = { }
-			for column in table.colnames:
+			for column in self.table.colnames:
 				value = record[ column ]
 				if np.ma.is_masked( value ):
 					item[ column ] = None
@@ -6063,7 +6177,7 @@ class AstroCatalog( Fetcher ):
 				else:
 					item[ column ] = str( value )
 			rows.append( item )
-		return { 'catalog': catalog, 'columns': list( table.colnames ),
+		return { 'catalog': self.catalog, 'columns': list( self.table.colnames ),
 			'rows': rows, 'count': len( rows ) }
 
 	def request( self, route: str, params: Dict[ str, Any ] | None=None,
@@ -6089,10 +6203,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'route', route )
+			self.route = route
 			self.timeout = time
 			if self.timeout < 1:
 				raise ValueError( 'time must be a positive integer.' )
-			self.route = route.strip( ).lstrip( '/' )
+			self.route = self.route.strip( ).lstrip( '/' )
 			self.params = params if params is not None else { }
 			self.format = str( self.params.get( 'format', 'json' ) ).strip( ).lower( )
 			if self.format not in ('json', 'csv', 'tsv'):
@@ -6192,7 +6307,8 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
+			self.name = name
+			self.name = self.name.strip( )
 			self.format = (data_format or 'json').strip( ).lower( )
 			if self.format not in ('json', 'csv', 'tsv'):
 				raise ValueError( 'Unsupported AstroCatalog output format.' )
@@ -6243,9 +6359,11 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'ra', ra )
+			self.ra = ra
 			throw_if( 'dec', dec )
-			self.right_ascension = ra.strip( )
-			self.declination = dec.strip( )
+			self.dec = dec
+			self.right_ascension = self.ra.strip( )
+			self.declination = self.dec.strip( )
 			self.radius = radius
 			self.format = (data_format or 'json').strip( ).lower( )
 			if self.radius < 1:
@@ -6420,13 +6538,15 @@ class AstroQuery( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if table is None:
+			throw_if( 'table', table )
+			self.table = table
+			if self.table is None:
 				return [ ]
 			
 			records: List[ Dict[ str, Any ] ] = [ ]
-			for row in table:
+			for row in self.table:
 				record: Dict[ str, Any ] = { }
-				for col in table.colnames:
+				for col in self.table.colnames:
 					try:
 						value = row[ col ]
 						if hasattr( value, 'item' ):
@@ -6468,7 +6588,8 @@ class AstroQuery( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
+			self.name = name
+			self.name = self.name.strip( )
 			self.row_limit = row_limit
 			if self.row_limit < 1:
 				raise ValueError( 'row_limit must be a positive integer.' )
@@ -6507,7 +6628,8 @@ class AstroQuery( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
+			self.name = name
+			self.name = self.name.strip( )
 			self.row_limit = row_limit
 			if self.row_limit < 1:
 				raise ValueError( 'row_limit must be a positive integer.' )
@@ -6549,10 +6671,12 @@ class AstroQuery( Fetcher ):
 		"""
 		try:
 			throw_if( 'ra', ra )
+			self.ra = ra
 			throw_if( 'dec', dec )
+			self.dec = dec
 			
-			self.right_ascension = ra.strip( )
-			self.declination = dec.strip( )
+			self.right_ascension = self.ra.strip( )
+			self.declination = self.dec.strip( )
 			self.radius = radius
 			if not (0.0 < self.radius <= 180.0):
 				raise ValueError( 'radius must be greater than zero and at most 180 degrees.' )
@@ -6739,7 +6863,9 @@ class StarMap( Fetcher ):
 		Returns:
 		    str: Text produced by the operation.
 		"""
-		return '1' if value else '0'
+		throw_if( 'value', value )
+		self.value = value
+		return '1' if self.value else '0'
 	
 	def extract_links( self, html: str, base_url: str ) -> Dict[ str, str ]:
 		"""Extract links from the supplied content.
@@ -6761,19 +6887,22 @@ class StarMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			links: Dict[ str, str ] = { }
-			if not html or not isinstance( html, str ):
-				return links
+			throw_if( 'html', html )
+			self.html = html
 			throw_if( 'base_url', base_url )
+			self.base_url = base_url
+			links: Dict[ str, str ] = { }
+			if not self.html or not isinstance( self.html, str ):
+				return links
 			
 			pattern = re.compile(
 				r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>\s*(jpeg|png|gif|bmp|tiff)\s*</a>',
 				flags=re.IGNORECASE )
 			
-			for match in pattern.finditer( html ):
+			for match in pattern.finditer( self.html ):
 				href = match.group( 1 )
 				label = match.group( 2 ).lower( )
-				links[ label ] = urllib.parse.urljoin( base_url, href )
+				links[ label ] = urllib.parse.urljoin( self.base_url, href )
 			
 			return links
 		except Exception as exc:
@@ -6810,7 +6939,8 @@ class StarMap( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.object = name.strip( )
+			self.name = name
+			self.object = self.name.strip( )
 			self.zoom = max( 1, min( zoom, 18 ) )
 			self.box_color = box_color or 'yellow'
 			self.show_box = show_box
@@ -7143,8 +7273,9 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'page_size', page_size )
+			self.page_size = page_size
 			
-			value = page_size
+			value = self.page_size
 			if value < 1 or value > 1000:
 				raise ValueError( 'page_size must be between 1 and 1000.' )
 			
@@ -7177,7 +7308,9 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (sort_field or 'score').strip( )
+			throw_if( 'sort_field', sort_field )
+			self.sort_field = sort_field
+			value = (self.sort_field or 'score').strip( )
 			allowed = { 'score', 'lastModified' }
 			
 			if value not in allowed:
@@ -7214,7 +7347,9 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (sort_order or 'DESC').strip( ).upper( )
+			throw_if( 'sort_order', sort_order )
+			self.sort_order = sort_order
+			value = (self.sort_order or 'DESC').strip( ).upper( )
 			allowed = { 'ASC', 'DESC' }
 			
 			if value not in allowed:
@@ -7258,9 +7393,10 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
 			self.mode = 'search'
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.page_size = self.validate_page_size( page_size )
 			self.offset_mark = (offset_mark or '*').strip( )
 			self.sort_field = self.validate_sort_field( sort_field )
@@ -7310,9 +7446,10 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'package_id', package_id )
+			self.package_id = package_id
 			
 			self.mode = 'package_summary'
-			self.package_id = package_id.strip( )
+			self.package_id = self.package_id.strip( )
 			self.timeout = time
 			self.url = f'{self.base_url}/packages/{self.package_id}/summary'
 			self.params = { 'api_key': self.api_key }
@@ -7370,11 +7507,13 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'collection', collection )
+			self.collection = collection
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			
 			self.mode = 'collection'
-			self.collection = collection.strip( )
-			self.start_date = start_date.strip( )
+			self.collection = self.collection.strip( )
+			self.start_date = self.start_date.strip( )
 			self.page_size = self.validate_page_size( page_size )
 			self.offset_mark = (offset_mark or '*').strip( )
 			self.timeout = time
@@ -7515,22 +7654,26 @@ class GovData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -7689,10 +7832,12 @@ class StarChart( Fetcher ):
 		Returns:
 		    int: Binary integer flag representing the requested enabled or disabled state.
 		"""
+		throw_if( 'value', value )
+		self.value = value
 		if invert:
-			return 0 if value else 1
+			return 0 if self.value else 1
 		
-		return 1 if value else 0
+		return 1 if self.value else 0
 	
 	def search_object( self, name: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Search object.
@@ -7713,7 +7858,8 @@ class StarChart( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.query = name.strip( )
+			self.name = name
+			self.query = self.name.strip( )
 			self.url = self.search_url
 			self.params = { 'star': self.query }
 			
@@ -7800,8 +7946,9 @@ class StarChart( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
+			self.name = name
 			self.mode = 'object_chart'
-			self.query = name.strip( )
+			self.query = self.name.strip( )
 			self.zoom = zoom
 			self.box_color = (box_color or 'yellow').strip( )
 			self.show_box = show_box
@@ -8130,18 +8277,22 @@ class StarChart( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -8322,8 +8473,9 @@ class Congress( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 250:
 				raise ValueError( 'limit must be between 1 and 250.' )
 			
@@ -8357,10 +8509,11 @@ class Congress( Fetcher ):
 		"""
 		try:
 			throw_if( 'offset', offset )
-			if offset is None:
+			self.offset = offset
+			if self.offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
-			value = offset
+			value = self.offset
 			if value < 0:
 				raise ValueError( 'offset must be greater than or equal to 0.' )
 			
@@ -8393,7 +8546,9 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (bill_type or '').strip( ).lower( )
+			throw_if( 'bill_type', bill_type )
+			self.bill_type = bill_type
+			value = (self.bill_type or '').strip( ).lower( )
 			throw_if( 'bill_type', value )
 			
 			allowed = {
@@ -8442,7 +8597,9 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (law_type or '').strip( ).lower( )
+			throw_if( 'law_type', law_type )
+			self.law_type = law_type
+			value = (self.law_type or '').strip( ).lower( )
 			throw_if( 'law_type', value )
 			
 			allowed = { 'pub', 'priv' }
@@ -8479,7 +8636,9 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (report_type or '').strip( ).lower( )
+			throw_if( 'report_type', report_type )
+			self.report_type = report_type
+			value = (self.report_type or '').strip( ).lower( )
 			throw_if( 'report_type', value )
 			
 			allowed = { 'hrpt', 'srpt', 'erpt' }
@@ -8567,11 +8726,13 @@ class Congress( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
+			self.mode = mode
 			throw_if( 'url', url )
+			self.url = url
 			throw_if( 'params', params )
 			
-			self.mode = mode.strip( )
-			self.url = url.strip( )
+			self.mode = self.mode.strip( )
+			self.url = self.url.strip( )
 			self.timeout = time
 			self.params = params
 			
@@ -8745,12 +8906,13 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'congress', congress )
 			throw_if( 'bill_type', bill_type )
+			self.bill_type = bill_type
+			throw_if( 'congress', congress )
 			throw_if( 'bill_number', bill_number )
 			
 			self.congress_number = congress
-			self.bill_type = self.normalize_bill_type( bill_type )
+			self.bill_type = self.normalize_bill_type( self.bill_type )
 			self.bill_number = bill_number
 			self.url = (
 					f'{self.base_url}/bill/{self.congress_number}/'
@@ -8862,12 +9024,13 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'congress', congress )
 			throw_if( 'law_type', law_type )
+			self.law_type = law_type
+			throw_if( 'congress', congress )
 			throw_if( 'law_number', law_number )
 			
 			self.congress_number = congress
-			self.law_type = self.normalize_law_type( law_type )
+			self.law_type = self.normalize_law_type( self.law_type )
 			self.law_number = law_number
 			self.url = (
 					f'{self.base_url}/law/{self.congress_number}/'
@@ -8985,12 +9148,13 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'congress', congress )
 			throw_if( 'report_type', report_type )
+			self.report_type = report_type
+			throw_if( 'congress', congress )
 			throw_if( 'report_number', report_number )
 			
 			self.congress_number = congress
-			self.report_type = self.normalize_report_type( report_type )
+			self.report_type = self.normalize_report_type( self.report_type )
 			self.report_number = report_number
 			self.url = (
 					f'{self.base_url}/committee-report/{self.congress_number}/'
@@ -9166,22 +9330,26 @@ class Congress( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -9316,7 +9484,9 @@ class InternetArchive( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = rows
+			throw_if( 'rows', rows )
+			self.rows = rows
+			value = self.rows
 			if value < 1 or value > 100:
 				raise ValueError( 'rows must be between 1 and 100.' )
 			
@@ -9350,7 +9520,8 @@ class InternetArchive( Fetcher ):
 		"""
 		try:
 			throw_if( 'page', page )
-			value = page
+			self.page = page
+			value = self.page
 			if value < 1:
 				raise ValueError( 'page must be greater than or equal to 1.' )
 			
@@ -9386,6 +9557,7 @@ class InternetArchive( Fetcher ):
 		"""
 		try:
 			throw_if( 'keywords', keywords )
+			self.keywords = keywords
 			
 			parts: List[ str ] = [ f'({keywords.strip( )})' ]
 			
@@ -9440,7 +9612,8 @@ class InternetArchive( Fetcher ):
 		"""
 		try:
 			throw_if( 'keywords', keywords )
-			self.keywords = keywords.strip( )
+			self.keywords = keywords
+			self.keywords = self.keywords.strip( )
 			throw_if( 'keywords', self.keywords )
 			
 			self.timeout = time
@@ -9525,22 +9698,26 @@ class InternetArchive( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} '
 							f'This function uses the {tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -9745,7 +9922,8 @@ class OpenWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'location', location )
-			self.location = location.strip( )
+			self.location = location
+			self.location = self.location.strip( )
 			self.geocode_params = {
 					'name': self.location,
 					'count': count
@@ -10048,12 +10226,13 @@ class OpenWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'location', location )
+			self.location = location
 			
-			selected = self.geocode_location( location=location, count=count )
+			selected = self.geocode_location( location=self.location, count=count )
 			
 			if not selected:
 				return {
-						'location': location,
+						'location': self.location,
 						'mode': mode,
 						'message': 'No geocoding results found.',
 						'data': { }
@@ -10064,7 +10243,7 @@ class OpenWeather( Fetcher ):
 			
 			if lat is None or long is None:
 				return {
-						'location': location,
+						'location': self.location,
 						'mode': mode,
 						'message': 'Geocoding returned no usable coordinates.',
 						'geocoding': selected,
@@ -10144,19 +10323,23 @@ class OpenWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -10335,7 +10518,8 @@ class HistoricalWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'location', location )
-			self.location = location.strip( )
+			self.location = location
+			self.location = self.location.strip( )
 			self.geocode_params = {
 					'name': self.location,
 					'count': count
@@ -10481,14 +10665,16 @@ class HistoricalWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'location', location )
+			self.location = location
 			throw_if( 'date', date )
+			self.date = date
 			
-			selected = self.geocode_location( location=location, count=count )
+			selected = self.geocode_location( location=self.location, count=count )
 			
 			if not selected:
 				return {
-						'location': location,
-						'date': date.isoformat( ),
+						'location': self.location,
+						'date': self.date.isoformat( ),
 						'message': 'No geocoding results found.',
 						'data': { }
 				}
@@ -10498,8 +10684,8 @@ class HistoricalWeather( Fetcher ):
 			
 			if lat is None or long is None:
 				return {
-						'location': location,
-						'date': date.isoformat( ),
+						'location': self.location,
+						'date': self.date.isoformat( ),
 						'message': 'Geocoding returned no usable coordinates.',
 						'geocoding': selected,
 						'data': { }
@@ -10508,7 +10694,7 @@ class HistoricalWeather( Fetcher ):
 			result = self.fetch_historical(
 				lat=float( lat ),
 				long=float( long ),
-				date=date,
+				date=self.date,
 				zone=(zone or 'auto').strip( )
 			) or { }
 			
@@ -10552,19 +10738,23 @@ class HistoricalWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -10689,8 +10879,9 @@ class Grokipedia( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.limit = limit
 			self.offset = offset
 			self.client = GrokipediaClient( )
@@ -10748,8 +10939,9 @@ class Grokipedia( Fetcher ):
 		"""
 		try:
 			throw_if( 'page', page )
+			self.page = page
 			
-			self.page = page.strip( )
+			self.page = self.page.strip( )
 			self.include_content = include_content
 			self.client = GrokipediaClient( )
 			self.url = 'grokipedia.get_page'
@@ -10854,22 +11046,26 @@ class Grokipedia( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} '
 							f'This function uses the {tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -11022,6 +11218,7 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'params', params )
+			self.params = params
 			
 			if api_key:
 				self.api_key = api_key.strip( )
@@ -11029,7 +11226,7 @@ class GoogleGeocoding( Fetcher ):
 			self.timeout = time
 			self.params = { }
 			
-			for key, value in (params or { }).items( ):
+			for key, value in (self.params or { }).items( ):
 				if value is None:
 					continue
 				
@@ -11100,9 +11297,10 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
 			self.mode = 'forward'
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.language = (language or 'en').strip( )
 			self.region = (region or '').strip( )
 			self.timeout = time
@@ -11223,9 +11421,10 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'place_id', place_id )
+			self.place_id = place_id
 			
 			self.mode = 'place'
-			self.place_id = place_id.strip( )
+			self.place_id = self.place_id.strip( )
 			self.language = (language or 'en').strip( )
 			self.region = (region or '').strip( )
 			self.timeout = time
@@ -11358,22 +11557,26 @@ class GoogleGeocoding( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -11516,10 +11719,11 @@ class CensusData( Fetcher ):
 		"""
 		try:
 			throw_if( 'fields', fields )
+			self.fields = fields
 			
 			self.fields = [
 					field.strip( )
-					for field in fields.split( ',' )
+					for field in self.fields.split( ',' )
 					if field and field.strip( )
 			]
 			
@@ -11610,15 +11814,17 @@ class CensusData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if not rows:
+			throw_if( 'rows', rows )
+			self.rows = rows
+			if not self.rows:
 				return {
 						'columns': [ ],
 						'rows': [ ],
 						'count': 0,
 				}
 			
-			headers = rows[ 0 ] if isinstance( rows[ 0 ], list ) else [ ]
-			data_rows = rows[ 1: ] if len( rows ) > 1 else [ ]
+			headers = self.rows[ 0 ] if isinstance( self.rows[ 0 ], list ) else [ ]
+			data_rows = self.rows[ 1: ] if len( self.rows ) > 1 else [ ]
 			records: List[ Dict[ str, Any ] ] = [ ]
 			
 			for row in data_rows:
@@ -11670,10 +11876,12 @@ class CensusData( Fetcher ):
 		"""
 		try:
 			throw_if( 'year', year )
+			self.year = year
 			throw_if( 'dataset', dataset )
+			self.dataset = dataset
 			self.mode = 'variables'
-			self.year = year.strip( )
-			self.dataset = dataset.strip( ).strip( '/' )
+			self.year = self.year.strip( )
+			self.dataset = self.dataset.strip( ).strip( '/' )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}/variables.json'
 			# Census metadata endpoints do not require API credentials.
@@ -11736,20 +11944,23 @@ class CensusData( Fetcher ):
 		"""
 		try:
 			throw_if( 'year', year )
+			self.year = year
 			throw_if( 'dataset', dataset )
+			self.dataset = dataset
 			throw_if( 'fields', fields )
+			self.fields = fields
 			throw_if( 'CENSUS_API_KEY', self.api_key )
 			
 			self.mode = 'data'
-			self.year = year.strip( )
-			self.dataset = dataset.strip( ).strip( '/' )
+			self.year = self.year.strip( )
+			self.dataset = self.dataset.strip( ).strip( '/' )
 			self.geography_for = (geography_for or '').strip( )
 			self.geography_in = (geography_in or '').strip( )
 			self.predicates = self.parse_predicates( predicates )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}'
 			self.params = {
-					'get': self.normalize_fields( fields ),
+					'get': self.normalize_fields( self.fields ),
 					'for': self.geography_for,
 			}
 			
@@ -11882,22 +12093,26 @@ class CensusData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -12054,8 +12269,9 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'domain', domain )
+			self.domain = domain
 			
-			value = domain.strip( )
+			value = self.domain.strip( )
 			value = value.replace( 'https://', '' ).replace( 'http://', '' ).strip( '/' )
 			
 			if not value or '.' not in value:
@@ -12091,8 +12307,9 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
-			value = dataset_id.strip( )
+			value = self.dataset_id.strip( )
 			value = value.replace( '.json', '' ).strip( '/' )
 			
 			if not value:
@@ -12128,8 +12345,9 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 50000:
 				raise ValueError( 'limit must be between 1 and 50000.' )
 			
@@ -12163,10 +12381,11 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'offset', offset )
-			if offset is None:
+			self.offset = offset
+			if self.offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
-			value = offset
+			value = self.offset
 			if value < 0:
 				raise ValueError( 'offset must be greater than or equal to 0.' )
 			
@@ -12205,11 +12424,13 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'domain', domain )
+			self.domain = domain
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
 			self.mode = 'metadata'
-			self.domain = self.normalize_domain( domain )
-			self.dataset_id = self.normalize_dataset_id( dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.timeout = time
 			self.url = self.metadata_url.format(
 				domain=self.domain,
@@ -12284,11 +12505,13 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'domain', domain )
+			self.domain = domain
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
 			self.mode = 'rows'
-			self.domain = self.normalize_domain( domain )
-			self.dataset_id = self.normalize_dataset_id( dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.select_clause = (select or '').strip( )
 			self.where_clause = (where or '').strip( )
 			self.order_clause = (order or '').strip( )
@@ -12448,22 +12671,26 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -12622,8 +12849,9 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'domain', domain )
+			self.domain = domain
 			
-			value = domain.strip( )
+			value = self.domain.strip( )
 			value = value.replace( 'https://', '' ).replace( 'http://', '' ).strip( '/' )
 			
 			if not value or '.' not in value:
@@ -12659,8 +12887,9 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
-			value = dataset_id.strip( )
+			value = self.dataset_id.strip( )
 			value = value.replace( '.json', '' ).strip( '/' )
 			
 			if not value:
@@ -12696,8 +12925,9 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 50000:
 				raise ValueError( 'limit must be between 1 and 50000.' )
 			
@@ -12731,10 +12961,11 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'offset', offset )
-			if offset is None:
+			self.offset = offset
+			if self.offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
-			value = offset
+			value = self.offset
 			if value < 0:
 				raise ValueError( 'offset must be greater than or equal to 0.' )
 			
@@ -12773,11 +13004,13 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'domain', domain )
+			self.domain = domain
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
 			self.mode = 'metadata'
-			self.domain = self.normalize_domain( domain )
-			self.dataset_id = self.normalize_dataset_id( dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.timeout = time
 			self.url = self.metadata_url.format(
 				domain=self.domain,
@@ -12852,11 +13085,13 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'domain', domain )
+			self.domain = domain
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
 			self.mode = 'rows'
-			self.domain = self.normalize_domain( domain )
-			self.dataset_id = self.normalize_dataset_id( dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.select_clause = (select or '').strip( )
 			self.where_clause = (where or '').strip( )
 			self.order_clause = (order or '').strip( )
@@ -13016,22 +13251,26 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -13163,8 +13402,9 @@ class GlobalHealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'query_path', query_path )
+			self.query_path = query_path
 			
-			value = query_path.strip( ).lstrip( '/' )
+			value = self.query_path.strip( ).lstrip( '/' )
 			
 			if not value:
 				raise ValueError( "Argument 'query_path' cannot be empty!" )
@@ -13280,9 +13520,10 @@ class GlobalHealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'query_path', query_path )
+			self.query_path = query_path
 			
 			self.mode = 'athena'
-			self.query_path = self.normalize_query_path( query_path )
+			self.query_path = self.normalize_query_path( self.query_path )
 			self.fmt = (fmt or 'json').strip( )
 			self.timeout = time
 			self.url = f'{self.athena_base_url}/{self.query_path}'
@@ -13415,22 +13656,26 @@ class GlobalHealthData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -13551,8 +13796,9 @@ class UnitedNations( Fetcher ):
 		"""
 		try:
 			throw_if( 'query_path', query_path )
+			self.query_path = query_path
 			
-			value = query_path.strip( ).lstrip( '/' )
+			value = self.query_path.strip( ).lstrip( '/' )
 			
 			if not value:
 				raise ValueError( 'query_path cannot be empty.' )
@@ -13663,9 +13909,10 @@ class UnitedNations( Fetcher ):
 		"""
 		try:
 			throw_if( 'query_path', query_path )
+			self.query_path = query_path
 			
 			self.mode = 'sdmx_query'
-			self.query_path = self.normalize_query_path( query_path )
+			self.query_path = self.normalize_query_path( self.query_path )
 			self.timeout = time
 			
 			if self.timeout < 1:
@@ -13787,22 +14034,26 @@ class UnitedNations( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -13938,8 +14189,9 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			throw_if( 'asset_path', asset_path )
+			self.asset_path = asset_path
 			
-			value = asset_path.strip( ).lstrip( '/' )
+			value = self.asset_path.strip( ).lstrip( '/' )
 			
 			if not value:
 				raise ValueError( "Argument 'asset_path' cannot be empty!" )
@@ -13980,8 +14232,9 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			throw_if( 'page', page )
+			self.page = page
 			
-			value = page
+			value = self.page
 			if value < 1:
 				raise ValueError( 'page must be greater than or equal to 1.' )
 			
@@ -14015,8 +14268,9 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			throw_if( 'page_size', page_size )
+			self.page_size = page_size
 			
-			value = page_size
+			value = self.page_size
 			if value < 1 or value > 500:
 				raise ValueError( 'page_size must be between 1 and 500.' )
 			
@@ -14194,9 +14448,10 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			throw_if( 'asset_path', asset_path )
+			self.asset_path = asset_path
 			
 			self.mode = 'raster_metadata'
-			self.asset_path = self.normalize_asset_path( asset_path )
+			self.asset_path = self.normalize_asset_path( self.asset_path )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.asset_path}'
 			self.params = { }
@@ -14333,22 +14588,26 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -14471,8 +14730,9 @@ class Wonder( Fetcher ):
 		"""
 		try:
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			
-			value = dataset_id.strip( ).upper( )
+			value = self.dataset_id.strip( ).upper( )
 			
 			if not re.fullmatch( r'D\d{1,4}', value ):
 				raise ValueError(
@@ -14618,11 +14878,13 @@ class Wonder( Fetcher ):
 		"""
 		try:
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			throw_if( 'request_xml', request_xml )
+			self.request_xml = request_xml
 			
 			self.mode = 'query_xml'
-			self.dataset_id = self.normalize_dataset_id( dataset_id )
-			self.request_xml = request_xml.strip( )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
+			self.request_xml = self.request_xml.strip( )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.dataset_id}'
 			self.params = {
@@ -14748,27 +15010,31 @@ class Wonder( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -14940,8 +15206,9 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'feed', feed )
+			self.feed = feed
 			
-			value = feed.strip( )
+			value = self.feed.strip( )
 			allowed = {
 					'all_hour.geojson',
 					'all_day.geojson',
@@ -14998,8 +15265,9 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 20000:
 				raise ValueError( 'limit must be between 1 and 20000.' )
 			
@@ -15034,9 +15302,12 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			throw_if( name, value )
+			self.name = name
+			throw_if( 'value', value )
+			self.value = value
+			throw_if( self.name, self.value )
 			
-			number = value
+			number = self.value
 			if number < 0.0 or number > 10.0:
 				raise ValueError( f'{name} must be between 0.0 and 10.0.' )
 			
@@ -15070,8 +15341,9 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'order_by', order_by )
+			self.order_by = order_by
 			
-			value = order_by.strip( ).lower( )
+			value = self.order_by.strip( ).lower( )
 			allowed = {
 					'time',
 					'time-asc',
@@ -15115,8 +15387,9 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'latitude', latitude )
+			self.latitude = latitude
 			
-			value = latitude
+			value = self.latitude
 			if value < -90.0 or value > 90.0:
 				raise ValueError( 'latitude must be between -90 and 90.' )
 			
@@ -15150,8 +15423,9 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'longitude', longitude )
+			self.longitude = longitude
 			
-			value = longitude
+			value = self.longitude
 			if value < -180.0 or value > 180.0:
 				raise ValueError( 'longitude must be between -180 and 180.' )
 			
@@ -15184,9 +15458,11 @@ class USGSEarthquakes( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'max_radius_km', radius )
+			throw_if( 'radius', radius )
+			self.radius = radius
+			throw_if( 'max_radius_km', self.radius )
 			
-			value = radius
+			value = self.radius
 			if value < 0.0 or value > 20001.6:
 				raise ValueError( 'max_radius_km must be between 0.0 and 20001.6.' )
 			
@@ -15217,8 +15493,10 @@ class USGSEarthquakes( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'date', value )
-			return value.strip( )
+			throw_if( 'value', value )
+			self.value = value
+			throw_if( 'date', self.value )
+			return self.value.strip( )
 		
 		except Exception as e:
 			exception = Error( e )
@@ -15241,11 +15519,13 @@ class USGSEarthquakes( Fetcher ):
 		    str: Text produced by the operation.
 		"""
 		try:
-			if value is None:
+			throw_if( 'value', value )
+			self.value = value
+			if self.value is None:
 				return ''
 			
 			return dt.datetime.fromtimestamp(
-				float( value ) / 1000.0,
+				float( self.value ) / 1000.0,
 				tz=dt.timezone.utc
 			).isoformat( )
 		
@@ -15272,9 +15552,11 @@ class USGSEarthquakes( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'features', features )
+			self.features = features
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for feature in features or [ ]:
+			for feature in self.features or [ ]:
 				properties = feature.get( 'properties', { } ) or { }
 				geometry = feature.get( 'geometry', { } ) or { }
 				coordinates = geometry.get( 'coordinates', [ ] ) or [ ]
@@ -15333,12 +15615,14 @@ class USGSEarthquakes( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_magnitude = None
 			strongest_place = ''
 			most_recent = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				magnitude = row.get( 'Magnitude', None )
 				
 				if magnitude is not None:
@@ -15504,12 +15788,14 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'search'
 			self.feed = ''
-			self.start_date = self.to_iso_date( start_date )
-			self.end_date = self.to_iso_date( end_date )
+			self.start_date = self.to_iso_date( self.start_date )
+			self.end_date = self.to_iso_date( self.end_date )
 			self.min_magnitude = self.validate_magnitude( 'min_magnitude', min_magnitude )
 			self.max_magnitude = self.validate_magnitude( 'max_magnitude', max_magnitude )
 			self.limit = self.validate_limit( limit )
@@ -15679,27 +15965,31 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -15858,8 +16148,9 @@ class USGSWaterData( Fetcher ):
 		"""
 		try:
 			throw_if( 'collection', collection )
+			self.collection = collection
 			
-			value = collection.strip( )
+			value = self.collection.strip( )
 			allowed = {
 					'monitoring-locations',
 					'time-series-metadata',
@@ -15904,8 +16195,9 @@ class USGSWaterData( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 10000:
 				raise ValueError( 'limit must be between 1 and 10000.' )
 			
@@ -15938,7 +16230,9 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (parameter_code or '').strip( )
+			throw_if( 'parameter_code', parameter_code )
+			self.parameter_code = parameter_code
+			value = (self.parameter_code or '').strip( )
 			
 			if value and not re.fullmatch( r'\d{5}', value ):
 				raise ValueError( 'parameter_code must be a 5-digit USGS parameter code.' )
@@ -15970,17 +16264,19 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if payload is None:
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if self.payload is None:
 				return [ ]
 			
-			if isinstance( payload, list ):
+			if isinstance( self.payload, list ):
 				return [
 						item
-						for item in payload
+						for item in self.payload
 						if isinstance( item, dict )
 				]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [
@@ -15992,7 +16288,7 @@ class USGSWaterData( Fetcher ):
 					'timeSeries',
 					'observations'
 			]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				
 				if isinstance( value, list ):
 					return [
@@ -16001,7 +16297,7 @@ class USGSWaterData( Fetcher ):
 							if isinstance( item, dict )
 					]
 			
-			return [ payload ]
+			return [ self.payload ]
 		
 		except Exception as e:
 			exception = Error( e )
@@ -16033,9 +16329,11 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				properties = item.get( 'properties', { } ) or item
 				geometry = item.get( 'geometry', { } ) or { }
 				coordinates = geometry.get( 'coordinates', [ ] ) or [ ]
@@ -16114,9 +16412,11 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				properties = item.get( 'properties', { } ) or item
 				
 				rows.append(
@@ -16191,9 +16491,11 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				properties = item.get( 'properties', { } ) or item
 				
 				rows.append(
@@ -16271,23 +16573,25 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_location = ''
 			first_parameter = ''
 			first_value = ''
 			first_time = ''
 			
-			if rows:
+			if self.rows:
 				first_location = str(
-					rows[ 0 ].get( 'Name', '' )
-					or rows[ 0 ].get( 'Monitoring Location ID', '' )
+					self.rows[ 0 ].get( 'Name', '' )
+					or self.rows[ 0 ].get( 'Monitoring Location ID', '' )
 					or ''
 				)
-				first_parameter = str( rows[ 0 ].get( 'Parameter Name', '' ) or '' )
-				first_value = str( rows[ 0 ].get( 'Value', '' ) or '' )
+				first_parameter = str( self.rows[ 0 ].get( 'Parameter Name', '' ) or '' )
+				first_value = str( self.rows[ 0 ].get( 'Value', '' ) or '' )
 				first_time = str(
-					rows[ 0 ].get( 'Time', '' )
-					or rows[ 0 ].get( 'Begin Time', '' )
+					self.rows[ 0 ].get( 'Time', '' )
+					or self.rows[ 0 ].get( 'Begin Time', '' )
 					or ''
 				)
 			
@@ -16327,12 +16631,14 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -16372,9 +16678,11 @@ class USGSWaterData( Fetcher ):
 		"""
 		try:
 			throw_if( 'collection', collection )
+			self.collection = collection
 			throw_if( 'params', params )
+			self.params = params
 			
-			self.collection = self.validate_collection( collection )
+			self.collection = self.validate_collection( self.collection )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.collection}/items'
 			self.params = { }
@@ -16382,7 +16690,7 @@ class USGSWaterData( Fetcher ):
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 			
-			for key, value in params.items( ):
+			for key, value in self.params.items( ):
 				if value is None:
 					continue
 				
@@ -16770,27 +17078,31 @@ class USGSWaterData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -16940,8 +17252,9 @@ class USGSTheNationalMap( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			value = endpoint.strip( ).lower( )
+			value = self.endpoint.strip( ).lower( )
 			allowed = {
 					'datasets',
 					'products'
@@ -16980,8 +17293,9 @@ class USGSTheNationalMap( Fetcher ):
 		"""
 		try:
 			throw_if( 'max_items', max_items )
+			self.max_items = max_items
 			
-			value = max_items
+			value = self.max_items
 			if value < 1 or value > 500:
 				raise ValueError( 'max_items must be between 1 and 500.' )
 			
@@ -17015,10 +17329,11 @@ class USGSTheNationalMap( Fetcher ):
 		"""
 		try:
 			throw_if( 'offset', offset )
-			if offset is None:
+			self.offset = offset
+			if self.offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
-			value = offset
+			value = self.offset
 			if value < 0 or value > 10000:
 				raise ValueError( 'offset must be between 0 and 10000.' )
 			
@@ -17051,7 +17366,9 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (bbox or '').strip( )
+			throw_if( 'bbox', bbox )
+			self.bbox = bbox
+			value = (self.bbox or '').strip( )
 			
 			if not value:
 				return ''
@@ -17100,21 +17417,23 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if payload is None:
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if self.payload is None:
 				return [ ]
 			
-			if isinstance( payload, list ):
+			if isinstance( self.payload, list ):
 				return [
 						item
-						for item in payload
+						for item in self.payload
 						if isinstance( item, dict )
 				]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'items', 'datasets', 'data', 'results', 'products' ]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				
 				if isinstance( value, list ):
 					return [
@@ -17123,7 +17442,7 @@ class USGSTheNationalMap( Fetcher ):
 							if isinstance( item, dict )
 					]
 			
-			return [ payload ]
+			return [ self.payload ]
 		
 		except Exception as e:
 			exception = Error( e )
@@ -17156,9 +17475,11 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Id': item.get( 'id', '' ),
@@ -17213,9 +17534,11 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				download_url = (
 						item.get( 'downloadURL', None )
 						or item.get( 'downloadUrl', None )
@@ -17295,18 +17618,20 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_title = ''
 			first_dataset = ''
 			
-			if rows:
+			if self.rows:
 				first_title = str(
-					rows[ 0 ].get( 'Title', '' )
-					or rows[ 0 ].get( 'Name', '' )
-					or rows[ 0 ].get( 'Dataset', '' )
+					self.rows[ 0 ].get( 'Title', '' )
+					or self.rows[ 0 ].get( 'Name', '' )
+					or self.rows[ 0 ].get( 'Dataset', '' )
 					or ''
 				)
-				first_dataset = str( rows[ 0 ].get( 'Dataset', '' ) or '' )
+				first_dataset = str( self.rows[ 0 ].get( 'Dataset', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -17342,12 +17667,14 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -17388,9 +17715,11 @@ class USGSTheNationalMap( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			throw_if( 'params', params )
+			self.params = params
 			
-			self.endpoint = self.validate_endpoint( endpoint )
+			self.endpoint = self.validate_endpoint( self.endpoint )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { }
@@ -17398,7 +17727,7 @@ class USGSTheNationalMap( Fetcher ):
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 			
-			for key, value in params.items( ):
+			for key, value in self.params.items( ):
 				if value is None:
 					continue
 				
@@ -17631,25 +17960,29 @@ class USGSTheNationalMap( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -17792,8 +18125,9 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			value = endpoint.strip( ).strip( '/' )
+			value = self.endpoint.strip( ).strip( '/' )
 			
 			if not value:
 				raise ValueError( 'endpoint cannot be empty.' )
@@ -17837,8 +18171,9 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'max_items', max_items )
+			self.max_items = max_items
 			
-			value = max_items
+			value = self.max_items
 			if value < 1 or value > 1000:
 				raise ValueError( 'max_items must be between 1 and 1000.' )
 			
@@ -17872,10 +18207,11 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'offset', offset )
-			if offset is None:
+			self.offset = offset
+			if self.offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
-			value = offset
+			value = self.offset
 			if value < 0 or value > 150000:
 				raise ValueError( 'offset must be between 0 and 150000.' )
 			
@@ -17905,21 +18241,23 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if payload is None:
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if self.payload is None:
 				return [ ]
 			
-			if isinstance( payload, list ):
+			if isinstance( self.payload, list ):
 				return [
 						item
-						for item in payload
+						for item in self.payload
 						if isinstance( item, dict )
 				]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'items', 'results', 'data' ]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				
 				if isinstance( value, list ):
 					return [
@@ -17928,7 +18266,7 @@ class USGSScienceBase( Fetcher ):
 							if isinstance( item, dict )
 					]
 			
-			return [ payload ]
+			return [ self.payload ]
 		
 		except Exception as e:
 			exception = Error( e )
@@ -17959,35 +18297,37 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if not isinstance( item, dict ):
+			throw_if( 'item', item )
+			self.item = item
+			if not isinstance( self.item, dict ):
 				item = { }
 			
-			files = item.get( 'files', [ ] ) or [ ]
+			files = self.item.get( 'files', [ ] ) or [ ]
 			file_count = len( files ) if isinstance( files, list ) else 0
 			
-			web_links = item.get( 'webLinks', [ ] ) or [ ]
+			web_links = self.item.get( 'webLinks', [ ] ) or [ ]
 			link_count = len( web_links ) if isinstance( web_links, list ) else 0
 			
-			contacts = item.get( 'contacts', [ ] ) or [ ]
+			contacts = self.item.get( 'contacts', [ ] ) or [ ]
 			contact_count = len( contacts ) if isinstance( contacts, list ) else 0
 			
 			return {
-					'Id': item.get( 'id', '' ),
-					'Title': item.get( 'title', '' ),
-					'Type': item.get( 'itemType', '' ),
+					'Id': self.item.get( 'id', '' ),
+					'Title': self.item.get( 'title', '' ),
+					'Type': self.item.get( 'itemType', '' ),
 					'Updated': (
-							item.get( 'dateUpdated', None )
-							or item.get( 'lastUpdated', '' )
+							self.item.get( 'dateUpdated', None )
+							or self.item.get( 'lastUpdated', '' )
 					),
 					'Summary': (
-							item.get( 'summary', None )
-							or item.get( 'body', '' )
+							self.item.get( 'summary', None )
+							or self.item.get( 'body', '' )
 					),
-					'Has Spatial Metadata': item.get( 'spatial', None ) is not None,
+					'Has Spatial Metadata': self.item.get( 'spatial', None ) is not None,
 					'File Count': file_count,
 					'Web Link Count': link_count,
 					'Contact Count': contact_count,
-					'Raw Item': item
+					'Raw Item': self.item
 			}
 		
 		except Exception as e:
@@ -18020,9 +18360,11 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append( self.shape_single_item( item ) )
 			
 			return rows
@@ -18054,18 +18396,20 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_title = ''
 			first_type = ''
 			spatial_count = 0
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if row.get( 'Has Spatial Metadata', False ):
 					spatial_count += 1
 			
-			if rows:
-				first_title = str( rows[ 0 ].get( 'Title', '' ) or '' )
-				first_type = str( rows[ 0 ].get( 'Type', '' ) or '' )
+			if self.rows:
+				first_title = str( self.rows[ 0 ].get( 'Title', '' ) or '' )
+				first_type = str( self.rows[ 0 ].get( 'Type', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -18102,12 +18446,14 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -18149,8 +18495,9 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			self.endpoint = self.validate_endpoint( endpoint )
+			self.endpoint = self.validate_endpoint( self.endpoint )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { 'format': 'json' }
@@ -18266,8 +18613,9 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'item_id', item_id )
+			self.item_id = item_id
 			self.mode = 'item'
-			self.item_id = item_id.strip( )
+			self.item_id = self.item_id.strip( )
 			self.timeout = time
 			self.request( endpoint=f'item/{self.item_id}', params={ }, time=self.timeout )
 			detail = self.shape_single_item( self.payload or { } )
@@ -18353,24 +18701,28 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
+			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
 				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -18519,8 +18871,9 @@ class AirNow( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			self.endpoint = endpoint.strip( )
+			self.endpoint = self.endpoint.strip( )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { }
@@ -18584,9 +18937,11 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				category = item.get( 'Category', { } ) or { }
 				category_name = category.get( 'Name', '' ) if isinstance( category, dict ) else ''
 				
@@ -18637,13 +18992,15 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_aqi = None
 			dominant_parameter = ''
 			top_category = ''
 			reporting_area = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if not reporting_area and row.get( 'Reporting Area', '' ):
 					reporting_area = str( row.get( 'Reporting Area', '' ) )
 				
@@ -18740,9 +19097,10 @@ class AirNow( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
 			self.mode = 'current-zip'
-			self.zip_code = zip_code.strip( )
+			self.zip_code = self.zip_code.strip( )
 			self.distance = distance
 			self.timeout = time
 			
@@ -18849,11 +19207,13 @@ class AirNow( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			throw_if( 'date', date )
+			self.date = date
 			
 			self.mode = 'forecast-zip'
-			self.zip_code = zip_code.strip( )
-			self.date = date.strip( )
+			self.zip_code = self.zip_code.strip( )
+			self.date = self.date.strip( )
 			self.distance = distance
 			self.timeout = time
 			
@@ -18905,14 +19265,15 @@ class AirNow( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'date', date )
+			self.date = date
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
-			throw_if( 'date', date )
 			
 			self.mode = 'forecast-latlon'
 			self.latitude = latitude
 			self.longitude = longitude
-			self.date = date.strip( )
+			self.date = self.date.strip( )
 			self.distance = distance
 			self.timeout = time
 			
@@ -19028,22 +19389,26 @@ class AirNow( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f"{description.strip( )} This function uses the "
 							f"{tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -19198,8 +19563,9 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 500:
 				raise ValueError( 'limit must be between 1 and 500.' )
 			
@@ -19233,10 +19599,11 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			throw_if( 'offset', offset )
-			if offset is None:
+			self.offset = offset
+			if self.offset is None:
 				raise ValueError( 'offset cannot be None.' )
 			
-			value = offset
+			value = self.offset
 			if value < 0 or value > 10000:
 				raise ValueError( 'offset must be between 0 and 10000.' )
 			
@@ -19271,10 +19638,12 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
-			start_value = start_date.strip( )
-			end_value = end_date.strip( )
+			start_value = self.start_date.strip( )
+			end_value = self.end_date.strip( )
 			
 			if start_value > end_value:
 				raise ValueError( 'start_date must be on or before end_date.' )
@@ -19308,21 +19677,23 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if payload is None:
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if self.payload is None:
 				return [ ]
 			
-			if isinstance( payload, list ):
+			if isinstance( self.payload, list ):
 				return [
 						item
-						for item in payload
+						for item in self.payload
 						if isinstance( item, dict )
 				]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'results', 'data', 'items', 'records' ]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				
 				if isinstance( value, list ):
 					return [
@@ -19331,7 +19702,7 @@ class ClimateData( Fetcher ):
 							if isinstance( item, dict )
 					]
 			
-			return [ payload ]
+			return [ self.payload ]
 		
 		except Exception as e:
 			exception = Error( e )
@@ -19363,9 +19734,11 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Id': item.get( 'id', '' ),
@@ -19418,9 +19791,11 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				row: Dict[ str, Any ] = { }
 				
 				for key, value in item.items( ):
@@ -19455,22 +19830,24 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_title = ''
 			first_dataset = ''
 			
-			if rows:
+			if self.rows:
 				first_title = str(
-					rows[ 0 ].get( 'Title', '' )
-					or rows[ 0 ].get( 'Station', '' )
-					or rows[ 0 ].get( 'Date', '' )
-					or rows[ 0 ].get( 'Start Date', '' )
+					self.rows[ 0 ].get( 'Title', '' )
+					or self.rows[ 0 ].get( 'Station', '' )
+					or self.rows[ 0 ].get( 'Date', '' )
+					or self.rows[ 0 ].get( 'Start Date', '' )
 					or ''
 				)
 				first_dataset = str(
-					rows[ 0 ].get( 'Dataset', '' )
-					or rows[ 0 ].get( 'Datatype', '' )
-					or rows[ 0 ].get( 'Data Type', '' )
+					self.rows[ 0 ].get( 'Dataset', '' )
+					or self.rows[ 0 ].get( 'Datatype', '' )
+					or self.rows[ 0 ].get( 'Data Type', '' )
 					or ''
 				)
 			
@@ -19506,12 +19883,14 @@ class ClimateData( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -19552,16 +19931,18 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			throw_if( 'params', params )
+			self.params = params
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.timeout = time
 			self.params = { }
 			
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
 			
-			for key, value in params.items( ):
+			for key, value in self.params.items( ):
 				if value is None:
 					continue
 				
@@ -19683,12 +20064,15 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			throw_if( 'dataset', dataset )
+			self.dataset = dataset
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'data'
-			self.dataset = dataset.strip( )
-			self.start_date, self.end_date = self.validate_date_range( start_date, end_date )
+			self.dataset = self.dataset.strip( )
+			self.start_date, self.end_date = self.validate_date_range( self.start_date, self.end_date )
 			self.stations = (stations or '').strip( )
 			self.data_types = (data_types or '').strip( )
 			self.limit = self.validate_limit( limit )
@@ -19800,27 +20184,31 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -19979,8 +20367,9 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			value = endpoint.strip( ).lower( )
+			value = self.endpoint.strip( ).lower( )
 			allowed = {
 					'events',
 					'categories'
@@ -20019,8 +20408,9 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'status', status )
+			self.status = status
 			
-			value = status.strip( ).lower( )
+			value = self.status.strip( ).lower( )
 			allowed = {
 					'open',
 					'closed',
@@ -20060,8 +20450,9 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 500:
 				raise ValueError( 'limit must be between 1 and 500.' )
 			
@@ -20095,8 +20486,9 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'days', days )
+			self.days = days
 			
-			value = days
+			value = self.days
 			if value < 1 or value > 3650:
 				raise ValueError( 'days must be between 1 and 3650.' )
 			
@@ -20129,7 +20521,9 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = (bbox or '').strip( )
+			throw_if( 'bbox', bbox )
+			self.bbox = bbox
+			value = (self.bbox or '').strip( )
 			
 			if not value:
 				return ''
@@ -20238,9 +20632,11 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				categories = item.get( 'categories', [ ] ) or [ ]
 				sources = item.get( 'sources', [ ] ) or [ ]
 				geometry = item.get( 'geometry', [ ] ) or [ ]
@@ -20322,9 +20718,11 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Id': item.get( 'id', '' ),
@@ -20364,18 +20762,20 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			open_count = 0
 			first_title = ''
 			first_categories = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if str( row.get( 'Status', '' ) ).lower( ) == 'open':
 					open_count += 1
 			
-			if rows:
-				first_title = str( rows[ 0 ].get( 'Title', '' ) or '' )
-				first_categories = str( rows[ 0 ].get( 'Categories', '' ) or '' )
+			if self.rows:
+				first_title = str( self.rows[ 0 ].get( 'Title', '' ) or '' )
+				first_categories = str( self.rows[ 0 ].get( 'Categories', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -20412,12 +20812,14 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -20457,8 +20859,9 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			self.endpoint = self.validate_endpoint( endpoint )
+			self.endpoint = self.validate_endpoint( self.endpoint )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { }
@@ -20723,27 +21126,31 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -20880,8 +21287,9 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'table_name', table_name )
+			self.table_name = table_name
 			
-			value = table_name.strip( ).upper( )
+			value = self.table_name.strip( ).upper( )
 			allowed = {
 					'TRI_FACILITY',
 					'TRI_RELEASE',
@@ -20961,8 +21369,9 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'limit', limit )
+			self.limit = limit
 			
-			value = limit
+			value = self.limit
 			if value < 1 or value > 500:
 				raise ValueError( 'limit must be between 1 and 500.' )
 			
@@ -20997,7 +21406,8 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'table_name', table_name )
-			self.table_name = self.validate_table_name( table_name )
+			self.table_name = table_name
+			self.table_name = self.validate_table_name( self.table_name )
 			self.state_code = self.validate_state_code( state_code )
 			self.facility_name = (facility_name or '').strip( )
 			self.limit = self.validate_limit( limit )
@@ -21084,9 +21494,11 @@ class EnviroFacts( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				if not isinstance( item, dict ):
 					continue
 				
@@ -21126,22 +21538,24 @@ class EnviroFacts( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_facility = ''
 			first_state = ''
 			
-			if rows:
+			if self.rows:
 				first_facility = str(
-					rows[ 0 ].get( 'Facility Name', '' )
-					or rows[ 0 ].get( 'Primary Name', '' )
-					or rows[ 0 ].get( 'Name', '' )
+					self.rows[ 0 ].get( 'Facility Name', '' )
+					or self.rows[ 0 ].get( 'Primary Name', '' )
+					or self.rows[ 0 ].get( 'Name', '' )
 					or ''
 				)
 				
 				first_state = str(
-					rows[ 0 ].get( 'State', '' )
-					or rows[ 0 ].get( 'State Abbr', '' )
-					or rows[ 0 ].get( 'St', '' )
+					self.rows[ 0 ].get( 'State', '' )
+					or self.rows[ 0 ].get( 'State Abbr', '' )
+					or self.rows[ 0 ].get( 'St', '' )
 					or ''
 				)
 			
@@ -21179,13 +21593,15 @@ class EnviroFacts( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'table_name': self.table_name,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -21224,8 +21640,9 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.timeout = time
 			
 			if self.timeout < 1:
@@ -21283,10 +21700,11 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'table_name', table_name )
+			self.table_name = table_name
 			
 			self.mode = 'table'
 			self.path = self.resolve_table_path(
-				table_name=table_name,
+				table_name=self.table_name,
 				state_code=state_code,
 				facility_name=facility_name,
 				limit=limit
@@ -21389,27 +21807,31 @@ class EnviroFacts( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -21566,8 +21988,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
+			self.mode = mode
 			
-			value = mode.strip( ).lower( )
+			value = self.mode.strip( ).lower( )
 			allowed = {
 					'station',
 					'water-level',
@@ -21610,8 +22033,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			
-			value = station_id.strip( )
+			value = self.station_id.strip( )
 			
 			if not re.fullmatch( r'[A-Za-z0-9_-]{3,20}', value ):
 				raise ValueError(
@@ -21650,10 +22074,12 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'begin_date', begin_date )
+			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
-			begin_value = begin_date.strip( )
-			end_value = end_date.strip( )
+			begin_value = self.begin_date.strip( )
+			end_value = self.end_date.strip( )
 			
 			if not re.fullmatch( r'\d{8}', begin_value ):
 				raise ValueError( 'begin_date must use YYYYMMDD format.' )
@@ -21696,8 +22122,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'datum', datum )
+			self.datum = datum
 			
-			value = datum.strip( ).upper( )
+			value = self.datum.strip( ).upper( )
 			allowed = {
 					'MLLW',
 					'MHHW',
@@ -21745,8 +22172,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'units', units )
+			self.units = units
 			
-			value = units.strip( ).lower( )
+			value = self.units.strip( ).lower( )
 			allowed = {
 					'metric',
 					'english'
@@ -21785,8 +22213,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'time_zone', time_zone )
+			self.time_zone = time_zone
 			
-			value = time_zone.strip( ).lower( )
+			value = self.time_zone.strip( ).lower( )
 			allowed = {
 					'gmt',
 					'lst',
@@ -21826,8 +22255,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'interval', interval )
+			self.interval = interval
 			
-			value = interval.strip( ).lower( )
+			value = self.interval.strip( ).lower( )
 			allowed = {
 					'hilo',
 					'h',
@@ -21875,13 +22305,15 @@ class TidesAndCurrents( Fetcher ):
 		        project error type.
 		"""
 		try:
-			station = payload.get( 'stations', None ) if isinstance( payload, dict ) else None
+			throw_if( 'payload', payload )
+			self.payload = payload
+			station = self.payload.get( 'stations', None ) if isinstance( self.payload, dict ) else None
 			
 			if isinstance( station, list ) and station:
 				station = station[ 0 ]
 			
 			if not isinstance( station, dict ):
-				station = payload if isinstance( payload, dict ) else { }
+				station = self.payload if isinstance( self.payload, dict ) else { }
 			
 			row: Dict[ str, Any ] = {
 					'Station Id': station.get( 'id', '' ),
@@ -21927,15 +22359,17 @@ class TidesAndCurrents( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return rows
 			
-			records = payload.get( 'data', None )
+			records = self.payload.get( 'data', None )
 			
 			if records is None:
-				records = payload.get( 'predictions', [ ] )
+				records = self.payload.get( 'predictions', [ ] )
 			
 			for item in records or [ ]:
 				if not isinstance( item, dict ):
@@ -21979,29 +22413,31 @@ class TidesAndCurrents( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_station = ''
 			first_value = ''
 			first_time = ''
 			
-			if rows:
+			if self.rows:
 				first_station = str(
-					rows[ 0 ].get( 'Name', '' )
-					or rows[ 0 ].get( 'Station Id', '' )
+					self.rows[ 0 ].get( 'Name', '' )
+					or self.rows[ 0 ].get( 'Station Id', '' )
 					or self.station_id
 					or ''
 				)
 				first_value = str(
-					rows[ 0 ].get( 'V', '' )
-					or rows[ 0 ].get( 'Value', '' )
-					or rows[ 0 ].get( 'Prediction', '' )
-					or rows[ 0 ].get( 'Predicted Wl', '' )
+					self.rows[ 0 ].get( 'V', '' )
+					or self.rows[ 0 ].get( 'Value', '' )
+					or self.rows[ 0 ].get( 'Prediction', '' )
+					or self.rows[ 0 ].get( 'Predicted Wl', '' )
 					or ''
 				)
 				first_time = str(
-					rows[ 0 ].get( 'T', '' )
-					or rows[ 0 ].get( 'Time', '' )
-					or rows[ 0 ].get( 'Date Time', '' )
+					self.rows[ 0 ].get( 'T', '' )
+					or self.rows[ 0 ].get( 'Time', '' )
+					or self.rows[ 0 ].get( 'Date Time', '' )
 					or ''
 				)
 			
@@ -22040,13 +22476,15 @@ class TidesAndCurrents( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'station_id': self.station_id,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -22087,8 +22525,9 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.timeout = time
 			self.params = { }
 			
@@ -22153,9 +22592,10 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			
 			self.mode = 'station'
-			self.station_id = self.validate_station_id( station_id )
+			self.station_id = self.validate_station_id( self.station_id )
 			self.timeout = time
 			
 			self.request(
@@ -22207,14 +22647,17 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			throw_if( 'begin_date', begin_date )
+			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'water-level'
-			self.station_id = self.validate_station_id( station_id )
+			self.station_id = self.validate_station_id( self.station_id )
 			self.begin_date, self.end_date = self.validate_date_range(
-				begin_date,
-				end_date
+				self.begin_date,
+				self.end_date
 			)
 			self.datum = self.validate_datum( datum )
 			self.units = self.validate_units( units )
@@ -22282,14 +22725,17 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			throw_if( 'begin_date', begin_date )
+			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'tide-predictions'
-			self.station_id = self.validate_station_id( station_id )
+			self.station_id = self.validate_station_id( self.station_id )
 			self.begin_date, self.end_date = self.validate_date_range(
-				begin_date,
-				end_date
+				self.begin_date,
+				self.end_date
 			)
 			self.datum = self.validate_datum( datum )
 			self.units = self.validate_units( units )
@@ -22435,27 +22881,31 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -22593,8 +23043,9 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
+			self.mode = mode
 			
-			value = mode.strip( ).lower( )
+			value = self.mode.strip( ).lower( )
 			allowed = {
 					'daily-zip',
 					'daily-city-state',
@@ -22638,8 +23089,9 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
-			value = zip_code.strip( )
+			value = self.zip_code.strip( )
 			
 			if not re.fullmatch( r'\d{5}(?:-\d{4})?', value ):
 				raise ValueError( 'zip_code must be a valid 5-digit ZIP or ZIP+4 value.' )
@@ -22674,8 +23126,9 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'city', city )
+			self.city = city
 			
-			value = city.strip( )
+			value = self.city.strip( )
 			
 			if not value:
 				raise ValueError( 'city cannot be empty.' )
@@ -22713,8 +23166,9 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'state', state )
+			self.state = state
 			
-			value = state.strip( ).upper( )
+			value = self.state.strip( ).upper( )
 			
 			if not re.fullmatch( r'[A-Z]{2}', value ):
 				raise ValueError( 'state must be a two-letter abbreviation.' )
@@ -22748,9 +23202,11 @@ class UvIndex( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'records', records )
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				if not isinstance( item, dict ):
 					continue
 				
@@ -22790,12 +23246,14 @@ class UvIndex( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_uv = None
 			first_location = ''
 			first_alert = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if not first_location:
 					first_location = str(
 						row.get( 'City', '' )
@@ -22859,12 +23317,14 @@ class UvIndex( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
 					'params': self.params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -22905,9 +23365,10 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			throw_if( 'params', params )
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.params = params
 			self.timeout = time
 			
@@ -22962,9 +23423,10 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
 			self.mode = 'daily-zip'
-			self.zip_code = self.validate_zip_code( zip_code )
+			self.zip_code = self.validate_zip_code( self.zip_code )
 			self.endpoint = 'getEnvirofactsUVDAILY'
 			self.timeout = time
 			self.params = {
@@ -23020,11 +23482,13 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'city', city )
+			self.city = city
 			throw_if( 'state', state )
+			self.state = state
 			
 			self.mode = 'daily-city-state'
-			self.city = self.validate_city( city )
-			self.state = self.validate_state( state )
+			self.city = self.validate_city( self.city )
+			self.state = self.validate_state( self.state )
 			self.endpoint = 'getEnvirofactsUVDAILY'
 			self.timeout = time
 			self.params = {
@@ -23082,9 +23546,10 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
 			self.mode = 'hourly-zip'
-			self.zip_code = self.validate_zip_code( zip_code )
+			self.zip_code = self.validate_zip_code( self.zip_code )
 			self.endpoint = 'getEnvirofactsUVHOURLY'
 			self.timeout = time
 			self.params = {
@@ -23140,11 +23605,13 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'city', city )
+			self.city = city
 			throw_if( 'state', state )
+			self.state = state
 			
 			self.mode = 'hourly-city-state'
-			self.city = self.validate_city( city )
-			self.state = self.validate_state( state )
+			self.city = self.validate_city( self.city )
+			self.state = self.validate_state( self.state )
 			self.endpoint = 'getEnvirofactsUVHOURLY'
 			self.timeout = time
 			self.params = {
@@ -23276,27 +23743,31 @@ class UvIndex( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -23461,12 +23932,15 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'fields', fields )
+			self.fields = fields
 			throw_if( 'default_fields', default_fields )
+			self.default_fields = default_fields
 			
-			selected = (fields or '').strip( )
+			selected = (self.fields or '').strip( )
 			
 			if not selected:
-				selected = default_fields.strip( )
+				selected = self.default_fields.strip( )
 			
 			field_list = [
 					field.strip( )
@@ -23509,13 +23983,15 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return rows
 			
-			fields = payload.get( 'fields', [ ] ) or [ ]
-			data = payload.get( 'data', [ ] ) or [ ]
+			fields = self.payload.get( 'fields', [ ] ) or [ ]
+			data = self.payload.get( 'data', [ ] ) or [ ]
 			
 			for record in data:
 				if not isinstance( record, list ):
@@ -23573,10 +24049,12 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if not isinstance( payload, dict ):
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
-			sensor = payload.get( 'sensor', { } ) or { }
+			sensor = self.payload.get( 'sensor', { } ) or { }
 			
 			row = {
 					'Sensor Index': sensor.get( 'sensor_index', self.sensor_index ),
@@ -23625,11 +24103,13 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_pm25 = None
 			first_name = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if not first_name:
 					first_name = str(
 						row.get( 'Name', '' )
@@ -23685,12 +24165,16 @@ class PurpleAir( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
+			throw_if( 'params', params )
+			self.params = params
 			self.result = {
 					'mode': self.mode,
 					'url': self.url,
-					'params': params,
-					'summary': self.summarize_rows( rows ),
-					'rows': rows,
+					'params': self.params,
+					'summary': self.summarize_rows( self.rows ),
+					'rows': self.rows,
 					'raw': self.payload
 			}
 			
@@ -23731,7 +24215,8 @@ class PurpleAir( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			self.endpoint = endpoint.strip( ).strip( '/' )
+			self.endpoint = endpoint
+			self.endpoint = self.endpoint.strip( ).strip( '/' )
 			if self.endpoint != 'sensors' and not re.fullmatch(
 					r'sensors/[1-9][0-9]*', self.endpoint ):
 				raise ValueError( 'endpoint must identify sensors or a positive sensor index.' )
@@ -23978,27 +24463,31 @@ class PurpleAir( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
 							f'{description.strip( )} This function uses the '
 							f'{tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -24174,8 +24663,9 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
+			self.mode = mode
 			
-			value = mode.strip( ).lower( )
+			value = self.mode.strip( ).lower( )
 			allowed = {
 					'countries',
 					'providers',
@@ -24221,8 +24711,9 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			value = endpoint.strip( ).strip( '/' )
+			value = self.endpoint.strip( ).strip( '/' )
 			
 			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
 				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
@@ -24272,11 +24763,13 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'value', value )
 			throw_if( 'name', name )
-			throw_if( name, value )
+			self.name = name
+			throw_if( 'value', value )
+			self.value = value
+			throw_if( self.name, self.value )
 			
-			number = int( value )
+			number = int( self.value )
 			
 			if number < 1:
 				raise ValueError( f'{name} must be greater than or equal to 1.' )
@@ -24317,13 +24810,15 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'value', value )
 			throw_if( 'name', name )
+			self.name = name
+			throw_if( 'value', value )
+			self.value = value
 			
-			if value is None:
+			if self.value is None:
 				raise ValueError( f'{name} cannot be None.' )
 			
-			number = int( value )
+			number = int( self.value )
 			
 			if number < 0:
 				raise ValueError( f'{name} must be greater than or equal to 0.' )
@@ -24411,9 +24906,10 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'radius', radius )
+			self.radius = radius
 			value = self.validate_positive_integer(
 				name='radius',
-				value=radius,
+				value=self.radius,
 				maximum=100000
 			)
 			
@@ -24443,20 +24939,22 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if payload is None:
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if self.payload is None:
 				return [ ]
 			
-			if isinstance( payload, list ):
+			if isinstance( self.payload, list ):
 				return [
 						item
-						for item in payload
+						for item in self.payload
 						if isinstance( item, dict )
 				]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
-			results = payload.get( 'results', [ ] )
+			results = self.payload.get( 'results', [ ] )
 			
 			if isinstance( results, list ):
 				return [
@@ -24499,11 +24997,14 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			throw_if( 'resource_name', resource_name )
+			self.resource_name = resource_name
 			
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in self.coalesce_results( payload ):
+			for item in self.coalesce_results( self.payload ):
 				row = {
 						'Id': item.get( 'id', '' ),
 						'Name': item.get( 'name', '' ),
@@ -24513,7 +25014,7 @@ class OpenAQ( Fetcher ):
 								or item.get( 'name', '' )
 						),
 						'Code': item.get( 'code', '' ),
-						'Resource': resource_name,
+						'Resource': self.resource_name,
 						'First Datetime': item.get( 'datetimeFirst', '' ),
 						'Last Datetime': item.get( 'datetimeLast', '' )
 				}
@@ -24561,9 +25062,11 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in self.coalesce_results( payload ):
+			for item in self.coalesce_results( self.payload ):
 				coordinates = item.get( 'coordinates', { } ) or { }
 				country = item.get( 'country', { } ) or { }
 				provider = item.get( 'provider', { } ) or item.get( 'owner', { } ) or { }
@@ -24652,9 +25155,11 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in self.coalesce_results( payload ):
+			for item in self.coalesce_results( self.payload ):
 				location = item.get( 'location', { } ) or { }
 				parameter = item.get( 'parameter', { } ) or { }
 				coordinates = item.get( 'coordinates', { } ) or { }
@@ -24711,19 +25216,21 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_result = ''
 			first_parameter = ''
 			first_country = ''
 			
-			if rows:
+			if self.rows:
 				first_result = str(
-					rows[ 0 ].get( 'Name', '' ) or rows[ 0 ].get( 'Display Name', '' ) or rows[
-						0 ].get( 'Location Id', '' ) or rows[ 0 ].get( 'Id', '' ) or '' )
-				first_parameter = str( rows[ 0 ].get( 'First Parameter', '' ) or rows[
+					self.rows[ 0 ].get( 'Name', '' ) or self.rows[ 0 ].get( 'Display Name', '' ) or self.rows[
+						0 ].get( 'Location Id', '' ) or self.rows[ 0 ].get( 'Id', '' ) or '' )
+				first_parameter = str( self.rows[ 0 ].get( 'First Parameter', '' ) or self.rows[
 					0 ].get( 'Parameter', '' ) or '' )
 				first_country = str(
-					rows[ 0 ].get( 'Country', '' ) or rows[ 0 ].get( 'Country Code', '' ) or '' )
+					self.rows[ 0 ].get( 'Country', '' ) or self.rows[ 0 ].get( 'Country Code', '' ) or '' )
 			
 			return { 'count': count, 'first_result': first_result,
 					'first_parameter': first_parameter, 'first_country': first_country }
@@ -24756,9 +25263,11 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = { 'mode': self.mode, 'url': self.url,
 					'params': params if params is not None else self.params,
-					'summary': self.summarize_rows( rows ), 'rows': rows, 'raw': self.payload }
+					'summary': self.summarize_rows( self.rows ), 'rows': self.rows, 'raw': self.payload }
 			
 			return self.result
 		
@@ -24795,7 +25304,8 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			self.endpoint = self.validate_endpoint( endpoint )
+			self.endpoint = endpoint
+			self.endpoint = self.validate_endpoint( self.endpoint )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { }
@@ -24987,9 +25497,10 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'parameter_id', parameter_id )
+			self.parameter_id = parameter_id
 			self.mode = 'parameter_latest'
 			self.parameter_id = self.validate_positive_integer( name='parameter_id',
-				value=parameter_id )
+				value=self.parameter_id )
 			self.limit = self.validate_positive_integer( 'limit', limit, maximum=1000 )
 			self.page = self.validate_positive_integer( 'page', page )
 			self.timeout = time
@@ -25093,9 +25604,10 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'location_id', location_id )
+			self.location_id = location_id
 			self.mode = 'latest'
 			self.location_id = self.validate_positive_integer( name='location_id',
-				value=location_id )
+				value=self.location_id )
 			self.timeout = time
 			self.request( endpoint=f'locations/{self.location_id}/latest', params={ },
 				time=self.timeout )
@@ -25208,20 +25720,24 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 					'description': (f'{description.strip( )} This function uses the '
 					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
+					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': required, } }
 		
 		except Exception as e:
@@ -25334,7 +25850,8 @@ class Firms( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
-			value = mode.strip( ).lower( )
+			self.mode = mode
+			value = self.mode.strip( ).lower( )
 			allowed = { 'area', 'data-availability' }
 			if value not in allowed:
 				raise ValueError( "Unsupported FIRMS mode. Use 'area' or 'data-availability'." )
@@ -25368,8 +25885,9 @@ class Firms( Fetcher ):
 		"""
 		try:
 			throw_if( 'source', source )
+			self.source = source
 			
-			value = source.strip( ).upper( )
+			value = self.source.strip( ).upper( )
 			allowed = { 'LANDSAT_NRT', 'MODIS_NRT', 'MODIS_SP', 'VIIRS_NOAA20_NRT',
 					'VIIRS_NOAA20_SP', 'VIIRS_NOAA21_NRT', 'VIIRS_SNPP_NRT', 'VIIRS_SNPP_SP' }
 			
@@ -25406,7 +25924,8 @@ class Firms( Fetcher ):
 		"""
 		try:
 			throw_if( 'sensor', sensor )
-			value = sensor.strip( ).upper( )
+			self.sensor = sensor
+			value = self.sensor.strip( ).upper( )
 			allowed = { 'ALL', 'LANDSAT', 'MODIS', 'VIIRS_SNPP', 'VIIRS_NOAA20', 'VIIRS_NOAA21' }
 			if value not in allowed:
 				raise ValueError( 'Unsupported FIRMS sensor. Use ALL, LANDSAT, MODIS, '
@@ -25441,7 +25960,8 @@ class Firms( Fetcher ):
 		"""
 		try:
 			throw_if( 'day_range', day_range )
-			value = day_range
+			self.day_range = day_range
+			value = self.day_range
 			if value < 1 or value > 5:
 				raise ValueError( 'day_range must be between 1 and 5.' )
 			
@@ -25558,7 +26078,9 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			text = csv_text or ''
+			throw_if( 'csv_text', csv_text )
+			self.csv_text = csv_text
+			text = self.csv_text or ''
 			if not text.strip( ):
 				return [ ]
 			
@@ -25599,20 +26121,22 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			count = len( rows or [ ] )
+			throw_if( 'rows', rows )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_date = ''
 			first_sensor = ''
 			first_lat = ''
 			first_lon = ''
-			if rows:
+			if self.rows:
 				first_date = str(
-					rows[ 0 ].get( 'Acq Date', '' ) or rows[ 0 ].get( 'Date', '' ) or rows[
+					self.rows[ 0 ].get( 'Acq Date', '' ) or self.rows[ 0 ].get( 'Date', '' ) or self.rows[
 						0 ].get( 'Start Date', '' ) or '' )
 				first_sensor = str(
-					rows[ 0 ].get( 'Sensor', '' ) or rows[ 0 ].get( 'Satellite', '' ) or rows[
+					self.rows[ 0 ].get( 'Sensor', '' ) or self.rows[ 0 ].get( 'Satellite', '' ) or self.rows[
 						0 ].get( 'Source', '' ) or '' )
-				first_lat = str( rows[ 0 ].get( 'Latitude', '' ) or '' )
-				first_lon = str( rows[ 0 ].get( 'Longitude', '' ) or '' )
+				first_lat = str( self.rows[ 0 ].get( 'Latitude', '' ) or '' )
+				first_lon = str( self.rows[ 0 ].get( 'Longitude', '' ) or '' )
 			
 			return { 'count': count, 'first_date': first_date, 'first_sensor': first_sensor,
 					'first_lat': first_lat, 'first_lon': first_lon }
@@ -25643,8 +26167,10 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'rows', rows )
+			self.rows = rows
 			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
-					'summary': self.summarize_rows( rows ), 'rows': rows, 'raw': self.payload }
+					'summary': self.summarize_rows( self.rows ), 'rows': self.rows, 'raw': self.payload }
 			
 			return self.result
 		except Exception as e:
@@ -25674,9 +26200,10 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.map_key
 			throw_if( 'url', url )
-			self.url = url.strip( )
+			self.url = url
+			self.map_key
+			self.url = self.url.strip( )
 			self.timeout = time
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
@@ -25722,8 +26249,9 @@ class Firms( Fetcher ):
 		"""
 		try:
 			throw_if( 'source', source )
+			self.source = source
 			self.mode = 'area'
-			self.source = self.validate_source( source )
+			self.source = self.validate_source( self.source )
 			self.area_coordinates = self.validate_area_coordinates( area_coordinates )
 			self.day_range = self.validate_day_range( day_range )
 			self.date = self.validate_date( date )
@@ -25863,18 +26391,22 @@ class Firms( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
+			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
 				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
-			return { 'name': function.strip( ),
+				required = list( self.parameters.keys( ) )
+			return { 'name': self.function.strip( ),
 					'description': (f'{description.strip( )} This function uses the '
 					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
+					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': required, } }
 		
 		except Exception as e:
@@ -26020,7 +26552,8 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'mode', mode )
-			value = mode.strip( ).lower( )
+			self.mode = mode
+			value = self.mode.strip( ).lower( )
 			allowed = { 'states_bbox', 'flights_aircraft', 'arrivals_airport',
 			            'departures_airport',
 					'track_aircraft' }
@@ -26060,7 +26593,8 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			value = endpoint.strip( )
+			self.endpoint = endpoint
+			value = self.endpoint.strip( )
 			if value.startswith( 'http://' ) or value.startswith( 'https://' ):
 				raise ValueError( 'endpoint must be a path segment, not a full URL.' )
 			
@@ -26103,7 +26637,8 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'icao24', icao24 )
-			value = icao24.strip( ).lower( )
+			self.icao24 = icao24
+			value = self.icao24.strip( ).lower( )
 			if not re.fullmatch( r'[0-9a-f]{6}', value ):
 				raise ValueError( 'icao24 must be a six-character hexadecimal address.' )
 			
@@ -26138,7 +26673,8 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'airport', airport )
-			value = airport.strip( ).upper( )
+			self.airport = airport
+			value = self.airport.strip( ).upper( )
 			if not re.fullmatch( r'[A-Z0-9]{4}', value ):
 				raise ValueError( 'airport must be a four-character ICAO airport code.' )
 			
@@ -26173,11 +26709,13 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'value', value )
 			throw_if( 'name', name )
-			throw_if( name, value )
+			self.name = name
+			throw_if( 'value', value )
+			self.value = value
+			throw_if( self.name, self.value )
 			
-			number = int( value )
+			number = int( self.value )
 			
 			if number < 0:
 				raise ValueError( f'{name} must be greater than or equal to 0.' )
@@ -26214,9 +26752,11 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'begin', begin )
+			self.begin = begin
 			throw_if( 'end', end )
-			start = self.validate_epoch( 'begin', begin )
-			stop = self.validate_epoch( 'end', end )
+			self.end = end
+			start = self.validate_epoch( 'begin', self.begin )
+			stop = self.validate_epoch( 'end', self.end )
 			
 			if start > stop:
 				raise ValueError( 'begin must be less than or equal to end.' )
@@ -26252,11 +26792,13 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'value', value )
 			throw_if( 'name', name )
-			throw_if( name, value )
+			self.name = name
+			throw_if( 'value', value )
+			self.value = value
+			throw_if( self.name, self.value )
 			
-			number = float( value )
+			number = float( self.value )
 			
 			if number < -90.0 or number > 90.0:
 				raise ValueError( f'{name} must be between -90 and 90.' )
@@ -26292,11 +26834,13 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
-			throw_if( 'value', value )
 			throw_if( 'name', name )
-			throw_if( name, value )
+			self.name = name
+			throw_if( 'value', value )
+			self.value = value
+			throw_if( self.name, self.value )
 			
-			number = float( value )
+			number = float( self.value )
 			
 			if number < -180.0 or number > 180.0:
 				raise ValueError( f'{name} must be between -180 and 180.' )
@@ -26336,13 +26880,17 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'lamin', lamin )
+			self.lamin = lamin
 			throw_if( 'lomin', lomin )
+			self.lomin = lomin
 			throw_if( 'lamax', lamax )
+			self.lamax = lamax
 			throw_if( 'lomax', lomax )
-			min_lat = self.validate_latitude( 'lamin', lamin )
-			min_lon = self.validate_longitude( 'lomin', lomin )
-			max_lat = self.validate_latitude( 'lamax', lamax )
-			max_lon = self.validate_longitude( 'lomax', lomax )
+			self.lomax = lomax
+			min_lat = self.validate_latitude( 'lamin', self.lamin )
+			min_lon = self.validate_longitude( 'lomin', self.lomin )
+			max_lat = self.validate_latitude( 'lamax', self.lamax )
+			max_lon = self.validate_longitude( 'lomax', self.lomax )
 			
 			if min_lat >= max_lat:
 				raise ValueError( 'lamin must be less than lamax.' )
@@ -26465,7 +27013,8 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'endpoint', endpoint )
-			self.endpoint = self.validate_endpoint( endpoint )
+			self.endpoint = endpoint
+			self.endpoint = self.validate_endpoint( self.endpoint )
 			self.assign_credentials( client_id=client_id, client_secret=client_secret )
 			self.authenticate( )
 			
@@ -26515,10 +27064,12 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			states = [ ]
 			
-			if isinstance( payload, dict ):
-				states = payload.get( 'states', [ ] ) or [ ]
+			if isinstance( self.payload, dict ):
+				states = self.payload.get( 'states', [ ] ) or [ ]
 			
 			items: List[ Dict[ str, Any ] ] = [ ]
 			for row in states:
@@ -26545,7 +27096,7 @@ class OpenSky( Fetcher ):
 						'position_source': row[ 16 ] if len( row ) > 16 else None, } )
 			
 			self.result = { 'mode': 'states_bbox',
-					'time': payload.get( 'time', None ) if isinstance( payload, dict ) else None,
+					'time': self.payload.get( 'time', None ) if isinstance( self.payload, dict ) else None,
 					'count': len( items ), 'items': items, }
 			
 			return self.result
@@ -26581,10 +27132,13 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
+			throw_if( 'payload', payload )
+			self.payload = payload
 			throw_if( 'mode', mode )
+			self.mode = mode
 			items: List[ Dict[ str, Any ] ] = [ ]
 			
-			for row in payload or [ ]:
+			for row in self.payload or [ ]:
 				if not isinstance( row, dict ):
 					continue
 				
@@ -26607,7 +27161,7 @@ class OpenSky( Fetcher ):
 						'arrival_airport_candidates_count': row.get(
 							'arrivalAirportCandidatesCount' ), } )
 			
-			self.result = { 'mode': mode, 'count': len( items ), 'items': items, }
+			self.result = { 'mode': self.mode, 'count': len( items ), 'items': items, }
 			
 			return self.result
 		
@@ -26639,12 +27193,14 @@ class OpenSky( Fetcher ):
 		        project error type.
 		"""
 		try:
-			if not payload:
+			throw_if( 'payload', payload )
+			self.payload = payload
+			if not self.payload:
 				self.result = { 'mode': 'track_aircraft', 'icao24': None, 'callsign': None,
 						'start_time': None, 'end_time': None, 'count': 0, 'items': [ ], }
 				return self.result
 			
-			path = payload.get( 'path' ) or [ ]
+			path = self.payload.get( 'path' ) or [ ]
 			items: List[ Dict[ str, Any ] ] = [ ]
 			
 			for row in path:
@@ -26658,9 +27214,9 @@ class OpenSky( Fetcher ):
 						'true_track_deg': row[ 4 ] if len( row ) > 4 else None,
 						'on_ground': row[ 5 ] if len( row ) > 5 else None, } )
 			
-			self.result = { 'mode': 'track_aircraft', 'icao24': payload.get( 'icao24' ),
-					'callsign': payload.get( 'callsign' ) or payload.get( 'calllsign' ),
-					'start_time': payload.get( 'startTime' ), 'end_time': payload.get( 'endTime' ),
+			self.result = { 'mode': 'track_aircraft', 'icao24': self.payload.get( 'icao24' ),
+					'callsign': self.payload.get( 'callsign' ) or self.payload.get( 'calllsign' ),
+					'start_time': self.payload.get( 'startTime' ), 'end_time': self.payload.get( 'endTime' ),
 					'count': len( items ), 'items': items, }
 			
 			return self.result
@@ -26779,11 +27335,14 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'icao24', icao24 )
+			self.icao24 = icao24
 			throw_if( 'begin', begin )
+			self.begin = begin
 			throw_if( 'end', end )
+			self.end = end
 			self.mode = 'flights_aircraft'
-			self.icao24 = self.validate_icao24( icao24 )
-			self.begin, self.end = self.validate_time_range( begin, end )
+			self.icao24 = self.validate_icao24( self.icao24 )
+			self.begin, self.end = self.validate_time_range( self.begin, self.end )
 			self.params = { 'icao24': self.icao24, 'begin': self.begin, 'end': self.end, }
 			
 			self.payload = self.request( '/flights/aircraft', params=self.params,
@@ -26826,11 +27385,14 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'airport', airport )
+			self.airport = airport
 			throw_if( 'begin', begin )
+			self.begin = begin
 			throw_if( 'end', end )
+			self.end = end
 			self.mode = 'arrivals_airport'
-			self.airport = self.validate_airport( airport )
-			self.begin, self.end = self.validate_time_range( begin, end )
+			self.airport = self.validate_airport( self.airport )
+			self.begin, self.end = self.validate_time_range( self.begin, self.end )
 			self.params = { 'airport': self.airport, 'begin': self.begin, 'end': self.end, }
 			
 			self.payload = self.request( '/flights/arrival', params=self.params,
@@ -26873,11 +27435,14 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'airport', airport )
+			self.airport = airport
 			throw_if( 'begin', begin )
+			self.begin = begin
 			throw_if( 'end', end )
+			self.end = end
 			self.mode = 'departures_airport'
-			self.airport = self.validate_airport( airport )
-			self.begin, self.end = self.validate_time_range( begin, end )
+			self.airport = self.validate_airport( self.airport )
+			self.begin, self.end = self.validate_time_range( self.begin, self.end )
 			self.params = { 'airport': self.airport, 'begin': self.begin, 'end': self.end, }
 			
 			self.payload = self.request( '/flights/departure', params=self.params,
@@ -26918,8 +27483,9 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'icao24', icao24 )
+			self.icao24 = icao24
 			self.mode = 'track_aircraft'
-			self.icao24 = self.validate_icao24( icao24 )
+			self.icao24 = self.validate_icao24( self.icao24 )
 			self.time_value = (
 				self.validate_epoch( 'time_value', time_value ) if time_value is not None else 0)
 			self.params = { 'icao24': self.icao24, 'time': self.time_value, }
@@ -27044,19 +27610,23 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
+			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
 				raise ValueError( 'parameters must be a dict of param_name -> schema definition.' )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 					'description': (f'{description.strip( )} This function uses the '
 					                f'{tool.strip( )} service.'),
-					'parameters': { 'type': 'object', 'properties': parameters,
+					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': required, } }
 		
 		except Exception as exc:
