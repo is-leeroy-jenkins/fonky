@@ -6316,7 +6316,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = "fetch_object( self, name: str, quantity: str='', attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any"
+			exception.method = "fetch_object( self, **args ) -> Any"
 			raise exception
 	
 	def cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='',
@@ -16928,15 +16928,12 @@ class USGSWaterData( Fetcher ):
 			self.limit = self.validate_limit( limit )
 			self.timeout = time
 			
-			self.request(
-				collection='latest-daily',
+			self.request( collection='latest-daily',
 				params={
 						'monitoring_location_id': self.monitoring_location_id,
 						'parameter_code': self.parameter_code,
 						'limit': self.limit
-				},
-				time=self.timeout
-			)
+				}, time=self.timeout )
 			
 			records = self.coalesce_records( self.payload )
 			rows = self.shape_latest_values( records )
@@ -17178,46 +17175,22 @@ class USGSTheNationalMap( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method
+		    supports predictable introspection, documentation rendering, debugging,
+		    and user-interface
 		    option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'mode',
-				'endpoint',
-				'dataset',
-				'query_text',
-				'bbox',
-				'prod_formats',
-				'max_items',
-				'offset',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_endpoint',
-				'validate_max_items',
-				'validate_offset',
-				'validate_bbox',
-				'coalesce_records',
-				'shape_dataset_rows',
-				'shape_product_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_datasets',
-				'fetch_products',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'mode', 'endpoint', 'dataset', 'query_text', 'bbox', 'prod_formats',
+				'max_items', 'offset', 'params', 'payload', 'result', 'response', 'url', 'timeout',
+				'agents', 'headers', 'validate_endpoint', 'validate_max_items', 'validate_offset',
+				'validate_bbox', 'coalesce_records', 'shape_dataset_rows', 'shape_product_rows',
+				'summarize_rows', 'package_response', 'request', 'fetch_datasets',
+				 'fetch_products',
+				'fetch', 'create_schema' ]
 	
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
@@ -17706,7 +17679,6 @@ class USGSTheNationalMap( Fetcher ):
 			self.endpoint = endpoint
 			throw_if( 'params', params )
 			self.params = params
-			
 			self.endpoint = self.validate_endpoint( self.endpoint )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.endpoint}'
@@ -17723,13 +17695,8 @@ class USGSTheNationalMap( Fetcher ):
 					continue
 				
 				self.params[ key ] = value
-			
-			self.response = requests.get(
-				url=self.url,
-				params=self.params,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
+				timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( ) or { }
 			self.result = {
@@ -17744,9 +17711,7 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = (
-					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
-			)
+			exception.method = 'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -17773,13 +17738,7 @@ class USGSTheNationalMap( Fetcher ):
 			
 			self.mode = 'datasets'
 			self.timeout = time
-			
-			self.request(
-				endpoint='datasets',
-				params={ },
-				time=self.timeout
-			)
-			
+			self.request( endpoint='datasets', params={ }, time=self.timeout )
 			records = self.coalesce_records( self.payload )
 			rows = self.shape_dataset_rows( records )
 			
@@ -17832,19 +17791,10 @@ class USGSTheNationalMap( Fetcher ):
 			self.max_items = self.validate_max_items( max_items )
 			self.offset = self.validate_offset( offset )
 			self.timeout = time
-			
-			self.request(
-				endpoint='products',
-				params={
-						'datasets': self.dataset,
-						'q': self.query_text,
-						'bbox': self.bbox,
-						'prodFormats': self.prod_formats,
-						'max': self.max_items,
-						'offset': self.offset
-				},
-				time=self.timeout
-			)
+			self.request( endpoint='products',
+				params={ 'datasets': self.dataset, 'q': self.query_text, 'bbox': self.bbox,
+						'prodFormats': self.prod_formats, 'max': self.max_items,
+						'offset': self.offset }, time=self.timeout )
 			
 			records = self.coalesce_records( self.payload )
 			rows = self.shape_product_rows( records )
@@ -17895,22 +17845,11 @@ class USGSTheNationalMap( Fetcher ):
 		try:
 			
 			self.mode = (mode or 'products').strip( ).lower( )
-			
 			if self.mode == 'datasets':
-				return self.fetch_datasets(
-					time=time
-				)
-			
+				return self.fetch_datasets( time=time )
 			if self.mode == 'products':
-				return self.fetch_products(
-					dataset=dataset,
-					q=q,
-					bbox=bbox,
-					prod_formats=prod_formats,
-					max_items=max_items,
-					offset=offset,
-					time=time
-				)
+				return self.fetch_products( dataset=dataset, q=q, bbox=bbox,
+					prod_formats=prod_formats, max_items=max_items, offset=offset, time=time )
 			
 			raise ValueError( "Unsupported TNMAccess mode. Use 'datasets' or 'products'." )
 		
@@ -18053,44 +17992,21 @@ class USGSScienceBase( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method
+		    supports predictable introspection, documentation rendering, debugging,
+		    and user-interface
 		    option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'mode',
-				'endpoint',
-				'item_id',
-				'query_text',
-				'max_items',
-				'offset',
-				'fields',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_endpoint',
-				'validate_max_items',
-				'validate_offset',
-				'coalesce_records',
-				'shape_item_rows',
-				'shape_single_item',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_items',
-				'fetch_item',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'mode', 'endpoint', 'item_id', 'query_text', 'max_items', 'offset',
+				'fields', 'params', 'payload', 'result', 'response', 'url', 'timeout', 'agents',
+				'headers', 'validate_endpoint', 'validate_max_items', 'validate_offset',
+				'coalesce_records', 'shape_item_rows', 'shape_single_item', 'summarize_rows',
+				'package_response', 'request', 'fetch_items', 'fetch_item', 'fetch',
+				'create_schema' ]
 	
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
@@ -18235,24 +18151,15 @@ class USGSScienceBase( Fetcher ):
 				return [ ]
 			
 			if isinstance( self.payload, list ):
-				return [
-						item
-						for item in self.payload
-						if isinstance( item, dict )
-				]
+				return [ item for item in self.payload if isinstance( item, dict ) ]
 			
 			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'items', 'results', 'data' ]:
 				value = self.payload.get( key, None )
-				
 				if isinstance( value, list ):
-					return [
-							item
-							for item in value
-							if isinstance( item, dict )
-					]
+					return [ item for item in value if isinstance( item, dict ) ]
 			
 			return [ self.payload ]
 		
@@ -18292,10 +18199,8 @@ class USGSScienceBase( Fetcher ):
 			
 			files = self.item.get( 'files', [ ] ) or [ ]
 			file_count = len( files ) if isinstance( files, list ) else 0
-			
 			web_links = self.item.get( 'webLinks', [ ] ) or [ ]
 			link_count = len( web_links ) if isinstance( web_links, list ) else 0
-			
 			contacts = self.item.get( 'contacts', [ ] ) or [ ]
 			contact_count = len( contacts ) if isinstance( contacts, list ) else 0
 			
@@ -18322,9 +18227,7 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = (
-					'shape_single_item( self, *args, **kwargs ) -> Dict[ str, Any ]'
-			)
+			exception.method = 'shape_single_item( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def shape_item_rows( self,
@@ -19826,18 +19729,12 @@ class ClimateData( Fetcher ):
 			
 			if self.rows:
 				first_title = str(
-					self.rows[ 0 ].get( 'Title', '' )
-					or self.rows[ 0 ].get( 'Station', '' )
-					or self.rows[ 0 ].get( 'Date', '' )
-					or self.rows[ 0 ].get( 'Start Date', '' )
-					or ''
-				)
+					self.rows[ 0 ].get( 'Title', '' ) or self.rows[ 0 ].get( 'Station', '' ) or
+					self.rows[ 0 ].get( 'Date', '' ) or self.rows[ 0 ].get( 'Start Date',
+						'' ) or '' )
 				first_dataset = str(
-					self.rows[ 0 ].get( 'Dataset', '' )
-					or self.rows[ 0 ].get( 'Datatype', '' )
-					or self.rows[ 0 ].get( 'Data Type', '' )
-					or ''
-				)
+					self.rows[ 0 ].get( 'Dataset', '' ) or self.rows[ 0 ].get( 'Datatype', '' ) or
+					self.rows[ 0 ].get( 'Data Type', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -19873,15 +19770,9 @@ class ClimateData( Fetcher ):
 		try:
 			throw_if( 'rows', rows )
 			self.rows = rows
-			self.result = {
-					'mode': self.mode,
-					'url': self.url,
-					'params': self.params,
-					'summary': self.summarize_rows( self.rows ),
-					'rows': self.rows,
-					'raw': self.payload
-			}
-			
+			self.result = { 'mode': self.mode, 'url': self.url, 'params': self.params,
+					'summary': self.summarize_rows( self.rows ), 'rows': self.rows,
+					'raw': self.payload }
 			return self.result
 		
 		except Exception as e:
@@ -19893,8 +19784,7 @@ class ClimateData( Fetcher ):
 			)
 			raise exception
 	
-	def request( self, url: str, params: Dict[ str, Any ], time: int=20 ) -> Dict[
-		                                                                           str, Any ] | None:
+	def request( self, url: str, params: Dict[ str, Any ], time: int=20 ) -> Dict[ str, Any ]:
 		"""Request NOAA climate dataset and data records.
 
 		Purpose:
@@ -20009,8 +19899,7 @@ class ClimateData( Fetcher ):
 					'endDate': self.end_date,
 					'limit': self.limit,
 					'offset': self.offset
-			},
-				time=self.timeout )
+			}, time=self.timeout )
 			
 			records = self.coalesce_records( self.payload )
 			rows = self.shape_dataset_rows( records )
@@ -20057,7 +19946,6 @@ class ClimateData( Fetcher ):
 			self.start_date = start_date
 			throw_if( 'end_date', end_date )
 			self.end_date = end_date
-			
 			self.mode = 'data'
 			self.dataset = self.dataset.strip( )
 			self.start_date, self.end_date = self.validate_date_range( self.start_date, self.end_date )
@@ -20121,21 +20009,12 @@ class ClimateData( Fetcher ):
 		try:
 			
 			self.mode = (mode or 'datasets').strip( ).lower( )
-			
 			if self.mode == 'datasets':
-				return self.fetch_datasets(
-					keyword=keyword,
-					start_date=start_date,
-					end_date=end_date,
-					limit=limit,
-					offset=offset,
-					time=time
-				)
-			
+				return self.fetch_datasets( keyword=keyword, start_date=start_date,
+					end_date=end_date, limit=limit, offset=offset, time=time )
 			if self.mode == 'data':
 				return self.fetch_data( dataset=dataset, start_date=start_date, end_date=end_date,
 					stations=stations, data_types=data_types, limit=limit, time=time )
-			
 			raise ValueError( "Unsupported ClimateData mode. Use 'datasets' or 'data'." )
 		
 		except Exception as e:
@@ -20290,49 +20169,21 @@ class EoNet( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method
+		    supports predictable introspection, documentation rendering, debugging,
+		    and user-interface
 		    option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'mode',
-				'endpoint',
-				'source',
-				'category',
-				'status',
-				'limit',
-				'days',
-				'start_date',
-				'end_date',
-				'bbox',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_endpoint',
-				'validate_status',
-				'validate_limit',
-				'validate_days',
-				'validate_bbox',
-				'validate_date_pair',
-				'shape_event_rows',
-				'shape_category_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_events',
-				'fetch_categories',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'mode', 'endpoint', 'source', 'category', 'status', 'limit', 'days',
+				'start_date', 'end_date', 'bbox', 'params', 'payload', 'result', 'response', 'url',
+				'timeout', 'agents', 'headers', 'validate_endpoint', 'validate_status',
+				'validate_limit', 'validate_days', 'validate_bbox', 'validate_date_pair',
+				'shape_event_rows', 'shape_category_rows', 'summarize_rows', 'package_response',
+				'request', 'fetch_events', 'fetch_categories', 'fetch', 'create_schema' ]
 	
 	def validate_endpoint( self, endpoint: str ) -> str:
 		"""Validate endpoint.
@@ -20397,13 +20248,8 @@ class EoNet( Fetcher ):
 		try:
 			throw_if( 'status', status )
 			self.status = status
-			
 			value = self.status.strip( ).lower( )
-			allowed = {
-					'open',
-					'closed',
-					'all'
-			}
+			allowed = { 'open', 'closed', 'all' }
 			
 			if value not in allowed:
 				raise ValueError( "status must be 'open', 'closed', or 'all'." )
@@ -20522,9 +20368,7 @@ class EoNet( Fetcher ):
 			]
 			
 			if len( parts ) != 4:
-				raise ValueError(
-					'bbox must use min_lon,max_lat,max_lon,min_lat format.'
-				)
+				raise ValueError( 'bbox must use min_lon,max_lat,max_lon,min_lat format.' )
 			
 			numbers = [ float( part ) for part in parts ]
 			min_lon, max_lat, max_lon, min_lat = numbers
@@ -20581,9 +20425,7 @@ class EoNet( Fetcher ):
 			end_value = (end_date or '').strip( )
 			
 			if bool( start_value ) != bool( end_value ):
-				raise ValueError(
-					'start_date and end_date must either both be supplied or both be blank.'
-				)
+				raise ValueError( 'start_date and end_date must both be supplied or both blank.' )
 			
 			if start_value and end_value and start_value > end_value:
 				raise ValueError( 'start_date must be on or before end_date.' )
@@ -20633,45 +20475,26 @@ class EoNet( Fetcher ):
 				geometry_type = str( last_geometry.get( 'type', '' ) or '' )
 				latitude = None
 				longitude = None
-				
 				if geometry_type.lower( ) == 'point' and isinstance( coordinates, list ):
 					longitude = coordinates[ 0 ] if len( coordinates ) > 0 else None
 					latitude = coordinates[ 1 ] if len( coordinates ) > 1 else None
-				
 				category_titles = ', '.join(
-					[
-							str( category.get( 'title', category.get( 'id', '' ) ) )
-							for category in categories
-							if isinstance( category, dict )
-					]
-				)
+					[ str( category.get( 'title', category.get( 'id', '' ) ) ) for category in
+							categories if isinstance( category, dict ) ] )
 				source_ids = ', '.join(
-					[
-							str( source.get( 'id', source.get( 'title', '' ) ) )
-							for source in sources
-							if isinstance( source, dict )
-					]
-				)
+					[ str( source.get( 'id', source.get( 'title', '' ) ) ) for source in sources if
+							isinstance( source, dict ) ] )
 				closed_date = str( item.get( 'closed', '' ) or '' )
 				status = 'closed' if closed_date else 'open'
-				
-				rows.append(
-					{
-							'Id': item.get( 'id', '' ),
-							'Title': item.get( 'title', '' ),
-							'Status': status,
-							'Closed Date': closed_date,
-							'Categories': category_titles,
-							'Sources': source_ids,
-							'Geometry Count': len( geometry ),
-							'Last Geometry Type': geometry_type,
-							'Last Geometry Date': last_geometry.get( 'date', '' ),
-							'Latitude': latitude,
-							'Longitude': longitude,
-							'Link': item.get( 'link', '' ),
-							'Description': item.get( 'description', '' )
-					}
-				)
+				rows.append( { 'Id': item.get( 'id', '' ), 'Title': item.get( 'title', '' ),
+						'Status': status, 'Closed Date': closed_date, 'Categories':
+					               category_titles,
+						'Sources': source_ids, 'Geometry Count': len( geometry ),
+						'Last Geometry Type': geometry_type,
+						'Last Geometry Date': last_geometry.get( 'date', '' ), 'Latitude':
+					               latitude,
+						'Longitude': longitude, 'Link': item.get( 'link', '' ),
+						'Description': item.get( 'description', '' ) } )
 			
 			return rows
 		
@@ -20709,17 +20532,10 @@ class EoNet( Fetcher ):
 			throw_if( 'records', records )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
-			
 			for item in self.records or [ ]:
-				rows.append(
-					{
-							'Id': item.get( 'id', '' ),
-							'Title': item.get( 'title', '' ),
-							'Description': item.get( 'description', '' ),
-							'Link': item.get( 'link', '' )
-					}
-				)
-			
+				rows.append( { 'Id': item.get( 'id', '' ), 'Title': item.get( 'title', '' ),
+						'Description': item.get( 'description', '' ),
+						'Link': item.get( 'link', '' ) } )
 			return rows
 		
 		except Exception as e:
@@ -20817,9 +20633,7 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = (
-					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
-			)
+			exception.method ='package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ] = None,
@@ -20865,30 +20679,18 @@ class EoNet( Fetcher ):
 					continue
 				
 				self.params[ key ] = value
-			
-			self.response = requests.get(
-				url=self.url,
-				params=self.params,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
+				timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( ) or { }
-			self.result = {
-					'url': self.response.url,
-					'params': self.params,
-					'raw': self.payload
-			}
-			
+			self.result = { 'url': self.response.url, 'params': self.params, 'raw': self.payload }
 			return self.result
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = (
-					'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
-			)
+			exception.method = 'request( self, *args, **kwargs ) -> Dict[ str, Any ] | None'
 			raise exception
 	
 	def fetch_events( self, source: str='', category: str='',
@@ -20923,42 +20725,22 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			
 			self.mode = 'events'
 			self.source = (source or '').strip( )
 			self.category = (category or '').strip( )
 			self.status = self.validate_status( status )
 			self.limit = self.validate_limit( limit )
 			self.days = self.validate_days( days )
-			self.start_date, self.end_date = self.validate_date_pair(
-				start_date=start_date,
-				end_date=end_date
-			)
+			self.start_date, self.end_date = self.validate_date_pair( start_date=start_date,
+				end_date=end_date )
 			self.bbox = self.validate_bbox( bbox )
 			self.timeout = time
-			
-			self.request(
-				endpoint='events',
-				params={
-						'source': self.source,
-						'category': self.category,
-						'status': self.status,
-						'limit': self.limit,
-						'days': self.days,
-						'start': self.start_date,
-						'end': self.end_date,
-						'bbox': self.bbox
-				},
-				time=self.timeout
-			)
-			
-			records = (
-					self.payload.get( 'events', [ ] )
-					if isinstance( self.payload, dict )
-					else [ ]
-			)
+			self.request( endpoint='events',
+				params={ 'source': self.source, 'category': self.category, 'status': self.status,
+						'limit': self.limit, 'days': self.days, 'start': self.start_date,
+						'end': self.end_date, 'bbox': self.bbox }, time=self.timeout )
+			records = self.payload.get( 'events', [ ] ) if isinstance( self.payload, dict ) else [ ]
 			rows = self.shape_event_rows( records )
-			
 			return self.package_response( rows )
 		
 		except Exception as e:
@@ -20994,18 +20776,9 @@ class EoNet( Fetcher ):
 			
 			self.mode = 'categories'
 			self.timeout = time
-			
-			self.request(
-				endpoint='categories',
-				params={ },
-				time=self.timeout
-			)
-			
-			records = (
-					self.payload.get( 'categories', [ ] )
-					if isinstance( self.payload, dict )
-					else [ ]
-			)
+			self.request( endpoint='categories', params={ }, time=self.timeout )
+			records = (self.payload.get( 'categories', [ ] ) if isinstance( self.payload,
+				dict ) else [ ])
 			rows = self.shape_category_rows( records )
 			
 			return self.package_response( rows )
@@ -21058,22 +20831,11 @@ class EoNet( Fetcher ):
 			self.mode = (mode or 'events').strip( ).lower( )
 			
 			if self.mode == 'events':
-				return self.fetch_events(
-					source=source,
-					category=category,
-					status=status,
-					limit=limit,
-					days=days,
-					start_date=start_date,
-					end_date=end_date,
-					bbox=bbox,
-					time=time
-				)
-			
+				return self.fetch_events( source=source, category=category, status=status,
+					limit=limit, days=days, start_date=start_date, end_date=end_date, bbox=bbox,
+					time=time )
 			if self.mode == 'categories':
-				return self.fetch_categories(
-					time=time
-				)
+				return self.fetch_categories( time=time )
 			
 			raise ValueError( "Unsupported EONET mode. Use 'events' or 'categories'." )
 		
@@ -21218,41 +20980,21 @@ class EnviroFacts( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method
+		    supports predictable introspection, documentation rendering, debugging,
+		    and user-interface
 		    option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'mode',
-				'table_name',
-				'state_code',
-				'facility_name',
-				'limit',
-				'path',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_table_name',
-				'validate_state_code',
-				'validate_limit',
-				'resolve_table_path',
-				'shape_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_table',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'mode', 'table_name', 'state_code', 'facility_name', 'limit', 'path',
+				'params', 'payload', 'result', 'response', 'url', 'timeout', 'agents', 'headers',
+				'validate_table_name', 'validate_state_code', 'validate_limit',
+				'resolve_table_path', 'shape_rows', 'summarize_rows', 'package_response',
+				 'request',
+				'fetch_table', 'fetch', 'create_schema' ]
 	
 	def validate_table_name( self, table_name: str ) -> str:
 		"""Validate table name.
@@ -21400,66 +21142,28 @@ class EnviroFacts( Fetcher ):
 			self.facility_name = (facility_name or '').strip( )
 			self.limit = self.validate_limit( limit )
 			
-			segments: List[ str ] = [
-					self.table_name
-			]
+			segments: List[ str ] = [ self.table_name ]
 			
 			if self.state_code:
 				if self.table_name == 'EF_W_EMISSIONS_SOURCE_GHG':
-					segments.extend(
-						[
-								'STATE',
-								self.state_code
-						]
-					)
+					segments.extend( [ 'STATE', self.state_code ] )
 				else:
-					segments.extend(
-						[
-								'ST',
-								self.state_code
-						]
-					)
-			
+					segments.extend( [ 'ST', self.state_code ] )
 			if self.facility_name:
 				if self.table_name == 'EF_W_EMISSIONS_SOURCE_GHG':
-					segments.extend(
-						[
-								'FACILITY_NAME',
-								self.facility_name
-						]
-					)
+					segments.extend( [ 'FACILITY_NAME', self.facility_name ] )
 				else:
-					segments.extend(
-						[
-								'FACILITY_NAME',
-								self.facility_name
-						]
-					)
-			
-			segments.extend(
-				[
-						'ROWS',
-						str( self.limit ),
-						'JSON'
-				]
-			)
-			
+					segments.extend( [ 'FACILITY_NAME', self.facility_name ] )
+			segments.extend( [ 'ROWS', str( self.limit ), 'JSON' ] )
 			self.path = '/'.join(
-				[
-						urllib.parse.quote( str( segment ), safe='' )
-						for segment in segments
-				]
-			)
-			
+				[ urllib.parse.quote( str( segment ), safe='' ) for segment in segments ] )
 			return self.path
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
-			exception.method = (
-					'resolve_table_path( self, *args, **kwargs ) -> str'
-			)
+			exception.method =  'resolve_table_path( self, *args, **kwargs ) -> str'
 			raise exception
 	
 	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -21531,27 +21235,14 @@ class EnviroFacts( Fetcher ):
 			count = len( self.rows or [ ] )
 			first_facility = ''
 			first_state = ''
-			
 			if self.rows:
 				first_facility = str(
-					self.rows[ 0 ].get( 'Facility Name', '' )
-					or self.rows[ 0 ].get( 'Primary Name', '' )
-					or self.rows[ 0 ].get( 'Name', '' )
-					or ''
-				)
-				
+					self.rows[ 0 ].get( 'Facility Name', '' ) or self.rows[ 0 ].get(
+						'Primary '  'Name', '' ) or self.rows[ 0 ].get( 'Name', '' ) or '' )
 				first_state = str(
-					self.rows[ 0 ].get( 'State', '' )
-					or self.rows[ 0 ].get( 'State Abbr', '' )
-					or self.rows[ 0 ].get( 'St', '' )
-					or ''
-				)
-			
-			return {
-					'count': count,
-					'first_facility': first_facility,
-					'first_state': first_state
-			}
+					self.rows[ 0 ].get( 'State', '' ) or self.rows[ 0 ].get( 'State Abbr', '' ) or
+					self.rows[ 0 ].get( 'St', '' ) or '' )
+			return { 'count': count, 'first_facility': first_facility, 'first_state': first_state }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -21635,19 +21326,11 @@ class EnviroFacts( Fetcher ):
 			
 			if self.timeout < 1:
 				raise ValueError( 'time must be greater than or equal to 1.' )
-			
-			self.response = requests.get(
-				url=self.url,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+			self.response = requests.get( url=self.url, headers=self.headers,
+				timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( )
-			self.result = {
-					'url': self.url,
-					'params': self.params,
-					'raw': self.payload
-			}
+			self.result = { 'url': self.url, 'params': self.params, 'raw': self.payload }
 			
 			return self.result
 		
@@ -21689,25 +21372,12 @@ class EnviroFacts( Fetcher ):
 		try:
 			throw_if( 'table_name', table_name )
 			self.table_name = table_name
-			
 			self.mode = 'table'
-			self.path = self.resolve_table_path(
-				table_name=self.table_name,
-				state_code=state_code,
-				facility_name=facility_name,
-				limit=limit
-			)
-			self.params = {
-					'table_name': self.table_name,
-					'state_code': self.state_code,
-					'facility_name': self.facility_name,
-					'limit': self.limit
-			}
-			
-			self.request(
-				url=f'{self.base_url}/{self.path}',
-				time=time
-			)
+			self.path = self.resolve_table_path( table_name=self.table_name, state_code=state_code,
+				facility_name=facility_name, limit=limit )
+			self.params = { 'table_name': self.table_name, 'state_code': self.state_code,
+					'facility_name': self.facility_name, 'limit': self.limit }
+			self.request( url=f'{self.base_url}/{self.path}', time=time )
 			
 			records = self.payload if isinstance( self.payload, list ) else [ ]
 			rows = self.shape_rows( records )
@@ -21750,13 +21420,8 @@ class EnviroFacts( Fetcher ):
 		        project error type.
 		"""
 		try:
-			return self.fetch_table(
-				table_name=table_name,
-				state_code=state_code,
-				facility_name=facility_name,
-				limit=limit,
-				time=time
-			)
+			return self.fetch_table( table_name=table_name, state_code=state_code,
+				facility_name=facility_name, limit=limit, time=time )
 		
 		except Exception as e:
 			exception = Error( e )
@@ -21910,50 +21575,22 @@ class TidesAndCurrents( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method
+		    supports predictable introspection, documentation rendering, debugging,
+		    and user-interface
 		    option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'data_url',
-				'metadata_url',
-				'mode',
-				'station_id',
-				'begin_date',
-				'end_date',
-				'datum',
-				'units',
-				'time_zone',
-				'interval',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_mode',
-				'validate_station_id',
-				'validate_date_range',
-				'validate_datum',
-				'validate_units',
-				'validate_time_zone',
-				'validate_interval',
-				'shape_station_rows',
-				'shape_data_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_station',
-				'fetch_water_level',
-				'fetch_tide_predictions',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'data_url', 'metadata_url', 'mode', 'station_id', 'begin_date', 'end_date',
+				'datum', 'units', 'time_zone', 'interval', 'params', 'payload', 'result',
+				'response', 'url', 'timeout', 'agents', 'headers', 'validate_mode',
+				'validate_station_id', 'validate_date_range', 'validate_datum', 'validate_units',
+				'validate_time_zone', 'validate_interval', 'shape_station_rows', 'shape_data_rows',
+				'summarize_rows', 'package_response', 'request', 'fetch_station',
+				'fetch_water_level', 'fetch_tide_predictions', 'fetch', 'create_schema' ]
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -21977,13 +21614,8 @@ class TidesAndCurrents( Fetcher ):
 		try:
 			throw_if( 'mode', mode )
 			self.mode = mode
-			
 			value = self.mode.strip( ).lower( )
-			allowed = {
-					'station',
-					'water-level',
-					'tide-predictions'
-			}
+			allowed = { 'station', 'water-level', 'tide-predictions' }
 			
 			if value not in allowed:
 				raise ValueError(
@@ -22111,18 +21743,8 @@ class TidesAndCurrents( Fetcher ):
 		try:
 			throw_if( 'datum', datum )
 			self.datum = datum
-			
 			value = self.datum.strip( ).upper( )
-			allowed = {
-					'MLLW',
-					'MHHW',
-					'MHW',
-					'MTL',
-					'MSL',
-					'MLW',
-					'NAVD',
-					'STND'
-			}
+			allowed = { 'MLLW', 'MHHW', 'MHW', 'MTL', 'MSL', 'MLW', 'NAVD', 'STND' }
 			
 			if value not in allowed:
 				raise ValueError(
@@ -22295,7 +21917,8 @@ class TidesAndCurrents( Fetcher ):
 		try:
 			throw_if( 'payload', payload )
 			self.payload = payload
-			station = self.payload.get( 'stations', None ) if isinstance( self.payload, dict ) else None
+			station = self.payload.get( 'stations', None ) if isinstance( self.payload,
+				dict ) else None
 			
 			if isinstance( station, list ) and station:
 				station = station[ 0 ]
@@ -22407,34 +22030,19 @@ class TidesAndCurrents( Fetcher ):
 			first_station = ''
 			first_value = ''
 			first_time = ''
-			
 			if self.rows:
 				first_station = str(
-					self.rows[ 0 ].get( 'Name', '' )
-					or self.rows[ 0 ].get( 'Station Id', '' )
-					or self.station_id
-					or ''
-				)
+					self.rows[ 0 ].get( 'Name', '' ) or self.rows[ 0 ].get( 'Station Id',
+						'' ) or self.station_id or '' )
 				first_value = str(
-					self.rows[ 0 ].get( 'V', '' )
-					or self.rows[ 0 ].get( 'Value', '' )
-					or self.rows[ 0 ].get( 'Prediction', '' )
-					or self.rows[ 0 ].get( 'Predicted Wl', '' )
-					or ''
-				)
+					self.rows[ 0 ].get( 'V', '' ) or self.rows[ 0 ].get( 'Value', '' ) or
+					self.rows[ 0 ].get( 'Prediction', '' ) or self.rows[ 0 ].get(
+						'Predicted Wl', '' ) or '' )
 				first_time = str(
-					self.rows[ 0 ].get( 'T', '' )
-					or self.rows[ 0 ].get( 'Time', '' )
-					or self.rows[ 0 ].get( 'Date Time', '' )
-					or ''
-				)
-			
-			return {
-					'count': count,
-					'first_station': first_station,
-					'first_value': first_value,
-					'first_time': first_time
-			}
+					self.rows[ 0 ].get( 'T', '' ) or self.rows[ 0 ].get(
+						'Time', '' ) or self.rows[ 0 ].get( 'Date Time', '' ) or '' )
+			return { 'count': count, 'first_station': first_station, 'first_value': first_value,
+					'first_time': first_time }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -22482,9 +22090,7 @@ class TidesAndCurrents( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
-			exception.method = (
-					'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
-			)
+			exception.method = 'package_response( self, *args, **kwargs ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def request( self, url: str, params: Optional[ Dict[ str, Any ] ] = None,
@@ -22530,13 +22136,8 @@ class TidesAndCurrents( Fetcher ):
 					continue
 				
 				self.params[ key ] = value
-			
-			self.response = requests.get(
-				url=self.url,
-				params=self.params,
-				headers=self.headers,
-				timeout=self.timeout
-			)
+			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
+				timeout=self.timeout )
 			self.response.raise_for_status( )
 			self.payload = self.response.json( ) or { }
 			self.result = {
@@ -22585,12 +22186,8 @@ class TidesAndCurrents( Fetcher ):
 			self.mode = 'station'
 			self.station_id = self.validate_station_id( self.station_id )
 			self.timeout = time
-			
-			self.request(
-				url=f'{self.metadata_url}/stations/{self.station_id}.json',
-				params={ },
-				time=self.timeout
-			)
+			self.request( url=f'{self.metadata_url}/stations/{self.station_id}.json', params={ },
+				time=self.timeout )
 			
 			rows = self.shape_station_rows( self.payload )
 			
@@ -22640,33 +22237,20 @@ class TidesAndCurrents( Fetcher ):
 			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
 			self.end_date = end_date
-			
 			self.mode = 'water-level'
 			self.station_id = self.validate_station_id( self.station_id )
-			self.begin_date, self.end_date = self.validate_date_range(
-				self.begin_date,
-				self.end_date
-			)
+			self.begin_date, self.end_date = self.validate_date_range( self.begin_date,
+				self.end_date )
 			self.datum = self.validate_datum( datum )
 			self.units = self.validate_units( units )
 			self.time_zone = self.validate_time_zone( time_zone )
 			self.timeout = time
-			
-			self.request(
-				url=self.data_url,
-				params={
-						'product': 'water_level',
-						'application': 'Foo',
-						'station': self.station_id,
-						'begin_date': self.begin_date,
-						'end_date': self.end_date,
-						'datum': self.datum,
-						'units': self.units,
-						'time_zone': self.time_zone,
-						'format': 'json'
-				},
-				time=self.timeout
-			)
+			self.request( url=self.data_url,
+				params={ 'product': 'water_level', 'application': 'Foo', 'station':
+					self.station_id,
+						'begin_date': self.begin_date, 'end_date': self.end_date,
+						'datum': self.datum, 'units': self.units, 'time_zone': self.time_zone,
+						'format': 'json' }, time=self.timeout )
 			
 			rows = self.shape_data_rows( self.payload )
 			
@@ -22718,38 +22302,22 @@ class TidesAndCurrents( Fetcher ):
 			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
 			self.end_date = end_date
-			
 			self.mode = 'tide-predictions'
 			self.station_id = self.validate_station_id( self.station_id )
-			self.begin_date, self.end_date = self.validate_date_range(
-				self.begin_date,
-				self.end_date
-			)
+			self.begin_date, self.end_date = self.validate_date_range( self.begin_date,
+				self.end_date )
 			self.datum = self.validate_datum( datum )
 			self.units = self.validate_units( units )
 			self.time_zone = self.validate_time_zone( time_zone )
 			self.interval = self.validate_interval( interval )
 			self.timeout = time
-			
-			self.request(
-				url=self.data_url,
-				params={
-						'product': 'predictions',
-						'application': 'Foo',
-						'station': self.station_id,
-						'begin_date': self.begin_date,
-						'end_date': self.end_date,
-						'datum': self.datum,
-						'units': self.units,
-						'time_zone': self.time_zone,
-						'interval': self.interval,
-						'format': 'json'
-				},
-				time=self.timeout
-			)
-			
+			self.request( url=self.data_url,
+				params={ 'product': 'predictions', 'application': 'Foo', 'station':
+					self.station_id,
+						'begin_date': self.begin_date, 'end_date': self.end_date,
+						'datum': self.datum, 'units': self.units, 'time_zone': self.time_zone,
+						'interval': self.interval, 'format': 'json' }, time=self.timeout )
 			rows = self.shape_data_rows( self.payload )
-			
 			return self.package_response( rows )
 		
 		except Exception as e:
@@ -22797,35 +22365,15 @@ class TidesAndCurrents( Fetcher ):
 		"""
 		try:
 			self.mode = self.validate_mode( mode )
-			
 			if self.mode == 'station':
-				return self.fetch_station(
-					station_id=station_id,
-					time=time
-				)
-			
+				return self.fetch_station( station_id=station_id, time=time )
 			if self.mode == 'water-level':
-				return self.fetch_water_level(
-					station_id=station_id,
-					begin_date=begin_date,
-					end_date=end_date,
-					datum=datum,
-					units=units,
-					time_zone=time_zone,
-					time=time
-				)
-			
+				return self.fetch_water_level( station_id=station_id, begin_date=begin_date,
+					end_date=end_date, datum=datum, units=units, time_zone=time_zone, time=time )
 			if self.mode == 'tide-predictions':
-				return self.fetch_tide_predictions(
-					station_id=station_id,
-					begin_date=begin_date,
-					end_date=end_date,
-					datum=datum,
-					units=units,
-					time_zone=time_zone,
-					interval=interval,
-					time=time
-				)
+				return self.fetch_tide_predictions( station_id=station_id, begin_date=begin_date,
+					end_date=end_date, datum=datum, units=units, time_zone=time_zone,
+					interval=interval, time=time )
 			
 			raise ValueError(
 				"Unsupported mode. Use 'station', 'water-level', or "
@@ -22963,52 +22511,27 @@ class UvIndex( Fetcher ):
 		self.url = None
 		self.timeout = 20
 		self.agents = cfg.AGENTS
-		self.headers = {
-				'Accept': 'application/json',
-				'User-Agent': self.agents
-		}
+		self.headers = { 'Accept': 'application/json', 'User-Agent': self.agents }
 	
 	def __dir__( self ) -> List[ str ]:
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method
+		    supports predictable introspection, documentation rendering, debugging,
+		    and user-interface
 		    option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'mode',
-				'zip_code',
-				'city',
-				'state',
-				'endpoint',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_mode',
-				'validate_zip_code',
-				'validate_city',
-				'validate_state',
-				'shape_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_daily_zip',
-				'fetch_daily_city_state',
-				'fetch_hourly_zip',
-				'fetch_hourly_city_state',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'mode', 'zip_code', 'city', 'state', 'endpoint', 'params', 'payload',
+				'result', 'response', 'url', 'timeout', 'agents', 'headers', 'validate_mode',
+				'validate_zip_code', 'validate_city', 'validate_state', 'shape_rows',
+				'summarize_rows', 'package_response', 'request', 'fetch_daily_zip',
+				'fetch_daily_city_state', 'fetch_hourly_zip', 'fetch_hourly_city_state', 'fetch',
+				'create_schema' ]
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
@@ -23858,46 +23381,19 @@ class PurpleAir( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
-		    option display.
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method supports predictable introspection, documentation rendering, debugging,
+		    and user-interface option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'api_key',
-				'mode',
-				'endpoint',
-				'sensor_index',
-				'nwlng',
-				'nwlat',
-				'selng',
-				'selat',
-				'location_type',
-				'max_age',
-				'modified_since',
-				'fields',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'normalize_fields',
-				'shape_sensor_list_rows',
-				'shape_sensor_detail_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_sensors',
-				'fetch_sensor',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'api_key', 'mode', 'endpoint', 'sensor_index', 'nwlng', 'nwlat',
+				'selng', 'selat', 'location_type', 'max_age', 'modified_since', 'fields', 'params',
+				'payload', 'result', 'response', 'url', 'timeout', 'agents', 'headers',
+				'normalize_fields', 'shape_sensor_list_rows', 'shape_sensor_detail_rows',
+				'summarize_rows', 'package_response', 'request', 'fetch_sensors', 'fetch_sensor',
+				'fetch', 'create_schema' ]
 	
 	def normalize_fields( self, fields: str, default_fields: str ) -> str:
 		"""Normalize fields.
@@ -24578,57 +24074,22 @@ class OpenAQ( Fetcher ):
 		"""Return public member names.
 
 		Purpose:
-		    Returns a stable list of public attributes and methods exposed by the object. The method
-		    supports predictable introspection, documentation rendering, debugging, and user-interface
-		    option display.
+		    Returns a stable list of public attributes and methods exposed by the object. The
+		    method supports predictable introspection, documentation rendering, debugging,
+		    and user-interface option display.
 
 		Returns:
 		    List[str]: Ordered public attribute and method names exposed by the object.
 		"""
-		return [
-				'base_url',
-				'api_key',
-				'mode',
-				'endpoint',
-				'location_id',
-				'parameter_id',
-				'country_id',
-				'coordinates',
-				'radius',
-				'providers_id',
-				'parameters_id',
-				'limit',
-				'page',
-				'params',
-				'payload',
-				'result',
-				'response',
-				'url',
-				'timeout',
-				'agents',
-				'headers',
-				'validate_mode',
-				'validate_endpoint',
-				'validate_positive_integer',
-				'validate_non_negative_integer',
-				'validate_coordinates',
-				'validate_radius',
-				'coalesce_results',
-				'shape_resource_rows',
-				'shape_location_rows',
-				'shape_latest_rows',
-				'summarize_rows',
-				'package_response',
-				'request',
-				'fetch_countries',
-				'fetch_providers',
-				'fetch_parameters',
-				'fetch_parameter_latest',
-				'fetch_locations',
-				'fetch_latest',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'api_key', 'mode', 'endpoint', 'location_id', 'parameter_id',
+				'country_id', 'coordinates', 'radius', 'providers_id', 'parameters_id', 'limit',
+				'page', 'params', 'payload', 'result', 'response', 'url', 'timeout', 'agents',
+				'headers', 'validate_mode', 'validate_endpoint', 'validate_positive_integer',
+				'validate_non_negative_integer', 'validate_coordinates', 'validate_radius',
+				'coalesce_results', 'shape_resource_rows', 'shape_location_rows',
+				'shape_latest_rows', 'summarize_rows', 'package_response', 'request',
+				'fetch_countries', 'fetch_providers', 'fetch_parameters', 'fetch_parameter_latest',
+				'fetch_locations', 'fetch_latest', 'fetch', 'create_schema' ]
 	
 	def validate_mode( self, mode: str ) -> str:
 		"""Validate mode.
