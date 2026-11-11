@@ -5743,7 +5743,7 @@ class SpaceWeather( Fetcher ):
 				if start > end:
 					raise ValueError( 'start_date must precede or equal end_date.' )
 			# NASA documents DEMO_KEY for limited unauthenticated use.
-			self.active_key = str( api_key or self.api_key or 'DEMO_KEY' ).strip( )
+			self.active_key = (api_key or self.api_key or 'DEMO_KEY').strip( )
 			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = { 'api_key': self.active_key }
 			if self.start_date:
@@ -10714,7 +10714,7 @@ class Grokipedia( Fetcher ):
 					'mode': 'search',
 					'url': self.url,
 					'params': self.params,
-					'api_key_configured': bool( str( self.api_key or '' ).strip( ) ),
+					'api_key_configured': bool( (self.api_key or '').strip( ) ),
 					'data': self.response
 			}
 			
@@ -10770,7 +10770,7 @@ class Grokipedia( Fetcher ):
 					'mode': 'page',
 					'url': self.url,
 					'params': self.params,
-					'api_key_configured': bool( str( self.api_key or '' ).strip( ) ),
+					'api_key_configured': bool( (self.api_key or '').strip( ) ),
 					'data': self.response
 			}
 			
@@ -11027,7 +11027,7 @@ class GoogleGeocoding( Fetcher ):
 			throw_if( 'params', params )
 			
 			if api_key:
-				self.api_key = str( api_key ).strip( )
+				self.api_key = api_key.strip( )
 			
 			self.timeout = time
 			self.params = { }
