@@ -1472,11 +1472,9 @@ class ArXiv( Fetcher ):
 			max_docs = self.max_documents if max_documents is None else \
 				max( 1, min( max_documents, 300 ) )
 			
-			get_full = self.full_documents if full_documents is None else \
-				full_documents
+			get_full = self.full_documents if full_documents is None else  full_documents
 			
-			load_meta = self.include_metadata if include_metadata is None else \
-				include_metadata
+			load_meta = self.include_metadata if include_metadata is None else include_metadata
 			
 			self.fetcher = ArxivRetriever( load_max_docs=max_docs, get_full_documents=get_full,
 				load_all_available_meta=load_meta )
@@ -1577,12 +1575,12 @@ class GoogleDrive( Fetcher ):
 		    List[str]: Text or identifier values produced by the operation.
 		"""
 		return [ '', 'text/text', 'text/plain', 'text/html', 'text/csv', 'text/markdown',
-			'image/png', 'image/jpeg', 'application/epub+zip', 'application/pdf',
-			'application/rtf',
-			'application/vnd.google-apps.document', 'application/vnd.google-apps.presentation',
-			'application/vnd.google-apps.spreadsheet', 'application/vnd.google.colaboratory',
-			'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-			'application/vnd.openxmlformats-officedocument.wordprocessingml.document', ]
+		         'image/png', 'image/jpeg', 'application/epub+zip', 'application/pdf',
+		         'application/rtf', 'application/vnd.google-apps.document',
+			     'application/vnd.google-apps.presentation',
+			     'application/vnd.google-apps.spreadsheet', 'application/vnd.google.colaboratory',
+			     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', ]
 	
 	@property
 	def template_options( self ) -> List[ str ]:
@@ -1594,10 +1592,9 @@ class GoogleDrive( Fetcher ):
 		Returns:
 		    List[str]: Text or identifier values produced by the operation.
 		"""
-		return [ 'gdrive-all-in-folder', 'gdrive-query', 'gdrive-by-name',
-			'gdrive-query-in-folder',
-			'gdrive-mime-type', 'gdrive-mime-type-in-folder', 'gdrive-query-with-mime-type',
-			'gdrive-query-with-mime-type-and-folder', ]
+		return [ 'gdrive-all-in-folder', 'gdrive-query', 'gdrive-by-name', 'gdrive-query-in-folder',
+		         'gdrive-mime-type', 'gdrive-mime-type-in-folder', 'gdrive-query-with-mime-type',
+		         'gdrive-query-with-mime-type-and-folder', ]
 	
 	@property
 	def mode_options( self ) -> List[ str ]:
