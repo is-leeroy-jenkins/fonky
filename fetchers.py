@@ -2469,7 +2469,6 @@ class GoogleMaps( Fetcher ):
 			self.location = self.geometry.get( 'location', { } )
 			throw_if( 'latitude', self.location.get( 'lat' ) )
 			throw_if( 'longitude', self.location.get( 'lng' ) )
-
 			self.latitude = float( self.location[ 'lat' ] )
 			self.longitude = float( self.location[ 'lng' ] )
 			self.coordinates = (self.latitude, self.longitude)
@@ -2479,8 +2478,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = ('geocode_location( self, address: str ) '
-				'-> Tuple[ float, float ]')
+			exception.method = 'geocode_location( self, address: str ) -> Tuple[ float, float ]'
 			raise exception
 
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
