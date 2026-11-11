@@ -743,7 +743,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data(
 				self.url, self.html or '', [ 'scrape_paragraphs' ] ).get( 'Paragraphs', [ ] )
 		except Exception as exc:
@@ -774,7 +774,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data(
 				self.url, self.html or '', [ 'scrape_lists' ] ).get( 'Lists', [ ] )
 		except Exception as exc:
@@ -805,7 +805,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_tables' ] ).get( 'Tables', [ ] )
 		except Exception as exc:
@@ -836,7 +836,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data(
 				self.url, self.html or '', [ 'scrape_articles' ] ).get( 'Articles', [ ] )
 		except Exception as exc:
@@ -867,7 +867,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_headings' ] ).get( 'Headings', [ ] )
 		except Exception as exc:
@@ -898,7 +898,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_divisions' ] ).get( 'Divisions', [ ] )
 		except Exception as exc:
@@ -929,7 +929,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_sections' ] ).get( 'Sections', [ ] )
 		except Exception as exc:
@@ -960,7 +960,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_blockquotes' ] ).get( 'Blockquotes', [ ] )
 		except Exception as exc:
@@ -991,7 +991,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_hyperlinks' ] ).get( 'Hyperlinks', [ ] )
 		except Exception as exc:
@@ -1022,7 +1022,7 @@ class WebFetcher( Fetcher ):
 		try:
 			throw_if( 'uri', uri )
 			self.url = uri.strip( )
-			self.fetch( self.url, time=int( self.timeout or 10 ) )
+			self.fetch( self.url, time=self.timeout or 10 )
 			return self.extract_structured_data( self.url, self.html or '',
 				[ 'scrape_images' ] ).get( 'Images', [ ] )
 		except Exception as exc:
@@ -1381,7 +1381,7 @@ class WebCrawler( WebFetcher ):
 				'same_domain_only': same_domain_only,
 				'request_timeout': request_timeout, 'delay_seconds': delay_seconds,
 				'max_bytes_per_page': max_bytes,
-				'use_playwright': bool( self.use_playwright ),
+				'use_playwright': self.use_playwright,
 				'started_at': started_at.isoformat( ), 'finished_at': finished_at.isoformat( ),
 				'elapsed_seconds': round( (finished_at - started_at).total_seconds( ), 3 ),
 				'visited_urls': list( visited ), 'skipped_urls': skipped_urls, }
@@ -1640,12 +1640,11 @@ class GoogleDrive( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.query = str( question or '' ).strip( )
-			self.folder_id = str( folder_id or 'root' ).strip( ) or 'root'
+			self.query = (question or '').strip( )
+			self.folder_id = (folder_id or 'root').strip( ) or 'root'
 			self.num_results = results
 			self.template = template.strip( )
-			self.mime_type = (mime_type.strip( ) if isinstance( mime_type, str ) and str(
-				mime_type ).strip( ) else None)
+			self.mime_type = mime_type.strip( ) if isinstance( mime_type, str ) and mime_type.strip( ) else None
 			self.mode = mode.strip( )
 			self.credentials_path = cfg.GOOGLE_ACCOUNT_FILE
 			self.token_path = cfg.GOOGLE_DRIVE_TOKEN_PATH
@@ -2218,21 +2217,21 @@ class GoogleSearch( Fetcher ):
 			if self.start > 91:
 				raise ValueError( 'start cannot exceed 91 when requesting up to 10 results.' )
 			
-			self.exact_terms = str( exact_terms or '' ).strip( )
-			self.exclude_terms = str( exclude_terms or '' ).strip( )
-			self.file_type = str( file_type or '' ).strip( )
-			self.date_restrict = str( date_restrict or '' ).strip( )
-			self.gl = str( gl or '' ).strip( )
-			self.lr = str( lr or '' ).strip( )
-			self.safe = str( safe or 'off' ).strip( )
-			self.search_type = str( search_type or '' ).strip( )
-			self.site_search = str( site_search or '' ).strip( )
-			self.site_search_filter = str( site_search_filter or '' ).strip( )
-			self.sort = str( sort or '' ).strip( )
-			self.img_size = str( img_size or '' ).strip( )
-			self.img_type = str( img_type or '' ).strip( )
-			self.img_color_type = str( img_color_type or '' ).strip( )
-			self.img_dominant_color = str( img_dominant_color or '' ).strip( )
+			self.exact_terms = (exact_terms or '').strip( )
+			self.exclude_terms = (exclude_terms or '').strip( )
+			self.file_type = (file_type or '').strip( )
+			self.date_restrict = (date_restrict or '').strip( )
+			self.gl = (gl or '').strip( )
+			self.lr = (lr or '').strip( )
+			self.safe = (safe or 'off').strip( )
+			self.search_type = (search_type or '').strip( )
+			self.site_search = (site_search or '').strip( )
+			self.site_search_filter = (site_search_filter or '').strip( )
+			self.sort = (sort or '').strip( )
+			self.img_size = (img_size or '').strip( )
+			self.img_type = (img_type or '').strip( )
+			self.img_color_type = (img_color_type or '').strip( )
+			self.img_dominant_color = (img_dominant_color or '').strip( )
 			self.params = { 'q': self.keywords, 'key': self.api_key, 'cx': self.cse_id,
 				'num': self.results, 'start': self.start, 'safe': self.safe }
 			
@@ -3323,7 +3322,7 @@ class NavalObservatory( Fetcher ):
 			self.time_value = self.validate_time( time_value )
 			self.latitude, self.longitude = self.validate_coordinates( latitude=latitude,
 				longitude=longitude )
-			self.location_label = str( location_label or '' ).strip( )
+			self.location_label = (location_label or '').strip( )
 			self.url = f'{self.base_url}/celnav'
 			self.params = { 'date': self.date_value, 'time': self.time_value,
 			                'coords': f'{self.latitude},{self.longitude}' }
@@ -3378,7 +3377,7 @@ class NavalObservatory( Fetcher ):
 		        project error type.
 		"""
 		try:
-			active_mode = str( mode or 'celnav' ).strip( ).lower( )
+			active_mode = (mode or 'celnav').strip( ).lower( )
 			if active_mode == 'celnav':
 				return self.fetch_celnav( date_value=date_value, time_value=time_value,
 					latitude=latitude, longitude=longitude, location_label=location_label,
@@ -3848,12 +3847,12 @@ class EarthObservatory( Fetcher ):
 		try:
 			self.mode = 'events'
 			self.status = status.strip( ).lower( )
-			self.category = str( category or '' ).strip( )
-			self.source = str( source or '' ).strip( )
+			self.category = (category or '').strip( )
+			self.source = (source or '').strip( )
 			self.limit = limit
 			self.days = days
-			self.start_date = str( start_date or '' ).strip( )
-			self.end_date = str( end_date or '' ).strip( )
+			self.start_date = (start_date or '').strip( )
+			self.end_date = (end_date or '').strip( )
 			if self.status not in ('open', 'closed', 'all'):
 				raise ValueError( 'status must be open, closed, or all.' )
 			if self.limit < 1 or self.days < 1:
@@ -3990,7 +3989,7 @@ class EarthObservatory( Fetcher ):
 		"""
 		try:
 			self.mode = 'layers'
-			self.category = str( category or '' ).strip( )
+			self.category = (category or '').strip( )
 			if self.category and not re.fullmatch( r'[A-Za-z0-9_-]+', self.category ):
 				raise ValueError( 'category must be a valid EONET category identifier.' )
 			self.url = f'{self.base_url}/layers'
@@ -4434,8 +4433,8 @@ class GlobalImagery( Fetcher ):
 				bbox=bbox, width=width, height=height, projection=projection,
 				quality=quality, image_format=image_format, transparent=transparent )
 
-			self.output_dir = str( output_dir or 'python-examples' )
-			self.output_name = str( output_name or '' )
+			self.output_dir = output_dir or 'python-examples'
+			self.output_name = output_name or ''
 			if self.output_name:
 				if (Path( self.output_name ).name != self.output_name or '\\' in self.output_name
 						or self.output_name in ('.', '..')):
@@ -4807,9 +4806,9 @@ class NearbyObjects( Fetcher ):
 			self.mode = 'close_approaches'
 			self.start_date = start_date.strip( )
 			self.end_date = end_date.strip( )
-			self.dist_max = str( dist_max or '10LD' ).strip( )
-			self.body = str( body or 'Earth' ).strip( )
-			self.sort = str( sort or 'date' ).strip( )
+			self.dist_max = (dist_max or '10LD').strip( )
+			self.body = (body or 'Earth').strip( )
+			self.sort = (sort or 'date').strip( )
 			self.limit = limit
 			self.start = dt.datetime.strptime( self.start_date, '%Y-%m-%d' ).date( )
 			self.end = dt.datetime.strptime( self.end_date, '%Y-%m-%d' ).date( )
@@ -4879,7 +4878,7 @@ class NearbyObjects( Fetcher ):
 			self.include_physical = include_physical
 			self.include_close_approaches = include_close_approaches
 			self.include_discovery = include_discovery
-			self.ca_body = str( ca_body or '' ).strip( )
+			self.ca_body = (ca_body or '').strip( )
 			self.url = f'{self.base_url}/sbdb.api'
 			self.params = { self.query_type: self.query,
 				'phys-par': '1' if self.include_physical else '0',
@@ -5019,7 +5018,7 @@ class NearbyObjects( Fetcher ):
 			self.limit = limit
 			if self.limit < 1:
 				raise ValueError( 'limit must be positive.' )
-			self.start_date = str( date_min or '' ).strip( )
+			self.start_date = (date_min or '').strip( )
 			if self.start_date:
 				dt.datetime.strptime( self.start_date, '%Y-%m-%d' )
 			self.mode = 'fireballs'
@@ -5087,7 +5086,7 @@ class NearbyObjects( Fetcher ):
 		        project error type.
 		"""
 		try:
-			active_mode = str( mode or 'close_approaches' ).strip( ).lower( )
+			active_mode = (mode or 'close_approaches').strip( ).lower( )
 			
 			if active_mode == 'close_approaches':
 				return self.fetch_close_approaches( start_date=start_date, end_date=end_date,
@@ -5534,7 +5533,7 @@ class OpenScience( Fetcher ):
 		        project error type.
 		"""
 		try:
-			active_mode = str( mode or 'dataset' ).strip( ).lower( )
+			active_mode = (mode or 'dataset').strip( ).lower( )
 			if active_mode == 'dataset':
 				return self.fetch_dataset( accession=accession, time=time )
 			
@@ -5734,8 +5733,8 @@ class SpaceWeather( Fetcher ):
 				'MPC', 'RBE', 'HSS', 'WSAEnlilSimulations', 'notifications' }
 			if self.endpoint not in supported:
 				raise ValueError( 'Unsupported NASA DONKI endpoint.' )
-			self.start_date = str( start_date or '' ).strip( )
-			self.end_date = str( end_date or '' ).strip( )
+			self.start_date = (start_date or '').strip( )
+			self.end_date = (end_date or '').strip( )
 			if bool( self.start_date ) != bool( self.end_date ):
 				raise ValueError( 'start_date and end_date must be supplied together.' )
 			if self.start_date:
@@ -5750,9 +5749,9 @@ class SpaceWeather( Fetcher ):
 			if self.start_date:
 				self.params[ 'startDate' ] = self.start_date
 				self.params[ 'endDate' ] = self.end_date
-			self.location = str( location or '' ).strip( )
-			self.catalog = str( catalog or '' ).strip( )
-			self.notification_type = str( notification_type or '' ).strip( )
+			self.location = (location or '').strip( )
+			self.catalog = (catalog or '').strip( )
+			self.notification_type = (notification_type or '').strip( )
 			if self.endpoint == 'IPS':
 				if self.location:
 					self.params[ 'location' ] = self.location
@@ -5769,7 +5768,7 @@ class SpaceWeather( Fetcher ):
 				self.params[ 'halfAngle' ] = self.half_angle
 				if self.catalog:
 					self.params[ 'catalog' ] = self.catalog
-				self.keyword = str( keyword or '' ).strip( )
+				self.keyword = (keyword or '').strip( )
 				if self.keyword:
 					self.params[ 'keyword' ] = self.keyword
 			if self.endpoint == 'notifications' and self.notification_type:
@@ -5833,7 +5832,7 @@ class SpaceWeather( Fetcher ):
 		        project error type.
 		"""
 		try:
-			active_mode = str( mode or 'cme' ).strip( ).lower( )
+			active_mode = (mode or 'cme').strip( ).lower( )
 			self.mode = active_mode
 			endpoint_map = { 'cme': 'CME', 'cme_analysis': 'CMEAnalysis', 'gst': 'GST',
 				'ips': 'IPS', 'flr': 'FLR', 'sep': 'SEP', 'mpc': 'MPC', 'rbe': 'RBE', 'hss': 'HSS',
@@ -5845,12 +5844,12 @@ class SpaceWeather( Fetcher ):
 			
 			return self.fetch_endpoint( endpoint=endpoint_map[ active_mode ],
 				start_date=start_date.strip( ), end_date=end_date.strip( ),
-				time=time, location=str( location or 'ALL' ).strip( ),
-				catalog=str( catalog or 'ALL' ).strip( ),
-				notification_type=str( notification_type or 'all' ).strip( ),
+				time=time, location=(location or 'ALL').strip( ),
+				catalog=(catalog or 'ALL').strip( ),
+				notification_type=(notification_type or 'all').strip( ),
 				most_accurate_only=most_accurate_only,
 				complete_entry_only=complete_entry_only, speed=speed,
-				half_angle=half_angle, keyword=str( keyword or '' ).strip( ),
+				half_angle=half_angle, keyword=(keyword or '').strip( ),
 				api_key=api_key )
 		
 		except Exception as exc:
@@ -6197,7 +6196,7 @@ class AstroCatalog( Fetcher ):
 		try:
 			throw_if( 'name', name )
 			self.name = name.strip( )
-			self.format = str( data_format or 'json' ).strip( ).lower( )
+			self.format = (data_format or 'json').strip( ).lower( )
 			if self.format not in ('json', 'csv', 'tsv'):
 				raise ValueError( 'Unsupported AstroCatalog output format.' )
 			route_parts = [ urllib.parse.quote( self.name, safe='' ) ]
@@ -6251,7 +6250,7 @@ class AstroCatalog( Fetcher ):
 			self.right_ascension = ra.strip( )
 			self.declination = dec.strip( )
 			self.radius = radius
-			self.format = str( data_format or 'json' ).strip( ).lower( )
+			self.format = (data_format or 'json').strip( ).lower( )
 			if self.radius < 1:
 				raise ValueError( 'radius must be positive.' )
 			if self.format not in ('json', 'csv', 'tsv'):
@@ -7181,7 +7180,7 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( sort_field or 'score' ).strip( )
+			value = (sort_field or 'score').strip( )
 			allowed = { 'score', 'lastModified' }
 			
 			if value not in allowed:
@@ -7218,7 +7217,7 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( sort_order or 'DESC' ).strip( ).upper( )
+			value = (sort_order or 'DESC').strip( ).upper( )
 			allowed = { 'ASC', 'DESC' }
 			
 			if value not in allowed:
@@ -7266,7 +7265,7 @@ class GovData( Fetcher ):
 			self.mode = 'search'
 			self.query = query.strip( )
 			self.page_size = self.validate_page_size( page_size )
-			self.offset_mark = str( offset_mark or '*' ).strip( )
+			self.offset_mark = (offset_mark or '*').strip( )
 			self.sort_field = self.validate_sort_field( sort_field )
 			self.sort_order = self.validate_sort_order( sort_order )
 			self.timeout = time
@@ -7380,7 +7379,7 @@ class GovData( Fetcher ):
 			self.collection = collection.strip( )
 			self.start_date = start_date.strip( )
 			self.page_size = self.validate_page_size( page_size )
-			self.offset_mark = str( offset_mark or '*' ).strip( )
+			self.offset_mark = (offset_mark or '*').strip( )
 			self.timeout = time
 			self.url = f'{self.base_url}/collections/{self.collection}/{self.start_date}'
 			self.params = {
@@ -7451,7 +7450,7 @@ class GovData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = str( mode or 'search' ).strip( ).lower( )
+			self.mode = (mode or 'search').strip( ).lower( )
 			
 			if self.mode == 'search':
 				return self.fetch_search(
@@ -7807,9 +7806,9 @@ class StarChart( Fetcher ):
 			self.mode = 'object_chart'
 			self.query = name.strip( )
 			self.zoom = zoom
-			self.box_color = str( box_color or 'yellow' ).strip( )
+			self.box_color = (box_color or 'yellow').strip( )
 			self.show_box = show_box
-			self.image_source = str( image_source or '' ).strip( )
+			self.image_source = (image_source or '').strip( )
 			
 			self.url = self.link_url
 			self.params = {
@@ -7883,12 +7882,12 @@ class StarChart( Fetcher ):
 			self.ra = ra
 			self.dec = dec
 			self.zoom = zoom
-			self.box_color = str( box_color or 'yellow' ).strip( )
+			self.box_color = (box_color or 'yellow').strip( )
 			self.show_box = show_box
 			self.show_grid = show_grid
 			self.show_lines = show_lines
 			self.show_boundaries = show_boundaries
-			self.image_source = str( image_source or '' ).strip( )
+			self.image_source = (image_source or '').strip( )
 			
 			self.url = self.link_url
 			self.params = {
@@ -7961,7 +7960,7 @@ class StarChart( Fetcher ):
 			self.ra = ra
 			self.dec = dec
 			self.zoom = zoom
-			self.image_source = str( image_source or 'DSS2' ).strip( )
+			self.image_source = (image_source or 'DSS2').strip( )
 			self.show_grid = show_grid
 			self.show_lines = show_lines
 			self.show_boundaries = show_boundaries
@@ -8397,7 +8396,7 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( bill_type or '' ).strip( ).lower( )
+			value = (bill_type or '').strip( ).lower( )
 			throw_if( 'bill_type', value )
 			
 			allowed = {
@@ -8446,7 +8445,7 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( law_type or '' ).strip( ).lower( )
+			value = (law_type or '').strip( ).lower( )
 			throw_if( 'law_type', value )
 			
 			allowed = { 'pub', 'priv' }
@@ -8483,7 +8482,7 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( report_type or '' ).strip( ).lower( )
+			value = (report_type or '').strip( ).lower( )
 			throw_if( 'report_type', value )
 			
 			allowed = { 'hrpt', 'srpt', 'erpt' }
@@ -8526,7 +8525,7 @@ class Congress( Fetcher ):
 		try:
 			self.limit = self.validate_limit( limit )
 			self.offset = self.validate_offset( offset )
-			self.sort = str( sort or 'updateDate+desc' ).strip( )
+			self.sort = (sort or 'updateDate+desc').strip( )
 			
 			return {
 					'api_key': self.api_key,
@@ -8686,9 +8685,9 @@ class Congress( Fetcher ):
 			throw_if( 'congress', congress )
 			
 			self.congress_number = congress
-			self.bill_type = str( bill_type or '' ).strip( ).lower( )
-			self.from_date_time = str( from_date_time or '' ).strip( )
-			self.to_date_time = str( to_date_time or '' ).strip( )
+			self.bill_type = (bill_type or '').strip( ).lower( )
+			self.from_date_time = (from_date_time or '').strip( )
+			self.to_date_time = (to_date_time or '').strip( )
 			
 			if self.bill_type:
 				self.bill_type = self.normalize_bill_type( self.bill_type )
@@ -8811,7 +8810,7 @@ class Congress( Fetcher ):
 			throw_if( 'congress', congress )
 			
 			self.congress_number = congress
-			self.law_type = str( law_type or '' ).strip( ).lower( )
+			self.law_type = (law_type or '').strip( ).lower( )
 			
 			if self.law_type:
 				self.law_type = self.normalize_law_type( self.law_type )
@@ -8929,7 +8928,7 @@ class Congress( Fetcher ):
 			throw_if( 'congress', congress )
 			
 			self.congress_number = congress
-			self.report_type = str( report_type or '' ).strip( ).lower( )
+			self.report_type = (report_type or '').strip( ).lower( )
 			self.conference = conference
 			
 			if self.report_type:
@@ -9065,7 +9064,7 @@ class Congress( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = str( mode or 'congresses' ).strip( ).lower( )
+			self.mode = (mode or 'congresses').strip( ).lower( )
 			
 			if self.mode == 'congresses':
 				return self.fetch_congresses(
@@ -9450,9 +9449,9 @@ class InternetArchive( Fetcher ):
 			self.timeout = time
 			self.rows = self.validate_rows( rows )
 			self.page = self.validate_page( page )
-			self.sort = str( sort or 'downloads desc' ).strip( )
-			self.media_type = str( media_type or '' ).strip( )
-			self.collection = str( collection or '' ).strip( )
+			self.sort = (sort or 'downloads desc').strip( )
+			self.media_type = (media_type or '').strip( )
+			self.collection = (collection or '').strip( )
 			
 			active_fields = fields if fields else self.fields
 			if not isinstance( active_fields, list ) or not active_fields:
@@ -9821,7 +9820,7 @@ class OpenWeather( Fetcher ):
 			self.mode = 'current'
 			self.latitude = lat
 			self.longitude = long
-			self.timezone = str( zone or 'auto' ).strip( )
+			self.timezone = (zone or 'auto').strip( )
 			
 			self.params = {
 					'latitude': self.latitude,
@@ -9898,7 +9897,7 @@ class OpenWeather( Fetcher ):
 			self.mode = 'hourly'
 			self.latitude = lat
 			self.longitude = long
-			self.timezone = str( zone or 'auto' ).strip( )
+			self.timezone = (zone or 'auto').strip( )
 			
 			self.params = {
 					'latitude': self.latitude,
@@ -9976,7 +9975,7 @@ class OpenWeather( Fetcher ):
 			self.mode = 'daily'
 			self.latitude = lat
 			self.longitude = long
-			self.timezone = str( zone or 'auto' ).strip( )
+			self.timezone = (zone or 'auto').strip( )
 			
 			self.params = {
 					'latitude': self.latitude,
@@ -10080,7 +10079,7 @@ class OpenWeather( Fetcher ):
 				result = self.fetch_current(
 					lat=float( lat ),
 					long=float( long ),
-					zone=str( zone or 'auto' ).strip( ),
+					zone=(zone or 'auto').strip( ),
 					past_days=past_days
 				) or { }
 			
@@ -10088,7 +10087,7 @@ class OpenWeather( Fetcher ):
 				result = self.fetch_hourly(
 					lat=float( lat ),
 					long=float( long ),
-					zone=str( zone or 'auto' ).strip( ),
+					zone=(zone or 'auto').strip( ),
 					forecast_days=forecast_days,
 					past_days=past_days
 				) or { }
@@ -10097,7 +10096,7 @@ class OpenWeather( Fetcher ):
 				result = self.fetch_daily(
 					lat=float( lat ),
 					long=float( long ),
-					zone=str( zone or 'auto' ).strip( ),
+					zone=(zone or 'auto').strip( ),
 					forecast_days=forecast_days,
 					past_days=past_days
 				) or { }
@@ -10513,7 +10512,7 @@ class HistoricalWeather( Fetcher ):
 				lat=float( lat ),
 				long=float( long ),
 				date=date,
-				zone=str( zone or 'auto' ).strip( )
+				zone=(zone or 'auto').strip( )
 			) or { }
 			
 			result[ 'geocoding' ] = selected
@@ -10814,7 +10813,7 @@ class Grokipedia( Fetcher ):
 		"""
 		try:
 			
-			mode_value = str( mode or 'search' ).strip( ).lower( )
+			mode_value = (mode or 'search').strip( ).lower( )
 			
 			if mode_value == 'search':
 				return self.fetch_search( query=query, limit=limit, offset=offset )
@@ -11107,8 +11106,8 @@ class GoogleGeocoding( Fetcher ):
 			
 			self.mode = 'forward'
 			self.query = query.strip( )
-			self.language = str( language or 'en' ).strip( )
-			self.region = str( region or '' ).strip( )
+			self.language = (language or 'en').strip( )
+			self.region = (region or '').strip( )
 			self.timeout = time
 			self.params = {
 					'address': self.query,
@@ -11169,9 +11168,9 @@ class GoogleGeocoding( Fetcher ):
 			self.mode = 'reverse'
 			self.latitude = latitude
 			self.longitude = longitude
-			self.language = str( language or 'en' ).strip( )
-			self.result_type = str( result_type or '' ).strip( )
-			self.location_type = str( location_type or '' ).strip( )
+			self.language = (language or 'en').strip( )
+			self.result_type = (result_type or '').strip( )
+			self.location_type = (location_type or '').strip( )
 			self.timeout = time
 			self.params = {
 					'latlng': f'{self.latitude},{self.longitude}',
@@ -11230,8 +11229,8 @@ class GoogleGeocoding( Fetcher ):
 			
 			self.mode = 'place'
 			self.place_id = place_id.strip( )
-			self.language = str( language or 'en' ).strip( )
-			self.region = str( region or '' ).strip( )
+			self.language = (language or 'en').strip( )
+			self.region = (region or '').strip( )
 			self.timeout = time
 			self.params = {
 					'place_id': self.place_id,
@@ -11559,7 +11558,7 @@ class CensusData( Fetcher ):
 		"""
 		try:
 			self.predicates = { }
-			text = str( predicates or '' ).strip( )
+			text = (predicates or '').strip( )
 			
 			if not text:
 				return self.predicates
@@ -11747,8 +11746,8 @@ class CensusData( Fetcher ):
 			self.mode = 'data'
 			self.year = year.strip( )
 			self.dataset = dataset.strip( ).strip( '/' )
-			self.geography_for = str( geography_for or '' ).strip( )
-			self.geography_in = str( geography_in or '' ).strip( )
+			self.geography_for = (geography_for or '').strip( )
+			self.geography_in = (geography_in or '').strip( )
 			self.predicates = self.parse_predicates( predicates )
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}'
@@ -12293,10 +12292,10 @@ class Socrata( Fetcher ):
 			self.mode = 'rows'
 			self.domain = self.normalize_domain( domain )
 			self.dataset_id = self.normalize_dataset_id( dataset_id )
-			self.select_clause = str( select or '' ).strip( )
-			self.where_clause = str( where or '' ).strip( )
-			self.order_clause = str( order or '' ).strip( )
-			self.group_clause = str( group or '' ).strip( )
+			self.select_clause = (select or '').strip( )
+			self.where_clause = (where or '').strip( )
+			self.order_clause = (order or '').strip( )
+			self.group_clause = (group or '').strip( )
 			self.limit_value = self.validate_limit( limit )
 			self.offset_value = self.validate_offset( offset )
 			self.timeout = time
@@ -12392,7 +12391,7 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'rows' ).strip( ).lower( )
+			self.mode = (mode or 'rows').strip( ).lower( )
 			
 			if self.mode == 'metadata':
 				return self.fetch_metadata(
@@ -12861,10 +12860,10 @@ class HealthData( Fetcher ):
 			self.mode = 'rows'
 			self.domain = self.normalize_domain( domain )
 			self.dataset_id = self.normalize_dataset_id( dataset_id )
-			self.select_clause = str( select or '' ).strip( )
-			self.where_clause = str( where or '' ).strip( )
-			self.order_clause = str( order or '' ).strip( )
-			self.group_clause = str( group or '' ).strip( )
+			self.select_clause = (select or '').strip( )
+			self.where_clause = (where or '').strip( )
+			self.order_clause = (order or '').strip( )
+			self.group_clause = (group or '').strip( )
 			self.limit_value = self.validate_limit( limit )
 			self.offset_value = self.validate_offset( offset )
 			self.timeout = time
@@ -12960,7 +12959,7 @@ class HealthData( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'rows' ).strip( ).lower( )
+			self.mode = (mode or 'rows').strip( ).lower( )
 			
 			if self.mode == 'metadata':
 				return self.fetch_metadata(
@@ -13287,7 +13286,7 @@ class GlobalHealthData( Fetcher ):
 			
 			self.mode = 'athena'
 			self.query_path = self.normalize_query_path( query_path )
-			self.fmt = str( fmt or 'json' ).strip( )
+			self.fmt = (fmt or 'json').strip( )
 			self.timeout = time
 			self.url = f'{self.athena_base_url}/{self.query_path}'
 			self.params = { }
@@ -13364,7 +13363,7 @@ class GlobalHealthData( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'indicator_registry' ).strip( ).lower( )
+			self.mode = (mode or 'indicator_registry').strip( ).lower( )
 			
 			if self.mode == 'indicator_registry':
 				return self.fetch_indicator_registry(
@@ -13740,7 +13739,7 @@ class UnitedNations( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'datasets' ).strip( ).lower( )
+			self.mode = (mode or 'datasets').strip( ).lower( )
 			
 			if self.mode == 'datasets':
 				return self.fetch_datasets(
@@ -14124,7 +14123,7 @@ class WorldPopulation( Fetcher ):
 		try:
 			
 			self.mode = 'search'
-			self.query_text = str( query or '' ).strip( )
+			self.query_text = (query or '').strip( )
 			self.page = self.validate_page( page )
 			self.page_size = self.validate_page_size( page_size )
 			self.timeout = time
@@ -14275,7 +14274,7 @@ class WorldPopulation( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'catalog' ).strip( ).lower( )
+			self.mode = (mode or 'catalog').strip( ).lower( )
 			
 			if self.mode == 'catalog':
 				return self.fetch_catalog(
@@ -14697,7 +14696,7 @@ class Wonder( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'metadata_template' ).strip( ).lower( )
+			self.mode = (mode or 'metadata_template').strip( ).lower( )
 			
 			if self.mode == 'metadata_template':
 				return self.fetch_template(
@@ -15621,7 +15620,7 @@ class USGSEarthquakes( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'feed' ).strip( ).lower( )
+			self.mode = (mode or 'feed').strip( ).lower( )
 			
 			if self.mode == 'feed':
 				return self.fetch_feed(
@@ -15942,7 +15941,7 @@ class USGSWaterData( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( parameter_code or '' ).strip( )
+			value = (parameter_code or '').strip( )
 			
 			if value and not re.fullmatch( r'\d{5}', value ):
 				raise ValueError( 'parameter_code must be a 5-digit USGS parameter code.' )
@@ -16453,10 +16452,10 @@ class USGSWaterData( Fetcher ):
 		try:
 			
 			self.mode = 'monitoring-locations'
-			self.monitoring_location_id = str( monitoring_location_id or '' ).strip( )
-			self.state_code = str( state_code or '' ).strip( )
-			self.county_code = str( county_code or '' ).strip( )
-			self.site_type = str( site_type or '' ).strip( )
+			self.monitoring_location_id = (monitoring_location_id or '').strip( )
+			self.state_code = (state_code or '').strip( )
+			self.county_code = (county_code or '').strip( )
+			self.site_type = (site_type or '').strip( )
 			self.limit = self.validate_limit( limit )
 			self.timeout = time
 			
@@ -16696,7 +16695,7 @@ class USGSWaterData( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'monitoring-locations' ).strip( ).lower( )
+			self.mode = (mode or 'monitoring-locations').strip( ).lower( )
 			
 			if self.mode == 'monitoring-locations':
 				return self.fetch_monitoring_locations(
@@ -17055,7 +17054,7 @@ class USGSTheNationalMap( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( bbox or '' ).strip( )
+			value = (bbox or '').strip( )
 			
 			if not value:
 				return ''
@@ -17512,10 +17511,10 @@ class USGSTheNationalMap( Fetcher ):
 		try:
 			
 			self.mode = 'products'
-			self.dataset = str( dataset or '' ).strip( )
-			self.query_text = str( q or '' ).strip( )
+			self.dataset = (dataset or '').strip( )
+			self.query_text = (q or '').strip( )
 			self.bbox = self.validate_bbox( bbox )
-			self.prod_formats = str( prod_formats or '' ).strip( )
+			self.prod_formats = (prod_formats or '').strip( )
 			self.max_items = self.validate_max_items( max_items )
 			self.offset = self.validate_offset( offset )
 			self.timeout = time
@@ -17581,7 +17580,7 @@ class USGSTheNationalMap( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'products' ).strip( ).lower( )
+			self.mode = (mode or 'products').strip( ).lower( )
 			
 			if self.mode == 'datasets':
 				return self.fetch_datasets(
@@ -18222,10 +18221,10 @@ class USGSScienceBase( Fetcher ):
 		"""
 		try:
 			self.mode = 'items'
-			self.query_text = str( q or '' ).strip( )
+			self.query_text = (q or '').strip( )
 			self.max_items = self.validate_max_items( max_items )
 			self.offset = self.validate_offset( offset )
-			self.fields = str( fields or '' ).strip( )
+			self.fields = (fields or '').strip( )
 			self.timeout = time
 			
 			self.request( endpoint='items',
@@ -18313,7 +18312,7 @@ class USGSScienceBase( Fetcher ):
 		        project error type.
 		"""
 		try:
-			self.mode = str( mode or 'items' ).strip( ).lower( )
+			self.mode = (mode or 'items').strip( ).lower( )
 			if self.mode == 'items':
 				return self.fetch_items( q=q, max_items=max_items, offset=offset, fields=fields,
 					time=time )
@@ -19628,9 +19627,9 @@ class ClimateData( Fetcher ):
 		try:
 			
 			self.mode = 'datasets'
-			self.keyword = str( keyword or '' ).strip( )
-			self.start_date = str( start_date or '' ).strip( )
-			self.end_date = str( end_date or '' ).strip( )
+			self.keyword = (keyword or '').strip( )
+			self.start_date = (start_date or '').strip( )
+			self.end_date = (end_date or '').strip( )
 			self.limit = self.validate_limit( limit )
 			self.offset = self.validate_offset( offset )
 			self.timeout = time
@@ -19693,8 +19692,8 @@ class ClimateData( Fetcher ):
 			self.mode = 'data'
 			self.dataset = dataset.strip( )
 			self.start_date, self.end_date = self.validate_date_range( start_date, end_date )
-			self.stations = str( stations or '' ).strip( )
-			self.data_types = str( data_types or '' ).strip( )
+			self.stations = (stations or '').strip( )
+			self.data_types = (data_types or '').strip( )
 			self.limit = self.validate_limit( limit )
 			self.timeout = time
 			
@@ -19752,7 +19751,7 @@ class ClimateData( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'datasets' ).strip( ).lower( )
+			self.mode = (mode or 'datasets').strip( ).lower( )
 			
 			if self.mode == 'datasets':
 				return self.fetch_datasets(
@@ -20133,7 +20132,7 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( bbox or '' ).strip( )
+			value = (bbox or '').strip( )
 			
 			if not value:
 				return ''
@@ -20199,8 +20198,8 @@ class EoNet( Fetcher ):
 		        project error type.
 		"""
 		try:
-			start_value = str( start_date or '' ).strip( )
-			end_value = str( end_date or '' ).strip( )
+			start_value = (start_date or '').strip( )
+			end_value = (end_date or '').strip( )
 			
 			if bool( start_value ) != bool( end_value ):
 				raise ValueError(
@@ -20538,8 +20537,8 @@ class EoNet( Fetcher ):
 		try:
 			
 			self.mode = 'events'
-			self.source = str( source or '' ).strip( )
-			self.category = str( category or '' ).strip( )
+			self.source = (source or '').strip( )
+			self.category = (category or '').strip( )
 			self.status = self.validate_status( status )
 			self.limit = self.validate_limit( limit )
 			self.days = self.validate_days( days )
@@ -20668,7 +20667,7 @@ class EoNet( Fetcher ):
 		"""
 		try:
 			
-			self.mode = str( mode or 'events' ).strip( ).lower( )
+			self.mode = (mode or 'events').strip( ).lower( )
 			
 			if self.mode == 'events':
 				return self.fetch_events(
@@ -20927,7 +20926,7 @@ class EnviroFacts( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( state_code or '' ).strip( ).upper( )
+			value = (state_code or '').strip( ).upper( )
 			
 			if not value:
 				return ''
@@ -21003,7 +21002,7 @@ class EnviroFacts( Fetcher ):
 			throw_if( 'table_name', table_name )
 			self.table_name = self.validate_table_name( table_name )
 			self.state_code = self.validate_state_code( state_code )
-			self.facility_name = str( facility_name or '' ).strip( )
+			self.facility_name = (facility_name or '').strip( )
 			self.limit = self.validate_limit( limit )
 			
 			segments: List[ str ] = [
@@ -23467,7 +23466,7 @@ class PurpleAir( Fetcher ):
 		try:
 			throw_if( 'default_fields', default_fields )
 			
-			selected = str( fields or '' ).strip( )
+			selected = (fields or '').strip( )
 			
 			if not selected:
 				selected = default_fields.strip( )
@@ -24364,7 +24363,7 @@ class OpenAQ( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( coordinates or '' ).strip( )
+			value = (coordinates or '').strip( )
 			
 			if not value:
 				return ''
@@ -24858,8 +24857,8 @@ class OpenAQ( Fetcher ):
 		"""
 		try:
 			self.mode = 'countries'
-			self.providers_id = str( providers_id or '' ).strip( )
-			self.parameters_id = str( parameters_id or '' ).strip( )
+			self.providers_id = (providers_id or '').strip( )
+			self.parameters_id = (parameters_id or '').strip( )
 			self.limit = self.validate_positive_integer( 'limit', limit, maximum=1000 )
 			self.page = self.validate_positive_integer( 'page', page )
 			self.timeout = time
@@ -25050,8 +25049,8 @@ class OpenAQ( Fetcher ):
 					else self.validate_positive_integer( 'country_id', country_id ) )
 			self.coordinates = self.validate_coordinates( coordinates )
 			self.radius = self.validate_radius( radius )
-			self.providers_id = str( providers_id or '' ).strip( )
-			self.parameters_id = str( parameters_id or '' ).strip( )
+			self.providers_id = (providers_id or '').strip( )
+			self.parameters_id = (parameters_id or '').strip( )
 			self.limit = self.validate_positive_integer( 'limit', limit, maximum=1000 )
 			self.page = self.validate_positive_integer( 'page', page )
 			self.timeout = time
@@ -25476,7 +25475,7 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			value = str( date or '' ).strip( )
+			value = (date or '').strip( )
 			if not value:
 				return ''
 			
@@ -25562,7 +25561,7 @@ class Firms( Fetcher ):
 		        project error type.
 		"""
 		try:
-			text = str( csv_text or '' )
+			text = csv_text or ''
 			if not text.strip( ):
 				return [ ]
 			
@@ -26712,7 +26711,7 @@ class OpenSky( Fetcher ):
 		"""
 		try:
 			self.mode = 'states_bbox'
-			self.icao24 = self.validate_icao24( icao24 ) if str( icao24 or '' ).strip( ) else ''
+			self.icao24 = self.validate_icao24( icao24 ) if (icao24 or '').strip( ) else ''
 			self.time_value = (
 					self.validate_epoch( 'time_value', time_value ) if time_value is not None else
 					None)
