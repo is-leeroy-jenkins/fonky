@@ -4545,7 +4545,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = "fetch_wms_map( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, output_dir: str='python-examples', output_name: str='', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_wms_map( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_map_services( self ) -> Dict[ str, Any ] | None:
@@ -4682,7 +4682,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self, **args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class NearbyObjects( Fetcher ):
@@ -4849,8 +4849,7 @@ class NearbyObjects( Fetcher ):
 			raise exception
 
 	def fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD',
-			body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[
-				                                                                              str, Any ] | None:
+			body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Fetch close approaches.
 
 		Purpose:
@@ -4878,27 +4877,25 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'start_date', start_date )
-			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.start_date = start_date
 			self.end_date = end_date
+			self.limit = limit
 			self.mode = 'close_approaches'
 			self.start_date = self.start_date.strip( )
 			self.end_date = self.end_date.strip( )
 			self.dist_max = (dist_max or '10LD').strip( )
 			self.body = (body or 'Earth').strip( )
 			self.sort = (sort or 'date').strip( )
-			self.limit = limit
 			self.start = dt.datetime.strptime( self.start_date, '%Y-%m-%d' ).date( )
 			self.end = dt.datetime.strptime( self.end_date, '%Y-%m-%d' ).date( )
 			if self.start > self.end:
 				raise ValueError( 'start_date must be on or before end_date.' )
 			if self.limit < 1:
 				raise ValueError( 'limit must be positive.' )
-			if self.sort.lstrip( '-' ) not in ('date', 'dist', 'dist-min',
-					'v-inf', 'v-rel', 'h', 'object'):
+			if self.sort.lstrip( '-' ) not in ('date', 'dist', 'dist-min', 'v-inf', 'v-rel', 'h', 'object'):
 				raise ValueError( 'Unsupported JPL CAD sort field.' )
-			if not re.fullmatch( r'[0-9]+(?:\.[0-9]+)?(?:LD|au|AU|km|KM)',
-					self.dist_max ):
+			if not re.fullmatch( r'[0-9]+(?:\.[0-9]+)?(?:LD|au|AU|km|KM)', self.dist_max ):
 				raise ValueError( 'dist_max must contain a supported distance unit.' )
 			self.url = f'{self.base_url}/cad.api'
 			self.params = { 'date-min': self.start_date, 'date-max': self.end_date,
@@ -4913,7 +4910,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_close_approaches( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_object_lookup( self, query: str, query_type: str='sstr',
@@ -4973,7 +4970,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_object_lookup( self, query: str, query_type: str='sstr', include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_object_lookup( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_nhats_summary( self, dv: float = 6.0, dur: int=360, stay: int=8,
@@ -5023,7 +5020,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, time: int=20 ) -> Dict[ str, Any ]"
+			exception.method = "fetch_nhats_summary( self, **args ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float = 6.0, dur: int=360, stay: int=8,
@@ -5069,7 +5066,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_nhats_object( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ]:
@@ -5115,17 +5112,15 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ]"
+			exception.method = "fetch_fireballs( self, **args ) -> Dict[ str, Any ]"
 			raise exception
 	
-	def fetch( self, mode: str='close_approaches', start_date: str='',
-			end_date: str='', query: str='', query_type: str='sstr',
-			dist_max: str='10LD', body: str='Earth', sort: str='date',
-			limit: int=20, dv: float = 6.0, dur: int=360,
-			stay: int=8, launch: str='2020-2045', h: float = 26.0,
-			occ: int=7, include_physical: bool=True,
-			include_close_approaches: bool=True, ca_body: str='Earth',
-			include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None:
+	def fetch( self, mode: str='close_approaches', start_date: str='', end_date: str='',
+	           query: str='', query_type: str='sstr', dist_max: str='10LD',
+	           body: str='Earth', sort: str='date', limit: int=20, dv: float=6.0,
+	           dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0,
+	           occ: int=7, include_physical: bool=True, include_close_approaches: bool=True,
+	           ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[str, Any ]:
 		"""Fetch JPL SSD and CNEOS near-Earth object data.
 
 		Purpose:
@@ -5167,11 +5162,9 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			active_mode = (mode or 'close_approaches').strip( ).lower( )
-			
 			if active_mode == 'close_approaches':
 				return self.fetch_close_approaches( start_date=start_date, end_date=end_date,
-					dist_max=dist_max, body=body, sort=sort, limit=limit,
-					time=time )
+					dist_max=dist_max, body=body, sort=sort, limit=limit, time=time )
 			
 			if active_mode == 'object_lookup':
 				return self.fetch_object_lookup( query=query, query_type=query_type,
@@ -5196,7 +5189,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch( self, mode: str='close_approaches', start_date: str='', end_date: str='', query: str='', query_type: str='sstr', dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -5245,7 +5238,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self, **args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class OpenScience( Fetcher ):
@@ -5386,7 +5379,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str"
+			exception.method = "coerce_response( self, *args ) -> Dict[ str, Any ] | str"
 			raise exception
 	
 	def request( self, time: int=20 ) -> Dict[ str, Any ] | str:
@@ -5460,7 +5453,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_dataset( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_metadata( self, query: str, format_value: str='json',
@@ -5504,7 +5497,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_metadata( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_metadata( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
@@ -5548,7 +5541,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_assays( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_assays( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
@@ -5592,7 +5585,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_data( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_data( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='dataset', query: str='',
@@ -5641,7 +5634,7 @@ class OpenScience( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -5697,7 +5690,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self, **args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class SpaceWeather( Fetcher ):
@@ -5887,7 +5880,7 @@ class SpaceWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = "fetch_endpoint( self, endpoint: str, start_date: str, end_date: str, time: int=20, location: str='', catalog: str='', notification_type: str='', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_endpoint( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch( self, mode: str='cme', start_date: str='', end_date: str='',
@@ -5953,7 +5946,7 @@ class SpaceWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = "fetch( self, mode: str='cme', start_date: str='', end_date: str='', time: int=20, location: str='ALL', catalog: str='ALL', notification_type: str='all', most_accurate_only: bool=True, complete_entry_only: bool=True, speed: int=0, half_angle: int=0, keyword: str='', api_key: str=None ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -6008,7 +6001,7 @@ class SpaceWeather( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self, **args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class AstroCatalog( Fetcher ):
