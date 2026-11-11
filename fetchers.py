@@ -5825,9 +5825,7 @@ class SpaceWeather( Fetcher ):
 		try:
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
-			throw_if( 'start_date', start_date )
 			self.start_date = start_date
-			throw_if( 'end_date', end_date )
 			self.end_date = end_date
 			self.timeout = time
 			if self.timeout < 1:
@@ -6128,7 +6126,6 @@ class AstroCatalog( Fetcher ):
 		Returns:
 		    Dict[str, Any]: Structured mapping produced by the operation.
 		"""
-		throw_if( 'argument_string', argument_string )
 		self.argument_string = argument_string
 		params: Dict[ str, Any ] = { }
 		if not self.argument_string or not self.argument_string.strip( ):
