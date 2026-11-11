@@ -2624,7 +2624,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = "request_directions( self, origin: str, destination: str, mode: str='driving' ) -> Dict[ str, Any ] | None"
+			exception.method = "request_directions( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -2645,7 +2645,7 @@ class GoogleMaps( Fetcher ):
 
 		Returns:
 		    Dict[str, str] | None: Function schema dictionary used by downstream AI tool-calling
-		    integrations.
+		        integrations.
 
 		Raises:
 		    Error: If the implementation wraps a provider, parsing, filesystem, or processing failure in the
@@ -2673,7 +2673,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None"
+			exception.method = "create_schema( self, **args ) -> Dict[ str, str ] | None"
 			raise exception
 
 class GoogleWeather( Fetcher ):
@@ -2837,8 +2837,8 @@ class GoogleWeather( Fetcher ):
 		"""
 		try:
 			throw_if( 'path', path )
-			self.path = path
 			throw_if( 'params', params )
+			self.path = path
 			self.params = params
 			if not isinstance( self.params, dict ):
 				raise TypeError( 'params must be a dictionary.' )
@@ -2876,7 +2876,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = "request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None"
+			exception.method = "request( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def package_response( self ) -> Dict[ str, Any ]:
@@ -2954,7 +2954,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = "fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_current( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3005,7 +3005,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = "fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_hourly_forecast( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -3056,7 +3056,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = "fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_daily_forecast( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -3107,7 +3107,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = "fetch_hourly_history( self, address: str, hours: int=24, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_hourly_history( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -3149,7 +3149,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = "fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
+			exception.method = "fetch_alerts( self, **args ) -> Dict[ str, Any ] | None"
 			raise exception
 
 class NavalObservatory( Fetcher ):
@@ -4322,9 +4322,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = (
-				'validate_wms_options( self, projection: str, quality: str, '
-				'version: str ) -> Tuple[ str, str, str ]' )
+			exception.method = 'validate_wms_options( self, **args ) -> Tuple[ str, str, str ]'
 			raise exception
 
 	def get_capabilities_url( self, projection: str='epsg4326',
@@ -4361,7 +4359,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = "get_capabilities_url( self, projection: str='epsg4326', quality: str='best', version: str='1.1.1' ) -> str"
+			exception.method = "get_capabilities_url( self, **args ) -> str"
 			raise exception
 	
 	def build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ],
@@ -4397,10 +4395,10 @@ class GlobalImagery( Fetcher ):
 		"""
 		try:
 			throw_if( 'layer', layer )
-			self.layer = layer
 			throw_if( 'image_date', image_date )
-			self.image_date = image_date
 			throw_if( 'bbox', bbox )
+			self.layer = layer
+			self.image_date = image_date
 			self.bbox = bbox
 			self.projection, self.quality, self.version = self.validate_wms_options(
 				projection=projection, quality=quality, version=version )
@@ -4426,7 +4424,6 @@ class GlobalImagery( Fetcher ):
 			if not isinstance( transparent, bool ):
 				raise ValueError( 'transparent must be a boolean.' )
 			self.transparent = transparent
-
 			self.wms_url = (f'https://gibs.earthdata.nasa.gov/wms/'
 				f'{self.projection}/{self.quality}/wms.cgi')
 			self.params = { 'SERVICE': 'WMS', 'VERSION': self.version,
@@ -4452,7 +4449,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = "build_wms_url( self, layer: str, image_date: str, bbox: Tuple[ float, float, float, float ], width: int=1200, height: int=600, projection: str='epsg4326', quality: str='best', image_format: str='image/png', transparent: bool=True, version: str='1.1.1' ) -> str"
+			exception.method = "build_wms_url( self, **args ) -> str"
 			raise exception
 	
 	def fetch_wms_map( self, layer: str, image_date: str,
